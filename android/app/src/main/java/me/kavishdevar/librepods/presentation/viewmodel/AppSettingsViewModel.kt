@@ -18,6 +18,7 @@ import kotlin.math.roundToInt
 data class AppSettingsUiState(
     val showPhoneBatteryInWidget: Boolean = false,
     val conversationAwarenessPauseMusicEnabled: Boolean = false,
+    val conversationAwarenessBothPodsOnlyEnabled: Boolean = false,
     val relativeConversationAwarenessVolumeEnabled: Boolean = true,
     val disconnectWhenNotWearing: Boolean = false,
     val takeoverWhenDisconnected: Boolean = false,
@@ -137,6 +138,7 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
             currentState.copy(
                 showPhoneBatteryInWidget = sharedPreferences.getBoolean("show_phone_battery_in_widget", false),
                 conversationAwarenessPauseMusicEnabled = sharedPreferences.getBoolean("conversation_awareness_pause_music", false),
+                conversationAwarenessBothPodsOnlyEnabled = sharedPreferences.getBoolean("conversation_awareness_both_pods_only", false),
                 relativeConversationAwarenessVolumeEnabled = sharedPreferences.getBoolean("relative_conversation_awareness_volume", true),
                 disconnectWhenNotWearing = sharedPreferences.getBoolean("disconnect_when_not_wearing", false),
                 takeoverWhenDisconnected = sharedPreferences.getBoolean("takeover_when_disconnected", false),
@@ -165,6 +167,11 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
     fun setConversationAwarenessPauseMusicEnabled(enabled: Boolean) {
         sharedPreferences.edit { putBoolean("conversation_awareness_pause_music", enabled) }
         _uiState.update { it.copy(conversationAwarenessPauseMusicEnabled = enabled) }
+    }
+
+    fun setConversationAwarenessBothPodsOnlyEnabled(enabled: Boolean) {
+        sharedPreferences.edit { putBoolean("conversation_awareness_both_pods_only", enabled) }
+        _uiState.update { it.copy(conversationAwarenessBothPodsOnlyEnabled = enabled) }
     }
 
     fun setRelativeConversationAwarenessVolumeEnabled(enabled: Boolean) {
