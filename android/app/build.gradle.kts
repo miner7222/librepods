@@ -153,6 +153,7 @@ dependencies {
 //    implementation(libs.hilt.compiler)
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
+    testImplementation(libs.junit)
     implementation(libs.play.review)
     implementation(libs.play.review.ktx)
     implementation(libs.androidx.navigation3.ui)
