@@ -21,6 +21,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.components.AppInfoCard
 import me.kavishdevar.librepods.presentation.components.DeviceInfoCard
 import me.kavishdevar.librepods.presentation.components.StyledListItem
+import me.kavishdevar.librepods.utils.isSamsungDevice
 
 @Composable
 fun NotSupportedPage(
@@ -48,7 +49,13 @@ fun NotSupportedPage(
                 style = MaterialTheme.typography.bodyMedium,
             )
             Text(
-                text = stringResource(R.string.not_compatitble_description),
+                text = stringResource(
+                    if (isSamsungDevice()) {
+                        R.string.samsung_one_ui9_required
+                    } else {
+                        R.string.not_compatitble_description
+                    }
+                ),
                 style = MaterialTheme.typography.bodyMedium,
             )
             DeviceInfoCard()

@@ -243,6 +243,9 @@
     <string name="bypass_compatibility_check">Bypass compatibility check</string>
     <string name="bypass_compatiblity_check_confirmation">Are you sure your device is supported natively/you have Xposed module enabled?</string>
     <string name="not_supported">Not supported</string>
+    <string name="samsung_one_ui9_required">Galaxy phones do not need root. They need One UI 9 (Android 17), which includes the Bluetooth L2CAP fix required to control AirPods.\n\nGalaxy S26, S26+, and S26 Ultra work without root on One UI 9. Install the GitHub release APK — Play Store still hides Samsung until the stable One UI 9 rollout.\n\nOne UI 8 and 8.5 cannot open the AirPods control channel. That is a Samsung Bluetooth stack limitation, not something this app can patch without root.</string>
+    <string name="one_ui_version">One UI version</string>
+    <string name="unknown">Unknown</string>
     <string name="name_your_own_price">(Name your own price)</string>
     <string name="compatibility_play_dialog_confirmation">
         This device may not be supported due to platform limitations and requires an Xposed framework. Tick the checkbox below and type OK to continue.
