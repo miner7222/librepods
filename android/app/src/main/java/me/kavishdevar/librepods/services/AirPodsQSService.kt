@@ -64,9 +64,10 @@ class AirPodsQSService : TileService() {
             when (intent.action) {
                 AirPodsNotifications.AIRPODS_CONNECTED -> {
                     Log.d("AirPodsQSService", "Received AIRPODS_CONNECTED")
-                    isAirPodsConnected = true
-                    currentAncMode =
-                        ServiceManager.getService()?.getANC() ?: (NoiseControlMode.OFF.ordinal + 1)
+                    val service = ServiceManager.getService()
+                    isAirPodsConnected =
+                        BluetoothConnectionManager.aacpSocket?.isConnected == true && service != null
+                    currentAncMode = service?.getANC() ?: (NoiseControlMode.OFF.ordinal + 1)
                     updateTile()
                 }
                 AirPodsNotifications.AIRPODS_DISCONNECTED -> {
@@ -99,7 +100,8 @@ class AirPodsQSService : TileService() {
         Log.d("AirPodsQSService", "onStartListening")
 
         val service = ServiceManager.getService()
-        isAirPodsConnected = BluetoothConnectionManager.aacpSocket?.isConnected == true
+        isAirPodsConnected =
+            BluetoothConnectionManager.aacpSocket?.isConnected == true && service != null
         currentAncMode = service?.getANC() ?: (NoiseControlMode.OFF.ordinal + 1)
 
         if (currentAncMode == NoiseControlMode.OFF.ordinal + 1 && !isOffModeEnabled()) {
@@ -247,6 +249,10 @@ class AirPodsQSService : TileService() {
         val availableModes = getAvailableModes()
         Log.d("AirPodsQSService", "availableModes: $availableModes, currentAncMode: $currentAncMode")
         val currentIndex = availableModes.indexOf(currentAncMode)
+        if (currentIndex == -1) {
+            Log.d("AirPodsQSService", "Current ANC mode is unavailable; using first available mode")
+            return availableModes.first()
+        }
         val nextIndex = (currentIndex + 1) % availableModes.size
         Log.d("AirPodsQSService", "nextIndex: $nextIndex")
         return availableModes[nextIndex]
