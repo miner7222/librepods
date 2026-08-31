@@ -45,16 +45,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -177,7 +181,7 @@ fun BatteryIndicator(
             Text(
                 text = "\uDBC0\uDEE6", style = TextStyle(
                     fontSize = 14.sp,
-                    fontFamily = FontFamily(Font(R.font.sf_pro)),
+                    fontFamily = sfSymbolsFamily,
                     color = batteryFillColor,
                     textAlign = TextAlign.Center
                 ), modifier = Modifier.scale(scaleAnim.value)
@@ -187,11 +191,19 @@ fun BatteryIndicator(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "$prefix $batteryPercentage%",
+            text = buildAnnotatedString {
+                if (prefix.isNotEmpty()) {
+                    withStyle(SpanStyle(fontFamily = sfSymbolsFamily)) {
+                        append(prefix)
+                    }
+                    append(" ")
+                }
+                append("$batteryPercentage%")
+            },
             color = batteryTextColor,
             style = TextStyle(
                 fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.sf_pro)),
+                fontFamily = FontFamily(Font(R.font.pretendard)),
                 textAlign = TextAlign.Center
             ),
         )

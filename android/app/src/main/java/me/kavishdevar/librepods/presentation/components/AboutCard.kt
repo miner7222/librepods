@@ -24,9 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
@@ -39,15 +44,21 @@ fun AboutCard(
 ) {
     val serialNumbers = when (LocalDesignSystem.current) {
         DesignSystem.Apple -> listOf(
-            serialNumbers[0],
-            "􀀛 ${serialNumbers[1]}",
-            "􀀧 ${serialNumbers[2]}"
+            AnnotatedString(serialNumbers[0]),
+            buildAnnotatedString {
+                withStyle(SpanStyle(fontFamily = sfSymbolsFamily)) { append("􀀛") }
+                append(" ${serialNumbers[1]}")
+            },
+            buildAnnotatedString {
+                withStyle(SpanStyle(fontFamily = sfSymbolsFamily)) { append("􀀧") }
+                append(" ${serialNumbers[2]}")
+            }
         )
 
         DesignSystem.Material -> listOf(
-            serialNumbers[0],
-            stringResource(R.string.left) + " " + serialNumbers[1],
-            stringResource(R.string.right) + " " + serialNumbers[2],
+            AnnotatedString(serialNumbers[0]),
+            AnnotatedString(stringResource(R.string.left) + " " + serialNumbers[1]),
+            AnnotatedString(stringResource(R.string.right) + " " + serialNumbers[2]),
         )
     }
 
@@ -66,7 +77,7 @@ fun AboutCard(
 
         StyledListItem (
             name = stringResource(R.string.serial_number),
-            description = serialNumbers[serialNumber.intValue],
+            annotatedDescription = serialNumbers[serialNumber.intValue],
             onClick = { serialNumber.intValue = (serialNumber.intValue + 1) % serialNumbers.size }
         )
 

@@ -163,9 +163,12 @@ dependencies {
 }
 
 aboutLibraries {
+    collect {
+        configPath = file("aboutlibraries")
+    }
     export {
         prettyPrint = true
-        excludeFields = listOf("generated")
+        excludeFields = listOf("generated", "funding")
         outputFile = file("src/main/res/raw/aboutlibraries.json")
     }
 }

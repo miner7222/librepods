@@ -42,46 +42,68 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.kavishdevar.librepods.R
 
-val sfProFamily = FontFamily(Font(R.font.sf_pro))
+// PretendardJP is a variable font, so each weight is the same file pinned to a
+// different point on the 'wght' axis. It replaces SF Pro, which carries no
+// Hangul, and stands in for Apple SD Gothic Neo, which cannot be redistributed.
+private fun pretendard(weight: FontWeight) = Font(
+    R.font.pretendard_jp_variable,
+    weight,
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight))
+)
+
+val pretendardFamily = FontFamily(
+    pretendard(FontWeight.Thin),
+    pretendard(FontWeight.ExtraLight),
+    pretendard(FontWeight.Light),
+    pretendard(FontWeight.Normal),
+    pretendard(FontWeight.Medium),
+    pretendard(FontWeight.SemiBold),
+    pretendard(FontWeight.Bold),
+    pretendard(FontWeight.ExtraBold),
+    pretendard(FontWeight.Black)
+)
+
+// This exists solely for SF Symbols private-use glyphs and must not be used for text.
+val sfSymbolsFamily = FontFamily(Font(R.font.sf_pro))
 
 val AppleTypography = Typography().run {
     copy(
-        displayLarge = displayLarge.copy(fontFamily = sfProFamily),
-        displayMedium = displayMedium.copy(fontFamily = sfProFamily),
-        displaySmall = displaySmall.copy(fontFamily = sfProFamily),
+        displayLarge = displayLarge.copy(fontFamily = pretendardFamily),
+        displayMedium = displayMedium.copy(fontFamily = pretendardFamily),
+        displaySmall = displaySmall.copy(fontFamily = pretendardFamily),
 
-        headlineLarge = headlineLarge.copy(fontFamily = sfProFamily),
-        headlineMedium = headlineMedium.copy(fontFamily = sfProFamily),
-        headlineSmall = headlineSmall.copy(fontFamily = sfProFamily),
+        headlineLarge = headlineLarge.copy(fontFamily = pretendardFamily),
+        headlineMedium = headlineMedium.copy(fontFamily = pretendardFamily),
+        headlineSmall = headlineSmall.copy(fontFamily = pretendardFamily),
 
-        titleLarge = titleLarge.copy(fontFamily = sfProFamily),
-        titleMedium = titleMedium.copy(fontFamily = sfProFamily),
-        titleSmall = titleSmall.copy(fontFamily = sfProFamily),
+        titleLarge = titleLarge.copy(fontFamily = pretendardFamily),
+        titleMedium = titleMedium.copy(fontFamily = pretendardFamily),
+        titleSmall = titleSmall.copy(fontFamily = pretendardFamily),
 
-        bodyLarge = bodyLarge.copy(fontFamily = sfProFamily),
+        bodyLarge = bodyLarge.copy(fontFamily = pretendardFamily),
         bodyMedium = bodyMedium.copy(
-            fontFamily = sfProFamily,
+            fontFamily = pretendardFamily,
             fontSize = 16.sp
         ),
         bodySmall = bodySmall.copy(
-            fontFamily = sfProFamily,
+            fontFamily = pretendardFamily,
             fontSize = 14.sp,
             lineHeight = 18.sp
         ),
 
-        labelLarge = labelLarge.copy(fontFamily = sfProFamily),
+        labelLarge = labelLarge.copy(fontFamily = pretendardFamily),
 
         labelMedium = labelMedium.copy(
-            fontFamily = sfProFamily,
+            fontFamily = pretendardFamily,
             fontSize = 16.sp,
         ),
         labelMediumEmphasized = labelMediumEmphasized.copy(
-            fontFamily = sfProFamily,
+            fontFamily = pretendardFamily,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         ),
         labelSmallEmphasized = labelSmallEmphasized.copy(
-            fontFamily = sfProFamily,
+            fontFamily = pretendardFamily,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )

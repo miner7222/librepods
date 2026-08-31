@@ -301,7 +301,7 @@ fun AirPodsSettingsScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = FontFamily(Font(R.font.pretendard))
                             )
                         )
                     }
