@@ -26,6 +26,11 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.services.ServiceManager
 
 class NoiseControlGridWidget : AppWidgetProvider() {
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        WidgetThemePreferences.remove(context, appWidgetIds)
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,

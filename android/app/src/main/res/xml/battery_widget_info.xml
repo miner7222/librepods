@@ -2,6 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:description="@string/app_widget_description"
+    android:configure="me.kavishdevar.librepods.presentation.widgets.WidgetConfigActivity"
     android:initialKeyguardLayout="@layout/battery_widget"
     android:initialLayout="@layout/battery_widget"
     android:minWidth="250dp"
@@ -15,4 +16,5 @@
     android:targetCellHeight="2"
     android:updatePeriodMillis="30000"
     android:widgetCategory="home_screen|keyguard"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     tools:ignore="UnusedAttribute" />
