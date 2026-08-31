@@ -286,11 +286,16 @@ private fun StyledToggleContent(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 4.dp)
+                        // 4dp let the description run right up to the switch; the
+                        // extra room makes it wrap before it gets there.
+                        .padding(end = 16.dp)
                 ) {
                     Text(
+                        // bodyMedium, not labelMedium: same size, but labelMedium
+                        // inherits Medium weight and made these read bolder than
+                        // the list rows beside them.
                         text = label,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = textColor,
                     )
 
