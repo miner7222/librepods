@@ -26,6 +26,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.util.SizeF
 import android.widget.RemoteViews
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
@@ -38,62 +39,91 @@ class NoiseControlWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val views = RemoteViews(context.packageName, R.layout.noise_control_widget)
-
-        val offIntent = Intent(context, NoiseControlWidget::class.java).apply {
-            action = "ACTION_SET_ANC_MODE"
-            putExtra("ANC_MODE", 1)
-        }
-        val transparencyIntent = Intent(context, NoiseControlWidget::class.java).apply {
-            action = "ACTION_SET_ANC_MODE"
-            putExtra("ANC_MODE", 3)
-        }
-        val adaptiveIntent = Intent(context, NoiseControlWidget::class.java).apply {
-            action = "ACTION_SET_ANC_MODE"
-            putExtra("ANC_MODE", 4)
-        }
-        val ancIntent = Intent(context, NoiseControlWidget::class.java).apply {
-            action = "ACTION_SET_ANC_MODE"
-            putExtra("ANC_MODE", 2)
+        ServiceManager.getService()?.let { service ->
+            service.updateNoiseControlWidget(appWidgetIds)
+            return
         }
 
-        views.setOnClickPendingIntent(
-            R.id.widget_off_button,
-            PendingIntent.getBroadcast(context, 0, offIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        )
-        views.setOnClickPendingIntent(
-            R.id.widget_transparency_button,
-            PendingIntent.getBroadcast(context, 1, transparencyIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        )
-        views.setOnClickPendingIntent(
-            R.id.widget_adaptive_button,
-            PendingIntent.getBroadcast(context, 2, adaptiveIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        )
-        views.setOnClickPendingIntent(
-            R.id.widget_anc_button,
-            PendingIntent.getBroadcast(context, 3, ancIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        )
-        ServiceManager.getService()?.updateNoiseControlWidget()
-        appWidgetManager.updateAppWidget(appWidgetIds, views)
+        appWidgetIds.forEach { appWidgetId ->
+            val isDarkTheme = WidgetThemePreferences.isDark(context, appWidgetId)
+            val opacity = WidgetThemePreferences.getOpacity(context, appWidgetId)
+            appWidgetManager.updateAppWidget(
+                appWidgetId,
+                RemoteViews(
+                    mapOf(
+                        SizeF(180f, 40f) to populateNoiseControlWidgetFallback(
+                            context,
+                            R.layout.noise_control_widget,
+                            isDarkTheme,
+                            opacity,
+                            NoiseControlWidget::class.java
+                        ),
+                        SizeF(250f, 40f) to populateNoiseControlWidgetFallback(
+                            context,
+                            R.layout.noise_control_widget_wide,
+                            isDarkTheme,
+                            opacity,
+                            NoiseControlWidget::class.java
+                        )
+                    )
+                )
+            )
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action == "ACTION_SET_ANC_MODE") {
-            val mode = intent.getIntExtra("ANC_MODE", 1)
-            Log.d("NoiseControlWidget", "Setting ANC mode to $mode")
-            val service = ServiceManager.getService()
+        handleNoiseControlWidgetIntent(context, intent, "NoiseControlWidget")
+    }
+}
 
-            if (service == null) {
-                Log.w("NoiseControlWidget", "Service unavailable")
-                return
+internal fun populateNoiseControlWidgetFallback(
+    context: Context,
+    layoutId: Int,
+    isDarkTheme: Boolean,
+    opacity: Int,
+    providerClass: Class<out AppWidgetProvider>
+): RemoteViews {
+    return RemoteViews(context.packageName, layoutId).also { views ->
+        views.applyNoiseControlWidgetTheme(isDarkTheme, opacity)
+        intArrayOf(1, 3, 4, 2).zip(
+            intArrayOf(
+                R.id.widget_off_button,
+                R.id.widget_transparency_button,
+                R.id.widget_adaptive_button,
+                R.id.widget_anc_button
+            )
+        ).forEachIndexed { requestCode, (mode, viewId) ->
+            val intent = Intent(context, providerClass).apply {
+                action = "ACTION_SET_ANC_MODE"
+                putExtra("ANC_MODE", mode)
             }
-
-             service.aacpManager
-                .sendControlCommand(
-                    AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE.value,
-                    mode.toByte()
+            views.setOnClickPendingIntent(
+                viewId,
+                PendingIntent.getBroadcast(
+                    context,
+                    requestCode,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
+            )
         }
     }
+}
+
+internal fun handleNoiseControlWidgetIntent(context: Context, intent: Intent, logTag: String) {
+    if (intent.action != "ACTION_SET_ANC_MODE") return
+
+    val mode = intent.getIntExtra("ANC_MODE", 1)
+    Log.d(logTag, "Setting ANC mode to $mode")
+    val service = ServiceManager.getService()
+    if (service == null) {
+        Log.w(logTag, "Service unavailable")
+        return
+    }
+
+    service.aacpManager.sendControlCommand(
+        AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE.value,
+        mode.toByte()
+    )
 }

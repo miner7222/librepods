@@ -47,6 +47,7 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="noise_control_widget_description">Control Noise Control Mode directly from your Home Screen.</string>
+    <string name="noise_control_grid_widget_description">Control Noise Control Mode from a compact grid.</string>
     <string name="island_connected_text">Connected</string>
     <string name="island_connected_remote_text">Connected to Linux</string>
     <string name="island_taking_over_text">Connected</string>
