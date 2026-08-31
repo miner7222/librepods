@@ -20,9 +20,16 @@
 
 package me.kavishdevar.librepods.presentation.widgets
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
+import android.util.SizeF
+import android.widget.RemoteViews
+import androidx.compose.material3.ExperimentalMaterial3Api
+import me.kavishdevar.librepods.MainActivity
+import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.services.ServiceManager
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -32,6 +39,50 @@ class BatteryWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        ServiceManager.getService()?.updateBattery()
+        ServiceManager.getService()?.let { service ->
+            service.updateBattery()
+            return
+        }
+
+        appWidgetIds.forEach { appWidgetId ->
+            val isDarkTheme = WidgetThemePreferences.isDark(context, appWidgetId)
+            val opacity = WidgetThemePreferences.getOpacity(context, appWidgetId)
+            val remoteViews = RemoteViews(
+                mapOf(
+                    SizeF(110f, 50f) to populateFallback(
+                        context,
+                        R.layout.battery_widget_compact,
+                        isDarkTheme,
+                        opacity
+                    ),
+                    SizeF(300f, 120f) to populateFallback(
+                        context,
+                        R.layout.battery_widget,
+                        isDarkTheme,
+                        opacity
+                    )
+                )
+            )
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun populateFallback(
+        context: Context,
+        layoutId: Int,
+        isDarkTheme: Boolean,
+        opacity: Int
+    ): RemoteViews {
+        return RemoteViews(context.packageName, layoutId).also { views ->
+            views.applyBatteryWidgetTheme(isDarkTheme, opacity)
+            val openActivityIntent = PendingIntent.getActivity(
+                context,
+                0,
+                Intent(context, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.battery_widget, openActivityIntent)
+        }
     }
 }

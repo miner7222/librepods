@@ -2,8 +2,8 @@
     <item>
         <shape android:shape="rectangle">
             <padding android:bottom="0dp" android:left="0dp" android:right="0dp" android:top="0dp" />
-            <solid android:color="#222222" />
-            <corners android:radius="32dp" />
+            <solid android:color="#1C1C1E" />
+            <corners android:radius="24dp" />
         </shape>
     </item>
 </layer-list>

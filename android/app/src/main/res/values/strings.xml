@@ -2,6 +2,7 @@
     <string name="app_name" translatable="false">LibrePods</string>
     <string name="app_description">Liberate your AirPods from Apple\'s ecosystem.</string>
     <string name="app_widget_description">See your AirPods battery status right from your home screen!</string>
+    <string name="battery_grid_widget_description">See your AirPods battery status in a compact grid.</string>
     <string name="accessibility">Accessibility</string>
     <string name="tone_volume">Tone Volume</string>
     <string name="tone_volume_description">Adjust the tone volume of sound effects played by AirPods.</string>
