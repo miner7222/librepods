@@ -266,7 +266,7 @@ fun TransparencySettingsScreen(viewModel: AirPodsViewModel) {
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily(Font(R.font.sf_pro))
+                    fontFamily = FontFamily(Font(R.font.pretendard))
                 ),
                 modifier = Modifier.padding(16.dp, bottom = 4.dp)
             )

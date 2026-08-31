@@ -353,7 +353,7 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase:
 //                        fontSize = 14.sp,
 //                        fontWeight = FontWeight.Bold,
 //                        color = textColor.copy(alpha = 0.6f),
-//                        fontFamily = FontFamily(Font(R.font.sf_pro))
+//                        fontFamily = FontFamily(Font(R.font.pretendard))
 //                    ), modifier = Modifier.padding(8.dp, bottom = 0.dp)
 //                )
 //                Column(
@@ -406,7 +406,7 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase:
 //                            stringResource(R.string.phone),
 //                            fontSize = 16.sp,
 //                            color = textColor,
-//                            fontFamily = FontFamily(Font(R.font.sf_pro)),
+//                            fontFamily = FontFamily(Font(R.font.pretendard)),
 //                            modifier = Modifier.weight(1f)
 //                        )
 //                        Checkbox(
@@ -469,7 +469,7 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase:
 //                            stringResource(R.string.media),
 //                            fontSize = 16.sp,
 //                            color = textColor,
-//                            fontFamily = FontFamily(Font(R.font.sf_pro)),
+//                            fontFamily = FontFamily(Font(R.font.pretendard)),
 //                            modifier = Modifier.weight(1f)
 //                        )
 //                        Checkbox(

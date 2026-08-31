@@ -59,17 +59,16 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
+import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 
 @Composable
 fun StyledListItem(
@@ -78,6 +77,7 @@ fun StyledListItem(
     name: String,
     onClick: (() -> Unit)?,
     description: String? = null,
+    annotatedDescription: AnnotatedString? = null,
     height: Dp = 58.dp,
     enabled: Boolean = true,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
@@ -114,6 +114,7 @@ fun StyledListItem(
                 name = name,
                 onClick = onClick,
                 description = description,
+                annotatedDescription = annotatedDescription,
                 height = height,
                 enabled = enabled,
                 index = 0,
@@ -132,6 +133,7 @@ fun StyledListScope.StyledListItem(
     name: String,
     onClick: (() -> Unit)? = null,
     description: String? = null,
+    annotatedDescription: AnnotatedString? = null,
     enabled: Boolean = onClick != null,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
     selected: Boolean? = null,
@@ -143,6 +145,7 @@ fun StyledListScope.StyledListItem(
             name = name,
             onClick = onClick,
             description = description,
+            annotatedDescription = annotatedDescription,
             enabled = enabled,
             index = index,
             count = count,
@@ -167,6 +170,7 @@ private fun StyledListItemContent(
     name: String,
     onClick: (() -> Unit)?,
     description: String? = null,
+    annotatedDescription: AnnotatedString? = null,
     height: Dp = 58.dp,
     enabled: Boolean = true,
     index: Int,
@@ -176,6 +180,7 @@ private fun StyledListItemContent(
     leadingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
+    val descriptionText = annotatedDescription ?: description?.let { AnnotatedString(it) }
     val isDarkTheme = isSystemInDarkTheme()
     val surfaceColor = MaterialTheme.colorScheme.surface
     val surfaceDimColor = MaterialTheme.colorScheme.surfaceDim
@@ -199,7 +204,7 @@ private fun StyledListItemContent(
                                 text = "􀆅",
                                 style = TextStyle(
                                     fontSize = 20.sp,
-                                    fontFamily = FontFamily(Font(R.font.sf_pro)),
+                                    fontFamily = sfSymbolsFamily,
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = floatAnimateState),
                                 ),
                                 modifier = Modifier.padding(end = 4.dp)
@@ -207,10 +212,12 @@ private fun StyledListItemContent(
                         } else {
                             Text(
                                 text = "􀯻",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = sfSymbolsFamily
+                                ),
                                 color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
                                 modifier = Modifier
-                                    .padding(start = if (description != null) 6.dp else 0.dp)
+                                    .padding(start = if (descriptionText != null) 6.dp else 0.dp)
                             )
                         }
                     }
@@ -290,10 +297,10 @@ private fun StyledListItemContent(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-                        if (description != null && orientation == ListItemOrientation.Vertical) {
+                        if (descriptionText != null && orientation == ListItemOrientation.Vertical) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = description,
+                                text = descriptionText,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) 0.6f else 0.8f), // TODO: move to color scheme
                             )
@@ -302,9 +309,9 @@ private fun StyledListItemContent(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    if (orientation == ListItemOrientation.Horizontal && description != null) {
+                    if (orientation == ListItemOrientation.Horizontal && descriptionText != null) {
                         Text(
-                            text = description,
+                            text = descriptionText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) 0.6f else 0.8f) // TODO: move to color scheme
                         )
@@ -371,8 +378,8 @@ private fun StyledListItemContent(
                         }
                     },
                     supportingContent = {
-                        if (description != null) Text(
-                            description,
+                        if (descriptionText != null) Text(
+                            descriptionText,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
@@ -383,7 +390,7 @@ private fun StyledListItemContent(
                             style = MaterialTheme.typography.labelMediumEmphasized,
                             modifier = Modifier.padding(
                                 top = 4.dp,
-                                bottom = if (description != null) 0.dp else 4.dp
+                                bottom = if (descriptionText != null) 0.dp else 4.dp
                             )
                         )
                     },
