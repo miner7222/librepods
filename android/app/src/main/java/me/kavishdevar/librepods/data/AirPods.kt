@@ -20,6 +20,13 @@ package me.kavishdevar.librepods.data
 
 import me.kavishdevar.librepods.R
 
+data class OverlayRingLayout(
+    val leftBud: Float = 0.1943f,
+    val rightBud: Float = 0.3951f,
+    val budPair: Float = 0.2947f,
+    val chargingCase: Float = 0.7035f,
+)
+
 open class AirPodsBase(
     val modelNumber: List<String>,
     val name: String,
@@ -32,7 +39,8 @@ open class AirPodsBase(
     val caseRes: Int,
     val capabilities: Set<Capability>,
     val connectedVideoRes: Int,
-    val islandVideoRes: Int
+    val islandVideoRes: Int,
+    val ringLayout: OverlayRingLayout = OverlayRingLayout()
 )
 
 /**

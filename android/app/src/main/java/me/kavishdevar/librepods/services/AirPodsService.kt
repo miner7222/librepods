@@ -96,9 +96,10 @@ import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
-import me.kavishdevar.librepods.data.FallbackArtwork
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.data.CustomEq
+import me.kavishdevar.librepods.data.FallbackArtwork
+import me.kavishdevar.librepods.data.OverlayRingLayout
 import me.kavishdevar.librepods.data.StemAction
 import me.kavishdevar.librepods.data.XposedRemotePrefProvider
 import me.kavishdevar.librepods.data.isHeadTrackingData
@@ -1805,7 +1806,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
         val popupWindow = PopupWindow(service.applicationContext)
-        popupWindow.open(name, batteryNotification, overlayModel()?.connectedVideoRes ?: FallbackArtwork.Pro.connected)
+        val overlayModel = overlayModel()
+        popupWindow.open(
+            name,
+            batteryNotification,
+            overlayModel?.connectedVideoRes ?: FallbackArtwork.Pro.connected,
+            overlayModel?.ringLayout ?: OverlayRingLayout()
+        )
         popupShown = true
     }
 
