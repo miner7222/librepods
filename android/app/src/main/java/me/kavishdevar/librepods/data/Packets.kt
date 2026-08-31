@@ -45,6 +45,13 @@ object BatteryStatus {
     const val OPTIMIZED_CHARGING = 5
 }
 
+fun batteryStatusForDisconnectedRestore(status: Int): Int {
+    return when (status) {
+        BatteryStatus.CHARGING, BatteryStatus.OPTIMIZED_CHARGING -> BatteryStatus.NOT_CHARGING
+        else -> status
+    }
+}
+
 @Parcelize
 data class Battery(val component: Int, val level: Int, val status: Int) : Parcelable {
     fun getComponentName(): String? {
@@ -158,6 +165,14 @@ class AirPodsNotifications {
         private var second: Battery = Battery(BatteryComponent.RIGHT, 0, BatteryStatus.DISCONNECTED)
         private var case: Battery = Battery(BatteryComponent.CASE, 0, BatteryStatus.DISCONNECTED)
 
+        private fun batteryOrUnavailable(component: Int, level: Int, status: Int): Battery {
+            return if (level in 0..100) {
+                Battery(component, level, status)
+            } else {
+                Battery(component, 0, BatteryStatus.DISCONNECTED)
+            }
+        }
+
         fun isBatteryData(data: ByteArray): Boolean {
             if (data.joinToString("") { "%02x".format(it) }.startsWith("040004000400")) {
                 Log.d("BatteryNotification", "Battery data starts with 040004000400. Most likely is a battery packet.")
@@ -180,14 +195,66 @@ class AirPodsNotifications {
             caseLevel: Int,
             caseCharging: Boolean
         ) {
-            first = Battery(BatteryComponent.LEFT, leftLevel, if (leftCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
-            second = Battery(BatteryComponent.RIGHT, rightLevel, if (rightCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
-            case = Battery(BatteryComponent.CASE, caseLevel, if (caseCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
+            first = batteryOrUnavailable(BatteryComponent.LEFT, leftLevel, if (leftCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
+            second = batteryOrUnavailable(BatteryComponent.RIGHT, rightLevel, if (rightCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
+            case = batteryOrUnavailable(BatteryComponent.CASE, caseLevel, if (caseCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
         }
 
-        fun setBattery(data: ByteArray) {
+        fun restoreBatterySnapshot(batteries: List<Battery>) {
+            val batteriesByComponent = batteries.associateBy { it.component }
+            first = restoredBatteryOrUnavailable(
+                BatteryComponent.LEFT, batteriesByComponent[BatteryComponent.LEFT]
+            )
+            second = restoredBatteryOrUnavailable(
+                BatteryComponent.RIGHT, batteriesByComponent[BatteryComponent.RIGHT]
+            )
+            case = restoredBatteryOrUnavailable(
+                BatteryComponent.CASE, batteriesByComponent[BatteryComponent.CASE]
+            )
+        }
+
+        /**
+         * Marks every component as no longer reporting. A lid closing kills the
+         * connection outright rather than sending a last packet, so without this
+         * the readings freeze at whatever they were - buds stuck on "charging".
+         */
+        fun markAllDisconnected() {
+            first = Battery(first.component, 0, BatteryStatus.DISCONNECTED)
+            second = Battery(second.component, 0, BatteryStatus.DISCONNECTED)
+            case = Battery(case.component, 0, BatteryStatus.DISCONNECTED)
+        }
+
+        /**
+         * Substitutes remembered levels for whichever components are no longer
+         * reporting, leaving the live ones untouched. Taking both buds out drops
+         * the case alone, so replacing the whole set would throw away good data.
+         */
+        fun fillDisconnectedFrom(remembered: List<Battery>) {
+            val byComponent = remembered.associateBy { it.component }
+            fun merge(current: Battery): Battery {
+                if (current.status != BatteryStatus.DISCONNECTED) return current
+                val fallback = byComponent[current.component] ?: return current
+                return restoredBatteryOrUnavailable(current.component, fallback)
+            }
+            first = merge(first)
+            second = merge(second)
+            case = merge(case)
+        }
+
+        private fun restoredBatteryOrUnavailable(component: Int, battery: Battery?): Battery {
+            if (battery == null) {
+                return Battery(component, 0, BatteryStatus.DISCONNECTED)
+            }
+            return batteryOrUnavailable(
+                component,
+                battery.level,
+                batteryStatusForDisconnectedRestore(battery.status)
+            )
+        }
+
+        fun setBattery(data: ByteArray): Boolean {
             if (data.size != 22) {
-                return
+                return false
             }
 //            first = if (data[10].toInt() == BatteryStatus.DISCONNECTED) {
 //                Battery(first.component, first.level, data[10].toInt())
@@ -205,15 +272,16 @@ class AirPodsNotifications {
 //                Battery(data[17].toInt(), data[19].toInt(), data[20].toInt())
 //            }
 //            sometimes it shows battery as -1%, just skip all that and set it normally
-            first = Battery(
+            first = batteryOrUnavailable(
                 data[7].toInt(), data[9].toInt(), data[10].toInt()
             )
-            second = Battery(
+            second = batteryOrUnavailable(
                 data[12].toInt(), data[14].toInt(), data[15].toInt()
             )
-            case = Battery(
+            case = batteryOrUnavailable(
                 data[17].toInt(), data[19].toInt(), data[20].toInt()
             )
+            return true
         }
 
         fun getBattery(): List<Battery> {

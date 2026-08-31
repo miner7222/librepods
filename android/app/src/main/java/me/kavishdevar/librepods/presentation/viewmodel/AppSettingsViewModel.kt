@@ -19,6 +19,7 @@ data class AppSettingsUiState(
     val showPhoneBatteryInWidget: Boolean = false,
     val conversationalAwarenessPauseMusicEnabled: Boolean = false,
     val conversationalAwarenessBothPodsOnlyEnabled: Boolean = false,
+    val rememberBatteryWhenDisconnected: Boolean = false,
     val relativeConversationalAwarenessVolumeEnabled: Boolean = true,
     val disconnectWhenNotWearing: Boolean = false,
     val takeoverWhenDisconnected: Boolean = false,
@@ -139,6 +140,7 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
                 showPhoneBatteryInWidget = sharedPreferences.getBoolean("show_phone_battery_in_widget", false),
                 conversationalAwarenessPauseMusicEnabled = sharedPreferences.getBoolean("conversational_awareness_pause_music", false),
                 conversationalAwarenessBothPodsOnlyEnabled = sharedPreferences.getBoolean("conversational_awareness_both_pods_only", false),
+                rememberBatteryWhenDisconnected = sharedPreferences.getBoolean("remember_battery_when_disconnected", false),
                 relativeConversationalAwarenessVolumeEnabled = sharedPreferences.getBoolean("relative_conversational_awareness_volume", true),
                 disconnectWhenNotWearing = sharedPreferences.getBoolean("disconnect_when_not_wearing", false),
                 takeoverWhenDisconnected = sharedPreferences.getBoolean("takeover_when_disconnected", false),
@@ -172,6 +174,11 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
     fun setConversationalAwarenessBothPodsOnlyEnabled(enabled: Boolean) {
         sharedPreferences.edit { putBoolean("conversational_awareness_both_pods_only", enabled) }
         _uiState.update { it.copy(conversationalAwarenessBothPodsOnlyEnabled = enabled) }
+    }
+
+    fun setRememberBatteryWhenDisconnected(enabled: Boolean) {
+        sharedPreferences.edit { putBoolean("remember_battery_when_disconnected", enabled) }
+        _uiState.update { it.copy(rememberBatteryWhenDisconnected = enabled) }
     }
 
     fun setRelativeConversationalAwarenessVolumeEnabled(enabled: Boolean) {

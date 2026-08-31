@@ -203,6 +203,13 @@ fun AppSettingsScreen(
                 enabled = state.isPremium
             )
 
+            StyledToggle(
+                label = stringResource(R.string.remember_battery_when_disconnected),
+                description = stringResource(R.string.remember_battery_when_disconnected_description),
+                checked = state.rememberBatteryWhenDisconnected,
+                onCheckedChange = viewModel::setRememberBatteryWhenDisconnected
+            )
+
             StyledList(title = stringResource(R.string.popup_animations)) {
                 StyledToggle(
                     label = stringResource(R.string.show_bottom_sheet_popup),

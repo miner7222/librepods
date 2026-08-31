@@ -135,6 +135,13 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "AirPodsService"
+private const val BATTERY_SNAPSHOT_LEFT_LEVEL = "battery_snapshot_left_level"
+private const val BATTERY_SNAPSHOT_LEFT_STATUS = "battery_snapshot_left_status"
+private const val BATTERY_SNAPSHOT_RIGHT_LEVEL = "battery_snapshot_right_level"
+private const val BATTERY_SNAPSHOT_RIGHT_STATUS = "battery_snapshot_right_status"
+private const val BATTERY_SNAPSHOT_CASE_LEVEL = "battery_snapshot_case_level"
+private const val BATTERY_SNAPSHOT_CASE_STATUS = "battery_snapshot_case_status"
+private const val BATTERY_SNAPSHOT_TIMESTAMP = "battery_snapshot_timestamp"
 
 object ServiceManager {
     private var service: AirPodsService? = null
@@ -166,6 +173,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         var earDetectionEnabled: Boolean = true,
         var conversationalAwarenessPauseMusic: Boolean = false,
         var conversationalAwarenessBothPodsOnly: Boolean = false,
+        var rememberBatteryWhenDisconnected: Boolean = false,
         var showPhoneBatteryInWidget: Boolean = true,
         var relativeConversationalAwarenessVolume: Boolean = true,
         var headGestures: Boolean = true,
@@ -275,6 +283,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 caseLevel = caseLevel,
                 caseCharging = caseCharging == true
             )
+            persistBatterySnapshot()
+            applyRememberedBattery()
             updateBattery()
         }
 
@@ -308,6 +318,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     caseLevel = caseLevel,
                     caseCharging = caseCharging == true
                 )
+                persistBatterySnapshot()
+                applyRememberedBattery()
                 sendBatteryBroadcast()
             } else {
                 Log.d(TAG, "Lid closed")
@@ -342,12 +354,17 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 caseLevel = caseLevel,
                 caseCharging = caseCharging == true
             )
+            persistBatterySnapshot()
+            applyRememberedBattery()
             updateBattery()
             Log.d(TAG, "Battery changed")
         }
 
         override fun onDeviceDisappeared() {
             Log.d(TAG, "All disappeared")
+            if (BluetoothConnectionManager.aacpSocket?.isConnected != true) {
+                onBatteryDisconnected()
+            }
             updateNotificationContent(
                 false
             )
@@ -379,6 +396,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
         sharedPreferences = getSharedPreferences("settings", MODE_PRIVATE)
         initializeConfig()
+        restoreBatterySnapshot()
 
         aacpManager = AACPManager()
         initializeAACPManagerCallback()
@@ -443,6 +461,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 )
                 if (!contains("conversational_awareness_both_pods_only")) putBoolean(
                     "conversational_awareness_both_pods_only", false
+                )
+                if (!contains("remember_battery_when_disconnected")) putBoolean(
+                    "remember_battery_when_disconnected", false
                 )
                 if (!contains("personalized_volume")) putBoolean("personalized_volume", false)
                 if (!contains("automatic_ear_detection")) putBoolean(
@@ -703,6 +724,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     aacpManager.disconnected()
                     BluetoothConnectionManager.aacpSocket = null
                     BluetoothConnectionManager.attSocket = null
+                    // Widgets read the socket to decide whether any listening
+                    // mode is in effect, so refresh only once it is gone.
+                    onBatteryDisconnected()
                 }
             }
         }
@@ -862,7 +886,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         aacpManager.setPacketCallback(object : AACPManager.PacketCallback {
             @SuppressLint("MissingPermission")
             override fun onBatteryInfoReceived(batteryInfo: ByteArray) {
-                batteryNotification.setBattery(batteryInfo)
+                if (batteryNotification.setBattery(batteryInfo)) {
+                    persistBatterySnapshot()
+                    applyRememberedBattery()
+                }
                 sendBroadcast(Intent(AirPodsNotifications.BATTERY_DATA).apply {
                     putParcelableArrayListExtra("data", ArrayList(batteryNotification.getBattery()))
                     setPackage(packageName)
@@ -1376,6 +1403,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             conversationalAwarenessBothPodsOnly = sharedPreferences.getBoolean(
                 "conversational_awareness_both_pods_only", false
             ),
+            rememberBatteryWhenDisconnected = sharedPreferences.getBoolean(
+                "remember_battery_when_disconnected", false
+            ),
             showPhoneBatteryInWidget = sharedPreferences.getBoolean(
                 "show_phone_battery_in_widget", true
             ),
@@ -1477,6 +1507,84 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         )
     }
 
+    private fun persistBatterySnapshot() {
+        val batteries = batteryNotification.getBattery()
+        val left = batteries.find { it.component == BatteryComponent.LEFT } ?: return
+        val right = batteries.find { it.component == BatteryComponent.RIGHT } ?: return
+        val case = batteries.find { it.component == BatteryComponent.CASE } ?: return
+
+        // Only a component that is actually reporting may overwrite what we
+        // remember for it. Taking both buds out drops the case to DISCONNECTED,
+        // and recording that would erase the very level we want to keep showing.
+        sharedPreferences.edit {
+            fun remember(levelKey: String, statusKey: String, battery: Battery) {
+                if (battery.status == BatteryStatus.DISCONNECTED) return
+                putInt(levelKey, battery.level)
+                putInt(statusKey, battery.status)
+            }
+            remember(BATTERY_SNAPSHOT_LEFT_LEVEL, BATTERY_SNAPSHOT_LEFT_STATUS, left)
+            remember(BATTERY_SNAPSHOT_RIGHT_LEVEL, BATTERY_SNAPSHOT_RIGHT_STATUS, right)
+            remember(BATTERY_SNAPSHOT_CASE_LEVEL, BATTERY_SNAPSHOT_CASE_STATUS, case)
+            putLong(BATTERY_SNAPSHOT_TIMESTAMP, System.currentTimeMillis())
+        }
+    }
+
+    private fun restoreBatterySnapshot() {
+        if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
+        batteryNotification.restoreBatterySnapshot(rememberedBattery() ?: return)
+    }
+
+    /**
+     * Keeps whatever a component last reported on screen once it stops reporting.
+     * Taking both buds out of the case drops the case alone while the service
+     * stays up, so this runs on every update rather than only at startup.
+     */
+    /**
+     * A disconnect never arrives as a battery packet, so nothing would otherwise
+     * clear a charging state that stopped being true when the lid closed.
+     */
+    private fun onBatteryDisconnected() {
+        batteryNotification.markAllDisconnected()
+        applyRememberedBattery()
+        updateBatteryWidget()
+        sendBatteryBroadcast()
+    }
+
+    private fun applyRememberedBattery() {
+        batteryNotification.fillDisconnectedFrom(rememberedBattery() ?: return)
+    }
+
+    private fun rememberedBattery(): List<Battery>? {
+        if (!config.rememberBatteryWhenDisconnected ||
+            !sharedPreferences.contains(BATTERY_SNAPSHOT_TIMESTAMP)
+        ) {
+            return null
+        }
+        return listOf(
+                Battery(
+                    BatteryComponent.LEFT,
+                    sharedPreferences.getInt(BATTERY_SNAPSHOT_LEFT_LEVEL, -1),
+                    sharedPreferences.getInt(
+                        BATTERY_SNAPSHOT_LEFT_STATUS, BatteryStatus.DISCONNECTED
+                    )
+                ),
+                Battery(
+                    BatteryComponent.RIGHT,
+                    sharedPreferences.getInt(BATTERY_SNAPSHOT_RIGHT_LEVEL, -1),
+                    sharedPreferences.getInt(
+                        BATTERY_SNAPSHOT_RIGHT_STATUS, BatteryStatus.DISCONNECTED
+                    )
+                ),
+                Battery(
+                    BatteryComponent.CASE,
+                    sharedPreferences.getInt(BATTERY_SNAPSHOT_CASE_LEVEL, -1),
+                    sharedPreferences.getInt(
+                        BATTERY_SNAPSHOT_CASE_STATUS, BatteryStatus.DISCONNECTED
+                    )
+                )
+        )
+    }
+
     override fun onSharedPreferenceChanged(preferences: SharedPreferences?, key: String?) {
         if (preferences == null || key == null) return
 
@@ -1490,6 +1598,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 preferences.getBoolean(key, false)
 
             "conversational_awareness_both_pods_only" -> config.conversationalAwarenessBothPodsOnly =
+                preferences.getBoolean(key, false)
+
+            "remember_battery_when_disconnected" -> config.rememberBatteryWhenDisconnected =
                 preferences.getBoolean(key, false)
 
             "show_phone_battery_in_widget" -> {
@@ -2841,7 +2952,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     Log.d("AirPods Service", "socket closed")
 //                        isConnectedLocally = false
                     aacpManager.disconnected()
+                    BluetoothConnectionManager.aacpSocket = null
+                    BluetoothConnectionManager.attSocket = null
                     updateNotificationContent(false)
+                    // Same order as the broadcast handler: the widgets read the
+                    // socket, so it has to be gone before they are repainted.
+                    onBatteryDisconnected()
                     sendBroadcast(Intent(AirPodsNotifications.AIRPODS_DISCONNECTED).apply {
                         setPackage(packageName)
                     })
@@ -2905,6 +3021,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         BluetoothConnectionManager.attSocket = null
 
         updateNotificationContent(false)
+        onBatteryDisconnected()
         sendBroadcast(Intent(AirPodsNotifications.AIRPODS_DISCONNECTED).apply {
             setPackage(packageName)
         })
