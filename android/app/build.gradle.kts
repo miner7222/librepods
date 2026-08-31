@@ -1,6 +1,7 @@
 import java.util.Properties
 
 val appVersionName = "1.0.0-rc2"
+val appVersionCode = 63
 
 plugins {
     alias(libs.plugins.android.application)
@@ -49,7 +50,7 @@ android {
     defaultConfig {
         applicationId = "me.kavishdevar.librepods"
         targetSdk = 37
-        versionCode = 63
+        versionCode = appVersionCode
         versionName = appVersionName
     }
     buildTypes {
@@ -171,6 +172,29 @@ aboutLibraries {
 
 val rootModuleDir = rootProject.file("../root-module-manual")
 val releaseDir = rootProject.file("../release")
+val modulePropTemplate = rootModuleDir.resolve("module.prop")
+val generatedModuleProp = layout.buildDirectory.file("generated/rootModuleProps/module.prop")
+
+val generateRootModuleProp = tasks.register("generateRootModuleProp") {
+    val template = modulePropTemplate
+    val versionName = appVersionName
+    val versionCode = appVersionCode
+    val output = generatedModuleProp
+
+    inputs.file(template)
+    inputs.property("versionName", versionName)
+    inputs.property("versionCode", versionCode)
+    outputs.file(output)
+
+    doLast {
+        val contents = template.readText()
+            .replace(Regex("(?m)^version=.*$"), "version=v$versionName")
+            .replace(Regex("(?m)^versionCode=.*$"), "versionCode=$versionCode")
+        val outputFile = output.get().asFile
+        outputFile.parentFile.mkdirs()
+        outputFile.writeText(contents)
+    }
+}
 
 fun cap(s: String) = s.replaceFirstChar { it.uppercase() }
 
@@ -185,7 +209,11 @@ fun registerRootModuleZipTask(
 
     val apkPath = "outputs/apk/$flavor/$buildType/app-$flavor-$buildType.apk"
 
-    from(rootModuleDir)
+    from(rootModuleDir) {
+        exclude("module.prop")
+    }
+
+    from(generateRootModuleProp)
 
     duplicatesStrategy = DuplicatesStrategy.WARN
 
