@@ -2170,6 +2170,11 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     ) {
         val notificationManager = getSystemService(NotificationManager::class.java)
 
+        if (!connected) {
+            notificationManager.cancel(2)
+            return
+        }
+
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -2227,8 +2232,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
             notificationManager.notify(2, updatedNotification)
             notificationManager.cancel(1)
-        } else if (!connected) {
-            notificationManager.cancel(2)
         } else if (!config.bleOnlyMode && BluetoothConnectionManager.aacpSocket?.isConnected != true) {
             showSocketConnectionFailureNotification("BluetoothConnectionManager.aacpSocket? created, but not connected. Check logs")
         }
