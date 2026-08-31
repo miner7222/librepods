@@ -30,9 +30,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,6 +52,20 @@ import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
 import kotlin.io.encoding.ExperimentalEncodingApi
+
+/**
+ * The artwork sits on a square canvas with a lot of transparent margin - the buds
+ * fill about 72% of it vertically and the case about 89% - so letting the image
+ * take the full column width made it roughly three times the height iOS gives it.
+ */
+private val ARTWORK_MAX_HEIGHT = 100.dp
+
+/**
+ * iOS keeps the products in a tight group: measured on a real AirPods settings
+ * capture, the right bud sits 0.85 bud widths from the case. Two equal-weight
+ * columns spread across the full width put them almost three bud widths apart.
+ */
+private val ARTWORK_ROW_MAX_WIDTH = 246.dp
 
 @Composable
 fun BatteryView(
@@ -71,7 +88,7 @@ fun BatteryView(
         contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.widthIn(max = 500.dp),
+            modifier = Modifier.widthIn(max = ARTWORK_ROW_MAX_WIDTH),
             horizontalArrangement = Arrangement.Center
         ) {
             Column(
@@ -81,9 +98,11 @@ fun BatteryView(
                 Image(
                     bitmap = ImageBitmap.imageResource(budsRes),
                     contentDescription = stringResource(R.string.buds),
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .heightIn(max = ARTWORK_MAX_HEIGHT)
+                        .padding(vertical = 8.dp)
                 )
 
                 if (
@@ -99,7 +118,7 @@ fun BatteryView(
                     singleDisplayed.value = false
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.wrapContentWidth(unbounded = true),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         if (leftLevel > 0 || left?.status != BatteryStatus.DISCONNECTED) {
@@ -132,9 +151,11 @@ fun BatteryView(
                 Image(
                     bitmap = ImageBitmap.imageResource(caseRes),
                     contentDescription = stringResource(R.string.case_alt),
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .heightIn(max = ARTWORK_MAX_HEIGHT)
+                        .padding(vertical = 8.dp)
                 )
 
                 if (caseLevel > 0 || case?.status != BatteryStatus.DISCONNECTED) {

@@ -1,0 +1,14 @@
+{
+  "uniqueId": "falah3d:airpods-4-artwork",
+  "name": "AirPods 4 artwork",
+  "developers": [
+    {
+      "name": "Falah3D (@3dFalah)"
+    }
+  ],
+  "description": "Images and animations rendered from the AirPods 4 model. Adapted camera, component arrangement, case-lid pose, framing, exposure, backgrounds and animation for LibrePods. Not an Apple-provided asset.",
+  "website": "https://sketchfab.com/3d-models/airpods-4-e44730974131402eb496352cab19c82e",
+  "licenses": [
+    "CC-BY-4.0"
+  ]
+}
