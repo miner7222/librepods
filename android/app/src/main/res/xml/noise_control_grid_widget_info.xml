@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:description="@string/noise_control_grid_widget_description"
+    android:initialKeyguardLayout="@layout/noise_control_widget_grid"
+    android:initialLayout="@layout/noise_control_widget_grid"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:previewImage="@drawable/example_appwidget_preview"
+    android:previewLayout="@layout/noise_control_widget_grid"
+    android:resizeMode="none"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="30000"
+    android:widgetCategory="home_screen|keyguard"
+    tools:ignore="UnusedAttribute" />

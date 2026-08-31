@@ -30,6 +30,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
@@ -111,9 +112,11 @@ import me.kavishdevar.librepods.presentation.overlays.PopupWindow
 import me.kavishdevar.librepods.presentation.widgets.BatteryGridWidget
 import me.kavishdevar.librepods.presentation.widgets.BatteryRing
 import me.kavishdevar.librepods.presentation.widgets.BatteryWidget
+import me.kavishdevar.librepods.presentation.widgets.NoiseControlGridWidget
 import me.kavishdevar.librepods.presentation.widgets.NoiseControlWidget
 import me.kavishdevar.librepods.presentation.widgets.WidgetThemePreferences
 import me.kavishdevar.librepods.presentation.widgets.applyBatteryWidgetTheme
+import me.kavishdevar.librepods.presentation.widgets.applyNoiseControlWidgetTheme
 import me.kavishdevar.librepods.utils.GestureDetector
 import me.kavishdevar.librepods.utils.HeadTracking
 import me.kavishdevar.librepods.utils.MediaController
@@ -150,6 +153,9 @@ private const val BATTERY_SNAPSHOT_RIGHT_STATUS = "battery_snapshot_right_status
 private const val BATTERY_SNAPSHOT_CASE_LEVEL = "battery_snapshot_case_level"
 private const val BATTERY_SNAPSHOT_CASE_STATUS = "battery_snapshot_case_status"
 private const val BATTERY_SNAPSHOT_TIMESTAMP = "battery_snapshot_timestamp"
+/** Matches none of the listening modes, which start at 1. */
+private const val NO_LISTENING_MODE = 0
+
 private val BATTERY_RING_TRACK = 0x40808080
 private val BATTERY_PROGRESS_GREEN = 0xFF67CE68.toInt()
 
@@ -981,6 +987,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         ?.get(0) ?: 0x00.toByte()))
                     sendANCBroadcast()
                     updateNoiseControlWidget()
+                    updateNoiseControlGridWidget()
                 }
             }
 
@@ -1557,6 +1564,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         batteryNotification.markAllDisconnected()
         applyRememberedBattery()
         updateBatteryWidget()
+        updateNoiseControlWidget()
         sendBatteryBroadcast()
     }
 
@@ -2225,36 +2233,127 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         sendBatteryNotification()
     }
 
-    fun updateNoiseControlWidget() {
+    fun updateNoiseControlWidget(appWidgetIds: IntArray? = null) {
         val appWidgetManager = AppWidgetManager.getInstance(this)
         val componentName = ComponentName(this, NoiseControlWidget::class.java)
-        val widgetIds = appWidgetManager.getAppWidgetIds(componentName)
-        val remoteViews = RemoteViews(packageName, R.layout.noise_control_widget).also { it ->
-            val ancStatus = ancNotification.status
+        val widgetIds = appWidgetIds ?: appWidgetManager.getAppWidgetIds(componentName)
+        widgetIds.forEach { appWidgetId ->
+            val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
+            val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
+            appWidgetManager.updateAppWidget(
+                appWidgetId,
+                RemoteViews(
+                    mapOf(
+                        SizeF(180f, 40f) to populateNoiseControlWidget(
+                            R.layout.noise_control_widget,
+                            isDarkTheme,
+                            opacity,
+                            NoiseControlWidget::class.java
+                        ),
+                        SizeF(250f, 40f) to populateNoiseControlWidget(
+                            R.layout.noise_control_widget_wide,
+                            isDarkTheme,
+                            opacity,
+                            NoiseControlWidget::class.java
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    fun updateNoiseControlGridWidget(appWidgetIds: IntArray? = null) {
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val componentName = ComponentName(this, NoiseControlGridWidget::class.java)
+        val widgetIds = appWidgetIds ?: appWidgetManager.getAppWidgetIds(componentName)
+        widgetIds.forEach { appWidgetId ->
+            val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
+            val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
+            appWidgetManager.updateAppWidget(
+                appWidgetId,
+                populateNoiseControlWidget(
+                    R.layout.noise_control_widget_grid,
+                    isDarkTheme,
+                    opacity,
+                    NoiseControlGridWidget::class.java
+                )
+            )
+        }
+    }
+
+    private fun populateNoiseControlWidget(
+        @LayoutRes layoutId: Int,
+        isDarkTheme: Boolean,
+        opacity: Int,
+        providerClass: Class<out AppWidgetProvider>
+    ): RemoteViews {
+        return RemoteViews(packageName, layoutId).also { it ->
+            // With nothing connected there is no mode in effect, so leave every
+            // button unselected rather than showing a stale highlight.
+            val ancStatus = if (BluetoothConnectionManager.aacpSocket?.isConnected == true) {
+                ancNotification.status
+            } else {
+                NO_LISTENING_MODE
+            }
             val allowOffModeValue =
                 aacpManager.controlCommandStatusList.find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION }
             val allowOffMode =
                 allowOffModeValue?.value?.takeIf { it.isNotEmpty() }?.get(0) == 0x01.toByte() || sharedPreferences.getBoolean("off_listening_mode", true)
-            it.setInt(
+            it.applyNoiseControlWidgetTheme(isDarkTheme, opacity, ancStatus, allowOffMode)
+
+            val offIntent = Intent(this, providerClass).apply {
+                action = "ACTION_SET_ANC_MODE"
+                putExtra("ANC_MODE", 1)
+            }
+            val transparencyIntent = Intent(this, providerClass).apply {
+                action = "ACTION_SET_ANC_MODE"
+                putExtra("ANC_MODE", 3)
+            }
+            val adaptiveIntent = Intent(this, providerClass).apply {
+                action = "ACTION_SET_ANC_MODE"
+                putExtra("ANC_MODE", 4)
+            }
+            val ancIntent = Intent(this, providerClass).apply {
+                action = "ACTION_SET_ANC_MODE"
+                putExtra("ANC_MODE", 2)
+            }
+            it.setOnClickPendingIntent(
                 R.id.widget_off_button,
-                "setBackgroundResource",
-                if (ancStatus == 1) R.drawable.widget_button_checked_shape_start else R.drawable.widget_button_shape_start
+                PendingIntent.getBroadcast(
+                    this,
+                    0,
+                    offIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             )
-            it.setInt(
+            it.setOnClickPendingIntent(
                 R.id.widget_transparency_button,
-                "setBackgroundResource",
-                if (ancStatus == 3) (if (allowOffMode) R.drawable.widget_button_checked_shape_middle else R.drawable.widget_button_checked_shape_start) else (if (allowOffMode) R.drawable.widget_button_shape_middle else R.drawable.widget_button_shape_start)
+                PendingIntent.getBroadcast(
+                    this,
+                    1,
+                    transparencyIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             )
-            it.setInt(
+            it.setOnClickPendingIntent(
                 R.id.widget_adaptive_button,
-                "setBackgroundResource",
-                if (ancStatus == 4) R.drawable.widget_button_checked_shape_middle else R.drawable.widget_button_shape_middle
+                PendingIntent.getBroadcast(
+                    this,
+                    2,
+                    adaptiveIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             )
-            it.setInt(
+            it.setOnClickPendingIntent(
                 R.id.widget_anc_button,
-                "setBackgroundResource",
-                if (ancStatus == 2) R.drawable.widget_button_checked_shape_end else R.drawable.widget_button_shape_end
+                PendingIntent.getBroadcast(
+                    this,
+                    3,
+                    ancIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             )
+
             it.setViewVisibility(
                 R.id.widget_off_button, if (allowOffMode) View.VISIBLE else View.GONE
             )
@@ -2275,8 +2374,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 )
             }
         }
-
-        appWidgetManager.updateAppWidget(widgetIds, remoteViews)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
