@@ -42,25 +42,20 @@ object WidgetThemePreferences {
     const val DEFAULT_OPACITY = 50
     private const val THEME_KEY_PREFIX = "widget_theme_"
     private const val OPACITY_KEY_PREFIX = "widget_opacity_"
+    private const val PHONE_BATTERY_KEY_PREFIX = "widget_phone_battery_"
+    private const val LEGACY_PHONE_BATTERY_KEY = "show_phone_battery_in_widget"
 
     fun preferenceKey(appWidgetId: Int): String = "$THEME_KEY_PREFIX$appWidgetId"
 
     fun opacityPreferenceKey(appWidgetId: Int): String = "$OPACITY_KEY_PREFIX$appWidgetId"
 
+    fun phoneBatteryPreferenceKey(appWidgetId: Int): String =
+        "$PHONE_BATTERY_KEY_PREFIX$appWidgetId"
+
     fun get(preferences: SharedPreferences, appWidgetId: Int): WidgetTheme =
         WidgetTheme.fromPreferenceValue(
             preferences.getString(preferenceKey(appWidgetId), WidgetTheme.SYSTEM.preferenceValue)
         )
-
-    fun set(
-        preferences: SharedPreferences,
-        appWidgetId: Int,
-        theme: WidgetTheme
-    ) {
-        preferences.edit()
-            .putString(preferenceKey(appWidgetId), theme.preferenceValue)
-            .apply()
-    }
 
     fun getOpacity(preferences: SharedPreferences, appWidgetId: Int): Int =
         preferences.getInt(opacityPreferenceKey(appWidgetId), DEFAULT_OPACITY).coerceIn(0, 100)
@@ -71,14 +66,23 @@ object WidgetThemePreferences {
             appWidgetId
         )
 
-    fun setOpacity(
-        preferences: SharedPreferences,
-        appWidgetId: Int,
-        opacity: Int
-    ) {
-        preferences.edit()
-            .putInt(opacityPreferenceKey(appWidgetId), opacity.coerceIn(0, 100))
-            .apply()
+    fun getShowPhoneBattery(preferences: SharedPreferences, appWidgetId: Int): Boolean {
+        val key = phoneBatteryPreferenceKey(appWidgetId)
+        return if (preferences.contains(key)) {
+            preferences.getBoolean(key, true)
+        } else {
+            preferences.getBoolean(LEGACY_PHONE_BATTERY_KEY, true)
+        }
+    }
+
+    fun remove(context: Context, appWidgetIds: IntArray) {
+        val editor = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE).edit()
+        appWidgetIds.forEach { appWidgetId ->
+            editor.remove(preferenceKey(appWidgetId))
+            editor.remove(opacityPreferenceKey(appWidgetId))
+            editor.remove(phoneBatteryPreferenceKey(appWidgetId))
+        }
+        editor.apply()
     }
 
     fun isDark(context: Context, appWidgetId: Int): Boolean {
