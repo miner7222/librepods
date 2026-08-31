@@ -61,10 +61,12 @@ import android.telecom.TelecomManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.util.SizeF
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.Toast
+import androidx.annotation.LayoutRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -106,8 +108,12 @@ import me.kavishdevar.librepods.data.isHeadTrackingData
 import me.kavishdevar.librepods.presentation.overlays.IslandType
 import me.kavishdevar.librepods.presentation.overlays.IslandWindow
 import me.kavishdevar.librepods.presentation.overlays.PopupWindow
+import me.kavishdevar.librepods.presentation.widgets.BatteryGridWidget
+import me.kavishdevar.librepods.presentation.widgets.BatteryRing
 import me.kavishdevar.librepods.presentation.widgets.BatteryWidget
 import me.kavishdevar.librepods.presentation.widgets.NoiseControlWidget
+import me.kavishdevar.librepods.presentation.widgets.WidgetThemePreferences
+import me.kavishdevar.librepods.presentation.widgets.applyBatteryWidgetTheme
 import me.kavishdevar.librepods.utils.GestureDetector
 import me.kavishdevar.librepods.utils.HeadTracking
 import me.kavishdevar.librepods.utils.MediaController
@@ -144,6 +150,8 @@ private const val BATTERY_SNAPSHOT_RIGHT_STATUS = "battery_snapshot_right_status
 private const val BATTERY_SNAPSHOT_CASE_LEVEL = "battery_snapshot_case_level"
 private const val BATTERY_SNAPSHOT_CASE_STATUS = "battery_snapshot_case_status"
 private const val BATTERY_SNAPSHOT_TIMESTAMP = "battery_snapshot_timestamp"
+private val BATTERY_RING_TRACK = 0x40808080
+private val BATTERY_PROGRESS_GREEN = 0xFF67CE68.toInt()
 
 object ServiceManager {
     private var service: AirPodsService? = null
@@ -660,8 +668,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             telephonyManager.registerTelephonyCallback(mainExecutor, phoneStateListener)
         }
 
-        if (config.showPhoneBatteryInWidget) {
-            widgetMobileBatteryEnabled = true
+        widgetMobileBatteryEnabled = config.showPhoneBatteryInWidget
+        run {
             val batteryChangedIntentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
             batteryChangedIntentFilter.addAction(AirPodsNotifications.DISCONNECT_RECEIVERS)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -2038,12 +2046,95 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    fun updateBatteryWidget() {
+    fun updateBatteryWidget(appWidgetIds: IntArray? = null) {
         val appWidgetManager = AppWidgetManager.getInstance(this)
         val componentName = ComponentName(this, BatteryWidget::class.java)
-        val widgetIds = appWidgetManager.getAppWidgetIds(componentName)
+        val widgetIds = appWidgetIds ?: appWidgetManager.getAppWidgetIds(componentName)
+        widgetIds.forEach { appWidgetId ->
+            val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
+            val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
+            val remoteViews = RemoteViews(
+                mapOf(
+                    SizeF(110f, 50f) to populateBatteryWidget(
+                        R.layout.battery_widget_compact,
+                        isDarkTheme,
+                        opacity
+                    ),
+                    SizeF(300f, 120f) to populateBatteryWidget(
+                        R.layout.battery_widget,
+                        isDarkTheme,
+                        opacity
+                    )
+                )
+            )
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+        }
+    }
 
-        val remoteViews = RemoteViews(packageName, R.layout.battery_widget).also { it ->
+    @OptIn(ExperimentalMaterial3Api::class)
+    fun updateBatteryGridWidget(appWidgetIds: IntArray? = null) {
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val componentName = ComponentName(this, BatteryGridWidget::class.java)
+        val widgetIds = appWidgetIds ?: appWidgetManager.getAppWidgetIds(componentName)
+        widgetIds.forEach { appWidgetId ->
+            val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
+            val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
+            appWidgetManager.updateAppWidget(
+                appWidgetId,
+                populateBatteryWidget(R.layout.battery_widget_grid, isDarkTheme, opacity)
+            )
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun populateBatteryWidget(
+        @LayoutRes layoutId: Int,
+        isDarkTheme: Boolean,
+        opacity: Int
+    ): RemoteViews {
+        val ringDp = when (layoutId) {
+            R.layout.battery_widget_compact -> 48
+            R.layout.battery_widget_grid -> 76
+            else -> 78
+        }
+        return RemoteViews(packageName, layoutId).also { it ->
+            it.applyBatteryWidgetTheme(isDarkTheme, opacity)
+
+            fun setChargingBolt(
+                chargingIconId: Int,
+                chargingOutlineId: Int,
+                level: Int?,
+                isCharging: Boolean,
+                ringId: Int
+            ) {
+                it.setImageViewBitmap(
+                    ringId,
+                    BatteryRing.bitmap(
+                        this,
+                        ringDp,
+                        level ?: 0,
+                        BATTERY_RING_TRACK,
+                        BATTERY_PROGRESS_GREEN
+                    )
+                )
+                val visibility = if (isCharging) View.VISIBLE else View.GONE
+                it.setViewVisibility(chargingIconId, visibility)
+                // The gap in the ring replaces the outline that used to separate
+                // the bolt from the stroke.
+                it.setViewVisibility(chargingOutlineId, View.GONE)
+                it.setInt(
+                    chargingIconId,
+                    "setColorFilter",
+                    if (level == 100) {
+                        BATTERY_PROGRESS_GREEN
+                    } else if (isDarkTheme) {
+                        Color.WHITE
+                    } else {
+                        Color.BLACK
+                    }
+                )
+            }
+
             val openActivityIntent = PendingIntent.getActivity(
                 this,
                 0,
@@ -2062,34 +2153,37 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             it.setTextViewText(R.id.left_battery_widget, leftBattery?.let {
                 "${it.level}%"
             } ?: "")
-            it.setProgressBar(
-                R.id.left_battery_progress, 100, leftBattery?.level ?: 0, false
-            )
-            it.setViewVisibility(
+            setChargingBolt(
                 R.id.left_charging_icon,
-                if (leftBattery?.status == BatteryStatus.CHARGING || leftBattery?.status == BatteryStatus.OPTIMIZED_CHARGING) View.VISIBLE else View.GONE
+                R.id.left_charging_icon_outline,
+                leftBattery?.level,
+                leftBattery?.status == BatteryStatus.CHARGING ||
+                    leftBattery?.status == BatteryStatus.OPTIMIZED_CHARGING,
+                R.id.left_battery_ring
             )
 
             it.setTextViewText(R.id.right_battery_widget, rightBattery?.let {
                 "${it.level}%"
             } ?: "")
-            it.setProgressBar(
-                R.id.right_battery_progress, 100, rightBattery?.level ?: 0, false
-            )
-            it.setViewVisibility(
+            setChargingBolt(
                 R.id.right_charging_icon,
-                if (rightBattery?.status == BatteryStatus.CHARGING || rightBattery?.status == BatteryStatus.OPTIMIZED_CHARGING ) View.VISIBLE else View.GONE
+                R.id.right_charging_icon_outline,
+                rightBattery?.level,
+                rightBattery?.status == BatteryStatus.CHARGING ||
+                    rightBattery?.status == BatteryStatus.OPTIMIZED_CHARGING,
+                R.id.right_battery_ring
             )
 
             it.setTextViewText(R.id.case_battery_widget, caseBattery?.let {
                 "${it.level}%"
             } ?: "")
-            it.setProgressBar(
-                R.id.case_battery_progress, 100, caseBattery?.level ?: 0, false
-            )
-            it.setViewVisibility(
+            setChargingBolt(
                 R.id.case_charging_icon,
-                if (caseBattery?.status == BatteryStatus.CHARGING || caseBattery?.status == BatteryStatus.OPTIMIZED_CHARGING ) View.VISIBLE else View.GONE
+                R.id.case_charging_icon_outline,
+                caseBattery?.level,
+                caseBattery?.status == BatteryStatus.CHARGING ||
+                    caseBattery?.status == BatteryStatus.OPTIMIZED_CHARGING,
+                R.id.case_battery_ring
             )
 
             it.setViewVisibility(
@@ -2100,20 +2194,25 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 val batteryManager = getSystemService(BatteryManager::class.java)
                 val batteryLevel =
                     batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-                val charging =
-                    batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS) == BatteryManager.BATTERY_STATUS_CHARGING
+                // BATTERY_PROPERTY_STATUS reads FULL once the phone is topped up
+                // and UNKNOWN on some devices, so it misses a plugged-in phone.
+                // The sticky battery broadcast says plainly what it is plugged into.
+                val charging = registerReceiver(
+                    null,
+                    IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                )?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0
                 it.setTextViewText(
                     R.id.phone_battery_widget, "$batteryLevel%"
                 )
-                it.setViewVisibility(
-                    R.id.phone_charging_icon, if (charging) View.VISIBLE else View.GONE
-                )
-                it.setProgressBar(
-                    R.id.phone_battery_progress, 100, batteryLevel, false
+                setChargingBolt(
+                    R.id.phone_charging_icon,
+                    R.id.phone_charging_icon_outline,
+                    batteryLevel,
+                    charging != 0,
+                    R.id.phone_battery_ring
                 )
             }
         }
-        appWidgetManager.updateAppWidget(widgetIds, remoteViews)
     }
 
     @SuppressLint("MissingPermission")
@@ -2121,6 +2220,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     fun updateBattery() {
         setBatteryMetadata()
         updateBatteryWidget()
+        updateBatteryGridWidget()
         sendBatteryBroadcast()
         sendBatteryNotification()
     }

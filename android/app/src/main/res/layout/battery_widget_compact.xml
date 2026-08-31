@@ -11,17 +11,16 @@
 
     <LinearLayout
         android:id="@+id/battery_widget_surface"
-        android:layout_width="450dp"
-        android:layout_height="180dp"
+        android:layout_width="180dp"
+        android:layout_height="64dp"
         android:layout_centerInParent="true"
-        android:layout_margin="0dp"
         android:background="@drawable/widget_background"
         android:baselineAligned="false"
         android:clipChildren="false"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp">
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp">
 
         <LinearLayout
             android:id="@+id/phone_battery_widget_container"
@@ -34,8 +33,8 @@
             android:visibility="gone">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_gravity="center"
                 android:clipChildren="false">
 
@@ -47,8 +46,8 @@
 
                 <ImageView
                     android:id="@+id/phone_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="16dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -58,8 +57,8 @@
 
                 <ImageView
                     android:id="@+id/phone_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="8dp"
+                    android:layout_height="13dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -69,8 +68,8 @@
 
                 <ImageView
                     android:id="@+id/phone_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/smartphone"
@@ -82,13 +81,14 @@
                 android:id="@+id/phone_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
                 android:text="Phone"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
+                android:visibility="gone"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
 
@@ -101,8 +101,8 @@
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_gravity="center"
                 android:clipChildren="false">
 
@@ -114,8 +114,8 @@
 
                 <ImageView
                     android:id="@+id/left_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="16dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -125,8 +125,8 @@
 
                 <ImageView
                     android:id="@+id/left_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="8dp"
+                    android:layout_height="13dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -136,8 +136,8 @@
 
                 <ImageView
                     android:id="@+id/left_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_left_notification"
@@ -149,13 +149,14 @@
                 android:id="@+id/left_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
                 android:text="Left"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
+                android:visibility="gone"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
 
@@ -168,8 +169,8 @@
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_gravity="center"
                 android:clipChildren="false">
 
@@ -181,8 +182,8 @@
 
                 <ImageView
                     android:id="@+id/right_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="16dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -192,8 +193,8 @@
 
                 <ImageView
                     android:id="@+id/right_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="8dp"
+                    android:layout_height="13dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -203,8 +204,8 @@
 
                 <ImageView
                     android:id="@+id/right_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_right_notification"
@@ -216,13 +217,14 @@
                 android:id="@+id/right_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
                 android:text="Right"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
+                android:visibility="gone"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
 
@@ -235,8 +237,8 @@
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_gravity="center"
                 android:clipChildren="false">
 
@@ -248,8 +250,8 @@
 
                 <ImageView
                     android:id="@+id/case_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="16dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -259,8 +261,8 @@
 
                 <ImageView
                     android:id="@+id/case_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="8dp"
+                    android:layout_height="13dp"
                     android:layout_gravity="top|center_horizontal"
                     android:layout_marginTop="-6dp"
                     android:importantForAccessibility="no"
@@ -270,8 +272,8 @@
 
                 <ImageView
                     android:id="@+id/case_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_case_notification"
@@ -283,13 +285,14 @@
                 android:id="@+id/case_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
                 android:text="Case"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
+                android:visibility="gone"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
     </LinearLayout>
