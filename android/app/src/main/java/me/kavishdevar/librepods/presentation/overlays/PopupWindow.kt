@@ -25,7 +25,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
@@ -34,13 +37,18 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.TouchDelegate
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.constraintlayout.widget.Guideline
+import androidx.core.content.ContextCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
@@ -50,6 +58,12 @@ import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.data.FallbackArtwork
+import me.kavishdevar.librepods.data.OverlayRingLayout
+import me.kavishdevar.librepods.presentation.widgets.BatteryRing
+
+// 93% of a turn leaves about 25 degrees open just before twelve o'clock,
+// which is where the charging bolt sits.
+private const val POPUP_RING_DP = 37
 
 @SuppressLint("InflateParams", "ClickableViewAccessibility")
 class PopupWindow(
@@ -62,17 +76,21 @@ class PopupWindow(
     private var autoCloseRunnable: Runnable? = null
     private var batteryUpdateReceiver: BroadcastReceiver? = null
     private var dimAnimator: ValueAnimator? = null
+    private var sheetWidthPx = 0
 
     @Suppress("DEPRECATION")
     private val mParams: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
         height = WindowManager.LayoutParams.WRAP_CONTENT
         val displayMetrics = context.resources.displayMetrics
         val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
-        width = if (screenWidthDp >= 600) {
+        val marginPx = (displayMetrics.widthPixels * 0.0357f).toInt()
+        sheetWidthPx = if (screenWidthDp >= 600) {
             (400 * displayMetrics.density).toInt()
         } else {
-            WindowManager.LayoutParams.MATCH_PARENT
+            displayMetrics.widthPixels - 2 * marginPx
         }
+        width = sheetWidthPx
+        y = marginPx
         type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
@@ -90,17 +108,30 @@ class PopupWindow(
         val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         mView = layoutInflater.inflate(R.layout.popup_window, null)
         mParams.x = 0
-        mParams.y = 0
 
         mView.setOnClickListener {
             close()
         }
 
-        mView.findViewById<ImageButton>(R.id.close_button).setOnClickListener {
+        val closeButton = mView.findViewById<ImageButton>(R.id.close_button)
+        closeButton.setOnClickListener {
             close()
         }
 
+        // The glyph stays small to match iOS, but a 30dp target is under the
+        // 44pt minimum, which is what an assistive pointer actually aims at.
+        closeButton.post {
+            val parent = closeButton.parent as? View ?: return@post
+            val minimum = (44f * context.resources.displayMetrics.density).toInt()
+            val bounds = Rect().also { closeButton.getHitRect(it) }
+            val growX = ((minimum - bounds.width()) / 2).coerceAtLeast(0)
+            val growY = ((minimum - bounds.height()) / 2).coerceAtLeast(0)
+            bounds.inset(-growX, -growY)
+            parent.touchDelegate = TouchDelegate(bounds, closeButton)
+        }
+
         val ll = mView.findViewById<LinearLayout>(R.id.linear_layout)
+        ll.minimumHeight = (sheetWidthPx * 1.026f).toInt()
         ll.setOnClickListener {
             close()
         }
@@ -128,13 +159,32 @@ class PopupWindow(
             }
         }
         mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        if (mWindowManager.isCrossWindowBlurEnabled) {
+            mParams.flags = mParams.flags or WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+            mParams.blurBehindRadius =
+                (BLUR_BEHIND_RADIUS_DP * context.resources.displayMetrics.density).toInt()
+        }
     }
 
     @SuppressLint("InlinedApi", "SetTextI18s")
-    fun open(name: String = "AirPods Pro", batteryNotification: AirPodsNotifications.BatteryNotification, videoRes: Int = FallbackArtwork.Pro.connected) {
+    fun open(
+        name: String = "AirPods Pro",
+        batteryNotification: AirPodsNotifications.BatteryNotification,
+        videoRes: Int = FallbackArtwork.Pro.connected,
+        ringLayout: OverlayRingLayout = OverlayRingLayout()
+    ) {
         try {
             if (mView.windowToken == null && mView.parent == null && !isClosing) {
                 mView.findViewById<TextView>(R.id.name).text = name
+
+                mView.findViewById<Guideline>(R.id.ring_guide_combined)
+                    .setGuidelinePercent(ringLayout.budPair)
+                mView.findViewById<Guideline>(R.id.ring_guide_left)
+                    .setGuidelinePercent(ringLayout.leftBud)
+                mView.findViewById<Guideline>(R.id.ring_guide_right)
+                    .setGuidelinePercent(ringLayout.rightBud)
+                mView.findViewById<Guideline>(R.id.ring_guide_case)
+                    .setGuidelinePercent(ringLayout.chargingCase)
 
                 updateBatteryStatus(batteryNotification)
 
@@ -223,34 +273,117 @@ class PopupWindow(
         }
     }
 
+    @SuppressLint("SetTextI18s")
     private fun updateBatteryStatusFromList(batteryList: List<Battery>) {
-        val batteryLeftText = mView.findViewById<TextView>(R.id.left_battery)
-        val batteryRightText = mView.findViewById<TextView>(R.id.right_battery)
-        val batteryCaseText = mView.findViewById<TextView>(R.id.case_battery)
+        val left = batteryList.find { it.component == BatteryComponent.LEFT }
+        val right = batteryList.find { it.component == BatteryComponent.RIGHT }
+        val case = batteryList.find { it.component == BatteryComponent.CASE }
+        val combinedBuds = if (
+            left != null &&
+            right != null &&
+            left.status != BatteryStatus.DISCONNECTED &&
+            right.status != BatteryStatus.DISCONNECTED &&
+            left.status == right.status &&
+            (left.level - right.level) in -3..3
+        ) {
+            Battery(
+                BatteryComponent.LEFT,
+                left.level.coerceAtMost(right.level),
+                left.status
+            )
+        } else {
+            null
+        }
+        val showCombinedBuds = combinedBuds != null
 
-        batteryLeftText.text = batteryList.find { it.component == BatteryComponent.LEFT }?.let {
-            if (it.status != BatteryStatus.DISCONNECTED) {
-                "\uDBC3\uDC8E    ${it.level}%"
-            } else {
-                ""
-            }
-        } ?: ""
+        val badgeVisibility = if (showCombinedBuds) View.GONE else View.VISIBLE
+        mView.findViewById<ImageView>(R.id.left_battery_badge).visibility = badgeVisibility
+        mView.findViewById<ImageView>(R.id.right_battery_badge).visibility = badgeVisibility
+        mView.findViewById<ImageView>(R.id.case_battery_badge).visibility = badgeVisibility
 
-        batteryRightText.text = batteryList.find { it.component == BatteryComponent.RIGHT }?.let {
-            if (it.status != BatteryStatus.DISCONNECTED) {
-                "\uDBC3\uDC8D    ${it.level}%"
-            } else {
-                ""
-            }
-        } ?: ""
+        updateBatteryCell(
+            R.id.combined_buds_battery_cell,
+            R.id.combined_buds_battery,
+            R.id.combined_buds_battery_ring,
+            R.id.combined_buds_battery_icon,
+            R.id.combined_buds_charging_icon,
+            R.id.combined_buds_charging_icon_outline,
+            combinedBuds?.level,
+            combinedBuds?.status
+        )
+        updateBatteryCell(
+            R.id.left_battery_cell,
+            R.id.left_battery,
+            R.id.popup_left_battery_ring,
+            R.id.popup_left_battery_icon,
+            R.id.popup_left_charging_icon,
+            R.id.popup_left_charging_icon_outline,
+            if (showCombinedBuds) null else left?.level,
+            if (showCombinedBuds) null else left?.status
+        )
+        updateBatteryCell(
+            R.id.right_battery_cell,
+            R.id.right_battery,
+            R.id.popup_right_battery_ring,
+            R.id.popup_right_battery_icon,
+            R.id.popup_right_charging_icon,
+            R.id.popup_right_charging_icon_outline,
+            if (showCombinedBuds) null else right?.level,
+            if (showCombinedBuds) null else right?.status
+        )
+        updateBatteryCell(
+            R.id.case_battery_cell,
+            R.id.case_battery,
+            R.id.popup_case_battery_ring,
+            R.id.popup_case_battery_icon,
+            R.id.popup_case_charging_icon,
+            R.id.popup_case_charging_icon_outline,
+            case?.level,
+            case?.status
+        )
+    }
 
-        batteryCaseText.text = batteryList.find { it.component == BatteryComponent.CASE }?.let {
-            if (it.status != BatteryStatus.DISCONNECTED) {
-                "\uDBC3\uDE6C    ${it.level}%"
-            } else {
-                ""
-            }
-        } ?: ""
+    private fun updateBatteryCell(
+        cellId: Int,
+        percentageId: Int,
+        ringId: Int,
+        deviceIconId: Int,
+        chargingIconId: Int,
+        chargingOutlineId: Int,
+        level: Int?,
+        status: Int?
+    ) {
+        val cell = mView.findViewById<View>(cellId)
+        val percentage = mView.findViewById<TextView>(percentageId)
+        if (level == null || status == null || status == BatteryStatus.DISCONNECTED) {
+            cell.visibility = View.GONE
+            percentage.text = ""
+            return
+        }
+
+        cell.visibility = View.VISIBLE
+        percentage.text = "$level%"
+        val chargingVisible =
+            status == BatteryStatus.CHARGING || status == BatteryStatus.OPTIMIZED_CHARGING
+        mView.findViewById<ImageView>(ringId).setImageBitmap(
+            BatteryRing.bitmap(
+                context,
+                POPUP_RING_DP,
+                level,
+                ContextCompat.getColor(context, R.color.popup_ring_track),
+                BATTERY_PROGRESS_GREEN
+            )
+        )
+        // Charging swaps the device glyph for a bolt inside the ring, the way
+        // the settings screen and iOS both show it.
+        mView.findViewById<ImageView>(chargingOutlineId).visibility = View.GONE
+        mView.findViewById<ImageView>(chargingIconId).apply {
+            visibility = if (chargingVisible) View.VISIBLE else View.GONE
+            imageTintList = ColorStateList.valueOf(BATTERY_PROGRESS_GREEN)
+        }
+        // iOS shows the device in the artwork above, never inside the ring, so
+        // the ring holds the bolt or nothing at all.
+        mView.findViewById<ImageView>(deviceIconId).visibility = View.GONE
     }
 
     @SuppressLint("SetTextI18s")
@@ -346,5 +479,7 @@ class PopupWindow(
         const val DISMISS_DIM_DURATION_MS = 240L
 
         const val DIM_AMOUNT = 0.3f
+        const val BLUR_BEHIND_RADIUS_DP = 48
+        val BATTERY_PROGRESS_GREEN = 0xFF21BD44.toInt()
     }
 }
