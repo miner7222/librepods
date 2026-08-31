@@ -4,7 +4,7 @@
     android:shape="rectangle">
 
     <solid
-        android:color="#902E2E2E">
+        android:color="@color/popup_close_background">
     </solid>
 
     <padding
