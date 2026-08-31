@@ -1,0 +1,323 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.LibrePods.AppWidget.Container"
+    android:id="@+id/battery_widget"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="0dp"
+    android:background="@android:color/transparent"
+    android:padding="0dp"
+    android:theme="@style/Theme.LibrePods.AppWidgetContainer">
+
+    <LinearLayout
+        android:id="@+id/battery_widget_surface"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/widget_background"
+        android:clipChildren="false"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:clipChildren="false"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clipChildren="false"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:layout_gravity="center"
+                    android:clipChildren="false">
+
+                    <ImageView
+                        android:id="@+id/left_battery_ring"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no" />
+
+                    <ImageView
+                        android:id="@+id/left_charging_icon_outline"
+                        android:layout_width="12dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="-6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_power"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+
+                    <ImageView
+                        android:id="@+id/left_charging_icon"
+                        android:layout_width="10dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="-6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_power"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+
+                    <ImageView
+                        android:id="@+id/left_battery_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/airpods_pro_left_notification"
+                        android:tint="@color/white"
+                        tools:ignore="HardcodedText" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/left_battery_widget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="@font/pretendard"
+                    android:gravity="center"
+                    android:text="Left"
+                    android:textColor="@color/white"
+                    android:textFontWeight="300"
+                    android:textSize="20sp"
+                    android:visibility="gone"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clipChildren="false"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:layout_gravity="center"
+                    android:clipChildren="false">
+
+                    <ImageView
+                        android:id="@+id/right_battery_ring"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no" />
+
+                    <ImageView
+                        android:id="@+id/right_charging_icon_outline"
+                        android:layout_width="12dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="-6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_power"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+
+                    <ImageView
+                        android:id="@+id/right_charging_icon"
+                        android:layout_width="10dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="-6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_power"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+
+                    <ImageView
+                        android:id="@+id/right_battery_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/airpods_pro_right_notification"
+                        android:tint="@color/white"
+                        tools:ignore="HardcodedText" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/right_battery_widget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="@font/pretendard"
+                    android:gravity="center"
+                    android:text="Right"
+                    android:textColor="@color/white"
+                    android:textFontWeight="300"
+                    android:textSize="20sp"
+                    android:visibility="gone"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:clipChildren="false"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clipChildren="false"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:layout_gravity="center"
+                    android:clipChildren="false">
+
+                    <ImageView
+                        android:id="@+id/case_battery_ring"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no" />
+
+                    <ImageView
+                        android:id="@+id/case_charging_icon_outline"
+                        android:layout_width="12dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="-6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_power"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+
+                    <ImageView
+                        android:id="@+id/case_charging_icon"
+                        android:layout_width="10dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="-6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_power"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+
+                    <ImageView
+                        android:id="@+id/case_battery_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/airpods_pro_case_notification"
+                        android:tint="@color/white"
+                        tools:ignore="HardcodedText" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/case_battery_widget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="@font/pretendard"
+                    android:gravity="center"
+                    android:text="Case"
+                    android:textColor="@color/white"
+                    android:textFontWeight="300"
+                    android:textSize="20sp"
+                    android:visibility="gone"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clipChildren="false">
+
+                <LinearLayout
+                    android:id="@+id/phone_battery_widget_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipChildren="false"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <FrameLayout
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_gravity="center"
+                        android:clipChildren="false">
+
+                        <ImageView
+                            android:id="@+id/phone_battery_ring"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:importantForAccessibility="no" />
+
+                        <ImageView
+                            android:id="@+id/phone_charging_icon_outline"
+                            android:layout_width="12dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="top|center_horizontal"
+                            android:layout_marginTop="-6dp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_power"
+                            android:visibility="gone"
+                            tools:ignore="HardcodedText" />
+
+                        <ImageView
+                            android:id="@+id/phone_charging_icon"
+                            android:layout_width="10dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="top|center_horizontal"
+                            android:layout_marginTop="-6dp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_power"
+                            android:visibility="gone"
+                            tools:ignore="HardcodedText" />
+
+                        <ImageView
+                            android:id="@+id/phone_battery_icon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/smartphone"
+                            android:tint="@color/white"
+                            tools:ignore="HardcodedText" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/phone_battery_widget"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/pretendard"
+                        android:gravity="center"
+                        android:text="Phone"
+                        android:textColor="@color/white"
+                        android:textFontWeight="300"
+                        android:textSize="20sp"
+                        android:visibility="gone"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
