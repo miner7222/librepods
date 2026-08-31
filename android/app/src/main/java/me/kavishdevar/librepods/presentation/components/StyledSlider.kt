@@ -98,6 +98,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -318,7 +319,7 @@ fun StyledSlider(
                             ) {
 
                                 startIcon?.let {
-                                    Text(it, fontFamily = FontFamily(Font(R.font.sf_pro)))
+                                    Text(it, fontFamily = sfSymbolsFamily)
                                     Spacer(Modifier.width(12.dp))
                                 }
 
@@ -345,7 +346,7 @@ fun StyledSlider(
 
                                 endIcon?.let {
                                     Spacer(Modifier.width(12.dp))
-                                    Text(it, fontFamily = FontFamily(Font(R.font.sf_pro)))
+                                    Text(it, fontFamily = sfSymbolsFamily)
                                 }
                             }
                         }
@@ -422,7 +423,7 @@ fun StyledSlider(
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Normal,
                                             color = labelTextColor,
-                                            fontFamily = FontFamily(Font(R.font.sf_pro))
+                                            fontFamily = FontFamily(Font(R.font.pretendard))
                                         )
                                     )
                                     Text(
@@ -431,7 +432,7 @@ fun StyledSlider(
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Normal,
                                             color = labelTextColor,
-                                            fontFamily = FontFamily(Font(R.font.sf_pro))
+                                            fontFamily = FontFamily(Font(R.font.pretendard))
                                         )
                                     )
                                 }
@@ -458,7 +459,7 @@ fun StyledSlider(
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Normal,
                                                 color = accentColor,
-                                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                                fontFamily = sfSymbolsFamily
                                             ),
                                             modifier = Modifier
                                                 .padding(horizontal = 12.dp)
@@ -510,7 +511,7 @@ fun StyledSlider(
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Normal,
                                                 color = accentColor,
-                                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                                fontFamily = sfSymbolsFamily
                                             ),
                                             modifier = Modifier
                                                 .padding(horizontal = 12.dp)
@@ -708,7 +709,7 @@ fun StyledSlider(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = labelTextColor.copy(alpha = 0.6f),
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = FontFamily(Font(R.font.pretendard))
                             ),
                             modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
                         )
@@ -734,7 +735,7 @@ fun StyledSlider(
                                 color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(
                                     alpha = 0.6f
                                 ),
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = FontFamily(Font(R.font.pretendard))
                             ),
                             modifier = Modifier
                                 .padding(horizontal = 18.dp, vertical = 4.dp)

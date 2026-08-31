@@ -234,7 +234,7 @@ fun TroubleshootingScreen() {
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily(Font(R.font.sf_pro))
+                    fontFamily = FontFamily(Font(R.font.pretendard))
                 ),
                 modifier = Modifier.padding(16.dp, bottom = 4.dp, top = 8.dp)
             )
@@ -375,7 +375,7 @@ fun TroubleshootingScreen() {
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             color = textColor.copy(alpha = 0.6f),
-                            fontFamily = FontFamily(Font(R.font.sf_pro))
+                            fontFamily = FontFamily(Font(R.font.pretendard))
                         ),
                         modifier = Modifier.padding(16.dp, bottom = 2.dp, top = 8.dp)
                     )
@@ -790,7 +790,7 @@ fun TroubleshootingScreen() {
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = FontFamily(Font(R.font.pretendard))
                             ),
                             color = textColor
                         )
@@ -799,7 +799,7 @@ fun TroubleshootingScreen() {
                                 .format(Date(selectedLogFile?.lastModified() ?: 0)),
                             fontSize = 14.sp,
                             color = textColor.copy(alpha = 0.7f),
-                            fontFamily = FontFamily(Font(R.font.sf_pro))
+                            fontFamily = FontFamily(Font(R.font.pretendard))
                         )
                     }
 

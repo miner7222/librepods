@@ -67,8 +67,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
@@ -84,9 +82,9 @@ import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
 import kotlinx.coroutines.launch
-import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -118,7 +116,7 @@ fun StyledIconButton(
                             text = icon,
                             style = TextStyle(
                                 fontSize = 20.sp,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = sfSymbolsFamily
                             )
                         )
                     }
@@ -133,7 +131,7 @@ fun StyledIconButton(
                             text = icon,
                             style = TextStyle(
                                 fontSize = 20.sp,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = sfSymbolsFamily
                             )
                         )
                     }
@@ -148,7 +146,7 @@ fun StyledIconButton(
                             text = icon,
                             style = TextStyle(
                                 fontSize = 20.sp,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = sfSymbolsFamily
                             )
                         )
                     }
@@ -163,7 +161,7 @@ fun StyledIconButton(
                             text = icon,
                             style = TextStyle(
                                 fontSize = 20.sp,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
+                                fontFamily = sfSymbolsFamily
                             )
                         )
                     }
@@ -410,7 +408,7 @@ half4 main(float2 coord) {
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Normal,
                         color = if (iconTint.isSpecified) iconTint else if (darkMode) Color.White else Color.Black,
-                        fontFamily = FontFamily(Font(R.font.sf_pro))
+                        fontFamily = sfSymbolsFamily
                     )
                 )
             }

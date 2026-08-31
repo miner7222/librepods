@@ -131,7 +131,7 @@ fun StyledToggle(
                 text = description, style = TextStyle(
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-                    fontFamily = FontFamily(Font(R.font.sf_pro)),
+                    fontFamily = FontFamily(Font(R.font.pretendard)),
                 ), modifier = Modifier.padding(horizontal = 16.dp)
             )
         }

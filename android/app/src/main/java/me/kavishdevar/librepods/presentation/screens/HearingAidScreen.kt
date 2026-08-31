@@ -149,7 +149,7 @@ fun HearingAidScreen(viewModel: AirPodsViewModel, onNavigateHearingAidAdjustment
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
                 color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(alpha = 0.6f),
-                fontFamily = FontFamily(Font(R.font.sf_pro))
+                fontFamily = FontFamily(Font(R.font.pretendard))
             ),
             modifier = Modifier.padding(horizontal = 16.dp)
         )

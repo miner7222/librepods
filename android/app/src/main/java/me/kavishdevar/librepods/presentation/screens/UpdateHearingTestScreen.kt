@@ -261,10 +261,10 @@ fun UpdateHearingTestScreen(
                             Log.d(TAG, "Left EQ updated at index $index to $parsed")
                         }
                     },
-//                        label = { Text("Value", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.sf_pro))) },
+//                        label = { Text("Value", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.pretendard))) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily(Font(R.font.pretendard)),
                         fontSize = 14.sp
                     ),
                     modifier = Modifier.weight(1f)
@@ -280,10 +280,10 @@ fun UpdateHearingTestScreen(
                             Log.d(TAG, "Right EQ updated at index $index to $parsed")
                         }
                     },
-//                        label = { Text("Value", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.sf_pro))) },
+//                        label = { Text("Value", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.pretendard))) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily(Font(R.font.pretendard)),
                         fontSize = 14.sp
                     ),
                     modifier = Modifier.weight(1f)
