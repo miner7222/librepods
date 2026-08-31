@@ -41,6 +41,8 @@
     <string name="conversational_awareness_pause_music_description">When you start speaking, music will be paused.</string>
     <string name="conversational_awareness_both_pods_only">Both AirPods in Ear</string>
     <string name="conversational_awareness_both_pods_only_description">Conversational Awareness only activates when both AirPods are in your ears. This also suppresses the Pause Music action when wearing a single AirPod.</string>
+    <string name="remember_battery_when_disconnected">Remember Battery Level</string>
+    <string name="remember_battery_when_disconnected_description">Show the last known battery level while your AirPods are disconnected.</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="noise_control_widget_description">Control Noise Control Mode directly from your Home Screen.</string>
