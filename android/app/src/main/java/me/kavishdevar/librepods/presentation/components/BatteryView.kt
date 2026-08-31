@@ -27,20 +27,22 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,8 +51,21 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
-import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import kotlin.io.encoding.ExperimentalEncodingApi
+
+/**
+ * The artwork sits on a square canvas with a lot of transparent margin - the buds
+ * fill about 72% of it vertically and the case about 89% - so letting the image
+ * take the full column width made it roughly three times the height iOS gives it.
+ */
+private val ARTWORK_MAX_HEIGHT = 100.dp
+
+/**
+ * iOS keeps the products in a tight group: measured on a real AirPods settings
+ * capture, the right bud sits 0.85 bud widths from the case. Two equal-weight
+ * columns spread across the full width put them almost three bud widths apart.
+ */
+private val ARTWORK_ROW_MAX_WIDTH = 246.dp
 
 @Composable
 fun BatteryView(
@@ -66,108 +81,89 @@ fun BatteryView(
     val rightLevel = right?.level ?: 0
     val caseLevel = case?.level ?: 0
 
-    val isSingleDisplay = left?.status == right?.status && (leftLevel - rightLevel) in -3..3
+    val singleDisplayed = remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier
-                .widthIn(max = 350.dp)
-                .height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.widthIn(max = ARTWORK_ROW_MAX_WIDTH),
+            horizontalArrangement = Arrangement.Center
         ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
+                Image(
+                    bitmap = ImageBitmap.imageResource(budsRes),
+                    contentDescription = stringResource(R.string.buds),
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .heightIn(max = ARTWORK_MAX_HEIGHT)
+                        .padding(vertical = 8.dp)
+                )
+
+                if (
+                    left?.status == right?.status &&
+                    (leftLevel - rightLevel) in -3..3
                 ) {
-                    Image(
-                        bitmap = ImageBitmap.imageResource(budsRes),
-                        contentDescription = stringResource(R.string.buds),
-                        modifier = Modifier.fillMaxWidth()
+                    BatteryIndicator(
+                        leftLevel.coerceAtMost(rightLevel),
+                        left?.status ?: BatteryStatus.NOT_CHARGING
                     )
-                }
+                    singleDisplayed.value = true
+                } else {
+                    singleDisplayed.value = false
 
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSingleDisplay) {
-                        BatteryIndicator(
-                            leftLevel.coerceAtMost(rightLevel),
-                            left?.status ?: BatteryStatus.NOT_CHARGING
-                        )
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            if (leftLevel > 0 || left?.status != BatteryStatus.DISCONNECTED) {
-                                BatteryIndicator(
-                                    leftLevel,
-                                    left?.status ?: BatteryStatus.NOT_CHARGING,
-                                    "\uDBC6\uDCE5"
-                                )
-                            }
+                    Row(
+                        modifier = Modifier.wrapContentWidth(unbounded = true),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (leftLevel > 0 || left?.status != BatteryStatus.DISCONNECTED) {
+                            BatteryIndicator(
+                                leftLevel,
+                                left?.status ?: BatteryStatus.NOT_CHARGING,
+                                "\uDBC6\uDCE5"
+                            )
+                        }
 
-                            if (leftLevel > 0 && rightLevel > 0) {
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
+                        if (leftLevel > 0 && rightLevel > 0) {
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
 
-                            if (rightLevel > 0 || right?.status != BatteryStatus.DISCONNECTED) {
-                                BatteryIndicator(
-                                    rightLevel,
-                                    right?.status ?: BatteryStatus.NOT_CHARGING,
-                                    "\uDBC6\uDCE8"
-                                )
-                            }
+                        if (rightLevel > 0 || right?.status != BatteryStatus.DISCONNECTED) {
+                            BatteryIndicator(
+                                rightLevel,
+                                right?.status ?: BatteryStatus.NOT_CHARGING,
+                                "\uDBC6\uDCE8"
+                            )
                         }
                     }
                 }
             }
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
+                Image(
+                    bitmap = ImageBitmap.imageResource(caseRes),
+                    contentDescription = stringResource(R.string.case_alt),
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = ImageBitmap.imageResource(caseRes),
-                        contentDescription = stringResource(R.string.case_alt),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                        .fillMaxWidth()
+                        .heightIn(max = ARTWORK_MAX_HEIGHT)
+                        .padding(vertical = 8.dp)
+                )
 
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (caseLevel > 0 || case?.status != BatteryStatus.DISCONNECTED) {
-                        BatteryIndicator(
-                            caseLevel,
-                            case?.status ?: BatteryStatus.NOT_CHARGING,
-                            prefix = if (!isSingleDisplay) "\uDBC3\uDE6C" else ""
-                        )
-                    }
+                if (caseLevel > 0 || case?.status != BatteryStatus.DISCONNECTED) {
+                    BatteryIndicator(
+                        caseLevel,
+                        case?.status ?: BatteryStatus.NOT_CHARGING,
+                        prefix = if (!singleDisplayed.value) "\uDBC3\uDE6C" else ""
+                    )
                 }
             }
         }
@@ -184,17 +180,16 @@ fun BatteryViewPreview() {
     )
 
     val bg = if (isSystemInDarkTheme()) Color.Black else Color(0xFFF2F2F7)
-    LibrePodsTheme(m3eEnabled = false) {
-        Box(
-            modifier = Modifier
-                .background(bg)
-                .padding(16.dp)
-        ) {
-            BatteryView(
-                batteryList = fakeBattery,
-                budsRes = R.drawable.airpods_5_wireless_buds,
-                caseRes = R.drawable.airpods_5_wireless_case
-            )
-        }
+
+    Box(
+        modifier = Modifier
+            .background(bg)
+            .padding(16.dp)
+    ) {
+        BatteryView(
+            batteryList = fakeBattery,
+            budsRes = R.drawable.airpods_pro_2_buds,
+            caseRes = R.drawable.airpods_pro_2_case
+        )
     }
 }
