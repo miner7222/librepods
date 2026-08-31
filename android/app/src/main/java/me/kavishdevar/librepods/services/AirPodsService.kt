@@ -201,7 +201,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         var conversationalAwarenessPauseMusic: Boolean = false,
         var conversationalAwarenessBothPodsOnly: Boolean = false,
         var rememberBatteryWhenDisconnected: Boolean = false,
-        var showPhoneBatteryInWidget: Boolean = true,
         var relativeConversationalAwarenessVolume: Boolean = true,
         var headGestures: Boolean = true,
         var disconnectWhenNotWearing: Boolean = false,
@@ -704,7 +703,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             telephonyManager.registerTelephonyCallback(mainExecutor, phoneStateListener)
         }
 
-        widgetMobileBatteryEnabled = config.showPhoneBatteryInWidget
         run {
             val batteryChangedIntentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
             batteryChangedIntentFilter.addAction(AirPodsNotifications.DISCONNECT_RECEIVERS)
@@ -1497,9 +1495,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             rememberBatteryWhenDisconnected = sharedPreferences.getBoolean(
                 "remember_battery_when_disconnected", false
             ),
-            showPhoneBatteryInWidget = sharedPreferences.getBoolean(
-                "show_phone_battery_in_widget", true
-            ),
             relativeConversationalAwarenessVolume = sharedPreferences.getBoolean(
                 "relative_conversational_awareness_volume", true
             ),
@@ -1696,8 +1691,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 preferences.getBoolean(key, false)
 
             "show_phone_battery_in_widget" -> {
-                config.showPhoneBatteryInWidget = preferences.getBoolean(key, true)
-                widgetMobileBatteryEnabled = config.showPhoneBatteryInWidget
                 updateBattery()
             }
 
@@ -1950,8 +1943,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     var device: BluetoothDevice? = null
 
     private lateinit var earReceiver: BroadcastReceiver
-    var widgetMobileBatteryEnabled = false
-
     object BatteryChangedIntentReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action == Intent.ACTION_BATTERY_CHANGED) {
@@ -2135,17 +2126,20 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         widgetIds.forEach { appWidgetId ->
             val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
             val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
+            val showPhoneBattery = WidgetThemePreferences.getShowPhoneBattery(sharedPreferences, appWidgetId)
             val remoteViews = RemoteViews(
                 mapOf(
                     SizeF(110f, 50f) to populateBatteryWidget(
                         R.layout.battery_widget_compact,
                         isDarkTheme,
-                        opacity
+                        opacity,
+                        showPhoneBattery
                     ),
                     SizeF(300f, 120f) to populateBatteryWidget(
                         R.layout.battery_widget,
                         isDarkTheme,
-                        opacity
+                        opacity,
+                        showPhoneBattery
                     )
                 )
             )
@@ -2161,9 +2155,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         widgetIds.forEach { appWidgetId ->
             val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
             val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
+            val showPhoneBattery = WidgetThemePreferences.getShowPhoneBattery(sharedPreferences, appWidgetId)
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                populateBatteryWidget(R.layout.battery_widget_grid, isDarkTheme, opacity)
+                populateBatteryWidget(R.layout.battery_widget_grid, isDarkTheme, opacity, showPhoneBattery)
             )
         }
     }
@@ -2172,7 +2167,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private fun populateBatteryWidget(
         @LayoutRes layoutId: Int,
         isDarkTheme: Boolean,
-        opacity: Int
+        opacity: Int,
+        showPhoneBattery: Boolean
     ): RemoteViews {
         val ringDp = when (layoutId) {
             R.layout.battery_widget_compact -> 48
@@ -2270,9 +2266,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
             it.setViewVisibility(
                 R.id.phone_battery_widget_container,
-                if (widgetMobileBatteryEnabled) View.VISIBLE else View.GONE
+                if (showPhoneBattery) View.VISIBLE else View.GONE
             )
-            if (widgetMobileBatteryEnabled) {
+            if (showPhoneBattery) {
                 val batteryManager = getSystemService(BatteryManager::class.java)
                 val batteryLevel =
                     batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
