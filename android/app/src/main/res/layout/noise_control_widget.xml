@@ -30,7 +30,7 @@
             <ImageView
                 android:layout_width="52dp"
                 android:layout_height="52dp"
-                android:src="@drawable/noise_cancellation"
+                android:src="@drawable/noise_control_off"
                 android:tint="@color/white" />
 
             <TextView

@@ -224,7 +224,7 @@ private fun NoiseControlIconItem(
 
 private fun getModeIconRes(mode: NoiseControlMode): Int {
     return when (mode) {
-        NoiseControlMode.OFF -> R.drawable.noise_cancellation
+        NoiseControlMode.OFF -> R.drawable.noise_control_off
         NoiseControlMode.TRANSPARENCY -> R.drawable.transparency
         NoiseControlMode.ADAPTIVE -> R.drawable.adaptive
         NoiseControlMode.NOISE_CANCELLATION -> R.drawable.noise_cancellation
