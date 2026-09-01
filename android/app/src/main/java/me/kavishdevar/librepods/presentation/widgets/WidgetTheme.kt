@@ -19,7 +19,9 @@
 package me.kavishdevar.librepods.presentation.widgets
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -40,6 +42,14 @@ enum class WidgetTheme(val preferenceValue: String) {
 object WidgetThemePreferences {
     const val SETTINGS_NAME = "settings"
     const val DEFAULT_OPACITY = 50
+
+    /**
+     * With One UI's wallpaper blur behind the plate the tint only has to lift
+     * contrast, not hide the wallpaper. Measured off an iOS battery widget the
+     * material sits around a quarter; without the blur the plate is doing all
+     * the separating on its own and needs [DEFAULT_OPACITY].
+     */
+    const val DEFAULT_BLURRED_OPACITY = 25
     private const val THEME_KEY_PREFIX = "widget_theme_"
     private const val OPACITY_KEY_PREFIX = "widget_opacity_"
     private const val PHONE_BATTERY_KEY_PREFIX = "widget_phone_battery_"
@@ -60,11 +70,13 @@ object WidgetThemePreferences {
     fun getOpacity(preferences: SharedPreferences, appWidgetId: Int): Int =
         preferences.getInt(opacityPreferenceKey(appWidgetId), DEFAULT_OPACITY).coerceIn(0, 100)
 
+    fun defaultOpacity(context: Context): Int =
+        if (isOneUiHomeActive(context)) DEFAULT_BLURRED_OPACITY else DEFAULT_OPACITY
+
     fun getOpacity(context: Context, appWidgetId: Int): Int =
-        getOpacity(
-            context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE),
-            appWidgetId
-        )
+        context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+            .getInt(opacityPreferenceKey(appWidgetId), defaultOpacity(context))
+            .coerceIn(0, 100)
 
     fun getShowPhoneBattery(preferences: SharedPreferences, appWidgetId: Int): Boolean {
         val key = phoneBatteryPreferenceKey(appWidgetId)
@@ -103,10 +115,31 @@ private val DARK_BUTTON_BACKGROUND = 0xFF2C2C2E.toInt()
 private val DARK_CHECKED_BUTTON_BACKGROUND = 0xFF90A8F6.toInt()
 private val LIGHT_BUTTON_BACKGROUND = 0xFFF2F2F7.toInt()
 private val LIGHT_CHECKED_BUTTON_BACKGROUND = 0xFF90A8F6.toInt()
+private const val ONE_UI_HOME_PACKAGE = "com.sec.android.app.launcher"
 
 private fun argbWithOpacity(color: Int, opacity: Int): Int {
     val alpha = opacity.coerceIn(0, 100) * 255 / 100
     return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
+}
+
+private fun argbWithBlurOpacity(color: Int, opacity: Int): Int {
+    val colorWithOpacity = argbWithOpacity(color, opacity)
+    return Color.argb(
+        Color.alpha(colorWithOpacity).coerceIn(1, 254),
+        Color.red(colorWithOpacity),
+        Color.green(colorWithOpacity),
+        Color.blue(colorWithOpacity)
+    )
+}
+
+internal fun isOneUiHomeActive(context: Context): Boolean {
+    val homeIntent = Intent(Intent.ACTION_MAIN).apply {
+        addCategory(Intent.CATEGORY_HOME)
+    }
+    return context.packageManager.resolveActivity(
+        homeIntent,
+        PackageManager.MATCH_DEFAULT_ONLY
+    )?.activityInfo?.packageName == ONE_UI_HOME_PACKAGE
 }
 
 private fun colorWithOpacity(color: Int, opacity: Int): ColorStateList {
@@ -116,22 +149,32 @@ private fun colorWithOpacity(color: Int, opacity: Int): ColorStateList {
     )
 }
 
-internal fun RemoteViews.applyBatteryWidgetTheme(isDarkTheme: Boolean, opacity: Int) {
+internal fun RemoteViews.applyBatteryWidgetTheme(
+    context: Context,
+    isDarkTheme: Boolean,
+    opacity: Int
+) {
     val primaryColor = if (isDarkTheme) Color.WHITE else Color.BLACK
     val backgroundColor = if (isDarkTheme) DARK_WIDGET_BACKGROUND else LIGHT_WIDGET_BACKGROUND
-    setInt(
-        R.id.battery_widget_surface,
-        "setBackgroundResource",
-        if (isDarkTheme) R.drawable.widget_background else R.drawable.widget_background_light
-    )
-    setColorStateList(
-        R.id.battery_widget_surface,
-        "setBackgroundTintList",
-        colorWithOpacity(
-            if (isDarkTheme) DARK_WIDGET_BACKGROUND else LIGHT_WIDGET_BACKGROUND,
-            opacity
+    if (isOneUiHomeActive(context)) {
+        setInt(
+            android.R.id.background,
+            "setBackgroundColor",
+            argbWithBlurOpacity(backgroundColor, opacity)
         )
-    )
+        setInt(R.id.battery_widget_surface, "setBackgroundResource", 0)
+    } else {
+        setInt(
+            R.id.battery_widget_surface,
+            "setBackgroundResource",
+            if (isDarkTheme) R.drawable.widget_background else R.drawable.widget_background_light
+        )
+        setColorStateList(
+            R.id.battery_widget_surface,
+            "setBackgroundTintList",
+            colorWithOpacity(backgroundColor, opacity)
+        )
+    }
     intArrayOf(
         R.id.phone_battery_widget,
         R.id.left_battery_widget,
@@ -173,12 +216,14 @@ private data class NoiseControlWidgetThemeResources(
 )
 
 internal fun RemoteViews.applyNoiseControlWidgetTheme(
+    context: Context,
     isDarkTheme: Boolean,
     opacity: Int,
     selectedMode: Int? = null,
     allowOffMode: Boolean = true
 ) {
     val primaryColor = if (isDarkTheme) Color.WHITE else Color.BLACK
+    val backgroundColor = if (isDarkTheme) DARK_WIDGET_BACKGROUND else LIGHT_WIDGET_BACKGROUND
     val resources = if (isDarkTheme) {
         NoiseControlWidgetThemeResources(
             buttonShapeStart = R.drawable.widget_button_shape_start,
@@ -203,23 +248,29 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
         )
     }
 
-    setInt(
-        R.id.noise_control_widget,
-        "setBackgroundResource",
-        if (isDarkTheme) {
-            R.drawable.noise_control_widget_background
-        } else {
-            R.drawable.noise_control_widget_background_light
-        }
-    )
-    setColorStateList(
-        R.id.noise_control_widget,
-        "setBackgroundTintList",
-        colorWithOpacity(
-            if (isDarkTheme) DARK_WIDGET_BACKGROUND else LIGHT_WIDGET_BACKGROUND,
-            opacity
+    if (isOneUiHomeActive(context)) {
+        setInt(
+            android.R.id.background,
+            "setBackgroundColor",
+            argbWithBlurOpacity(backgroundColor, opacity)
         )
-    )
+        setInt(R.id.noise_control_widget, "setBackgroundResource", 0)
+    } else {
+        setInt(
+            R.id.noise_control_widget,
+            "setBackgroundResource",
+            if (isDarkTheme) {
+                R.drawable.noise_control_widget_background
+            } else {
+                R.drawable.noise_control_widget_background_light
+            }
+        )
+        setColorStateList(
+            R.id.noise_control_widget,
+            "setBackgroundTintList",
+            colorWithOpacity(backgroundColor, opacity)
+        )
+    }
     intArrayOf(
         R.id.widget_off_label,
         R.id.widget_transparency_label,

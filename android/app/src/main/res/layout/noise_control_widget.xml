@@ -1,17 +1,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.LibrePods.AppWidget.Container"
-    android:id="@+id/noise_control_widget"
+    android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/noise_control_widget_background"
+    android:background="@android:color/transparent"
     android:theme="@style/Theme.LibrePods.AppWidgetContainer"
     tools:ignore="ContentDescription,NestedWeights">
 
     <LinearLayout
-        android:id="@android:id/background"
+        android:id="@+id/noise_control_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/noise_control_widget_background"
         android:baselineAligned="false"
         android:orientation="horizontal">
 
