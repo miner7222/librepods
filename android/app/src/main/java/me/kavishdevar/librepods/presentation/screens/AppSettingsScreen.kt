@@ -543,7 +543,8 @@ fun AppSettingsScreen(
                verticalAlignment = Alignment.CenterVertically
            ) {
                StyledIconButton(
-                   icon = "\uDBC0\uDD84",
+                   icon = R.drawable.sf_xmark,
+                   contentDescription = "Close",
                    backdrop = innerBackdrop,
                    onClick = { contactBottomSheet.value = false }
                )
@@ -558,7 +559,8 @@ fun AppSettingsScreen(
                    )
                )
                StyledIconButton(
-                   icon = "\uDBC0\uDE1F",
+                   icon = R.drawable.sf_paperplane,
+                   contentDescription = "Send",
                    backdrop = innerBackdrop,
                    surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0091FF) else Color(0xFF0088FF),
                    iconTint = if (subjectState.text.isNotEmpty() && descriptionState.text.isNotEmpty()) Color.White else Color.Gray,

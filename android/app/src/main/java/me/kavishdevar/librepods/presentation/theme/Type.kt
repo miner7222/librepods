@@ -63,9 +63,6 @@ val pretendardFamily = FontFamily(
     pretendard(FontWeight.Black)
 )
 
-// This exists solely for SF Symbols private-use glyphs and must not be used for text.
-val sfSymbolsFamily = FontFamily(Font(R.font.sf_pro))
-
 val AppleTypography = Typography().run {
     copy(
         displayLarge = displayLarge.copy(fontFamily = pretendardFamily),

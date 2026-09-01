@@ -99,7 +99,8 @@ fun NavigationRoot(
                     } else {
                         StyledIconButton(
                             onClick = { backStack.add(Screen.AppSettings) },
-                            icon = "􀍟",
+                            icon = R.drawable.sf_gear,
+                            contentDescription = stringResource(R.string.settings),
                             backdrop = scaffoldBackdrop
                         )
                     }
@@ -133,7 +134,8 @@ fun NavigationRoot(
                                 Log.d("HeadTrackingScreen", "Head tracking stopped")
                             }
                         },
-                        icon = if (state.headTrackingActive) "􀊅" else "􀊃",
+                        icon = if (state.headTrackingActive) R.drawable.sf_pause else R.drawable.sf_play,
+                        contentDescription = if (state.headTrackingActive) "Pause" else "Play",
                         backdrop = scaffoldBackdrop
                     )
                 }

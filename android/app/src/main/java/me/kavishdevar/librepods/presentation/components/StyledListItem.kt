@@ -33,8 +33,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
@@ -59,16 +61,15 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
-import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 
 /**
  * iOS secondaryLabel, measured off clean captures: about 0.46 of the label on
@@ -86,6 +87,7 @@ fun StyledListItem(
     onClick: (() -> Unit)?,
     description: String? = null,
     annotatedDescription: AnnotatedString? = null,
+    inlineContent: Map<String, InlineTextContent> = emptyMap(),
     height: Dp = 58.dp,
     enabled: Boolean = true,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
@@ -123,6 +125,7 @@ fun StyledListItem(
                 onClick = onClick,
                 description = description,
                 annotatedDescription = annotatedDescription,
+                inlineContent = inlineContent,
                 height = height,
                 enabled = enabled,
                 index = 0,
@@ -142,6 +145,7 @@ fun StyledListScope.StyledListItem(
     onClick: (() -> Unit)? = null,
     description: String? = null,
     annotatedDescription: AnnotatedString? = null,
+    inlineContent: Map<String, InlineTextContent> = emptyMap(),
     enabled: Boolean = onClick != null,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
     selected: Boolean? = null,
@@ -154,6 +158,7 @@ fun StyledListScope.StyledListItem(
             onClick = onClick,
             description = description,
             annotatedDescription = annotatedDescription,
+            inlineContent = inlineContent,
             enabled = enabled,
             index = index,
             count = count,
@@ -179,6 +184,7 @@ private fun StyledListItemContent(
     onClick: (() -> Unit)?,
     description: String? = null,
     annotatedDescription: AnnotatedString? = null,
+    inlineContent: Map<String, InlineTextContent> = emptyMap(),
     height: Dp = 58.dp,
     enabled: Boolean = true,
     index: Int,
@@ -208,24 +214,20 @@ private fun StyledListItemContent(
                                 animationSpec = tween(durationMillis = 300)
                             )
 
-                            Text(
-                                text = "􀆅",
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    fontFamily = sfSymbolsFamily,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = floatAnimateState),
-                                ),
-                                modifier = Modifier.padding(end = 4.dp)
+                            Icon(
+                                painter = painterResource(R.drawable.sf_checkmark),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = floatAnimateState),
+                                modifier = Modifier.padding(end = 4.dp).size(24.dp)
                             )
                         } else {
-                            Text(
-                                text = "􀯻",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontFamily = sfSymbolsFamily
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+                            Icon(
+                                painter = painterResource(R.drawable.sf_chevron_forward),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(0.6f),
                                 modifier = Modifier
                                     .padding(start = if (descriptionText != null) 6.dp else 0.dp)
+                                    .size(19.dp)
                             )
                         }
                     }
@@ -311,6 +313,7 @@ private fun StyledListItemContent(
                                 text = descriptionText,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT),
+                                inlineContent = inlineContent,
                             )
                         }
                     }
@@ -321,7 +324,8 @@ private fun StyledListItemContent(
                         Text(
                             text = descriptionText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT)
+                            color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT),
+                            inlineContent = inlineContent,
                         )
                     }
 
@@ -389,6 +393,7 @@ private fun StyledListItemContent(
                         if (descriptionText != null) Text(
                             descriptionText,
                             style = MaterialTheme.typography.bodySmall,
+                            inlineContent = inlineContent,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                     },

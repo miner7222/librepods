@@ -310,8 +310,8 @@ fun AccessibilitySettingsScreen(
             },
             valueRange = 0f..100f,
             snapPoints = listOf(75f),
-            startIcon = "\uDBC0\uDEA1",
-            endIcon = "\uDBC0\uDEA9",
+            startIcon = R.drawable.sf_speaker_fill,
+            endIcon = R.drawable.sf_speaker_wave_3_fill,
             independent = true,
             enabled = state.isPremium
         )

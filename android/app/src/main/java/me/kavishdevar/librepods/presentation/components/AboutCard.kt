@@ -20,19 +20,26 @@
 
 package me.kavishdevar.librepods.presentation.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.em
+import kotlin.io.encoding.ExperimentalEncodingApi
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
-import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun AboutCard(
@@ -42,23 +49,50 @@ fun AboutCard(
     version: String?,
     navigateToVersion: () -> Unit
 ) {
-    val serialNumbers = when (LocalDesignSystem.current) {
+    val left = stringResource(R.string.left)
+    val right = stringResource(R.string.right)
+    val inlineIconTint = MaterialTheme.colorScheme.onSurface.copy(
+        alpha = if (isSystemInDarkTheme()) 0.6f else 0.46f
+    )
+    val serialNumberEntries = when (LocalDesignSystem.current) {
         DesignSystem.Apple -> listOf(
-            AnnotatedString(serialNumbers[0]),
+            AnnotatedString(serialNumbers[0]) to emptyMap<String, InlineTextContent>(),
             buildAnnotatedString {
-                withStyle(SpanStyle(fontFamily = sfSymbolsFamily)) { append("􀀛") }
+                appendInlineContent("leftSerialIcon", left)
                 append(" ${serialNumbers[1]}")
-            },
+            } to mapOf(
+                "leftSerialIcon" to InlineTextContent(
+                    Placeholder(1.193.em, 1.193.em, PlaceholderVerticalAlign.TextCenter)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.sf_l_circle_fill),
+                        contentDescription = left,
+                        tint = inlineIconTint,
+                        modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                    )
+                }
+            ),
             buildAnnotatedString {
-                withStyle(SpanStyle(fontFamily = sfSymbolsFamily)) { append("􀀧") }
+                appendInlineContent("rightSerialIcon", right)
                 append(" ${serialNumbers[2]}")
-            }
+            } to mapOf(
+                "rightSerialIcon" to InlineTextContent(
+                    Placeholder(1.193.em, 1.193.em, PlaceholderVerticalAlign.TextCenter)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.sf_r_circle_fill),
+                        contentDescription = right,
+                        tint = inlineIconTint,
+                        modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                    )
+                }
+            )
         )
 
         DesignSystem.Material -> listOf(
-            AnnotatedString(serialNumbers[0]),
-            AnnotatedString(stringResource(R.string.left) + " " + serialNumbers[1]),
-            AnnotatedString(stringResource(R.string.right) + " " + serialNumbers[2]),
+            AnnotatedString(serialNumbers[0]) to emptyMap<String, InlineTextContent>(),
+            AnnotatedString("$left ${serialNumbers[1]}") to emptyMap<String, InlineTextContent>(),
+            AnnotatedString("$right ${serialNumbers[2]}") to emptyMap<String, InlineTextContent>(),
         )
     }
 
@@ -77,8 +111,9 @@ fun AboutCard(
 
         StyledListItem (
             name = stringResource(R.string.serial_number),
-            annotatedDescription = serialNumbers[serialNumber.intValue],
-            onClick = { serialNumber.intValue = (serialNumber.intValue + 1) % serialNumbers.size }
+            annotatedDescription = serialNumberEntries[serialNumber.intValue].first,
+            inlineContent = serialNumberEntries[serialNumber.intValue].second,
+            onClick = { serialNumber.intValue = (serialNumber.intValue + 1) % serialNumberEntries.size }
         )
 
         StyledListItem(
