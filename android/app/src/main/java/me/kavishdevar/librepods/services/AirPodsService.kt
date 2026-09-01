@@ -2102,7 +2102,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             else -> 78
         }
         return RemoteViews(packageName, layoutId).also { it ->
-            it.applyBatteryWidgetTheme(isDarkTheme, opacity)
+            it.applyBatteryWidgetTheme(this, isDarkTheme, opacity)
 
             fun setChargingBolt(
                 chargingIconId: Int,
@@ -2145,7 +2145,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 Intent(this, MainActivity::class.java),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            it.setOnClickPendingIntent(R.id.battery_widget, openActivityIntent)
+            it.setOnClickPendingIntent(android.R.id.background, openActivityIntent)
 
             val leftBattery =
                 batteryNotification.getBattery().find { it.component == BatteryComponent.LEFT }
@@ -2295,7 +2295,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 aacpManager.controlCommandStatusList.find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION }
             val allowOffMode =
                 allowOffModeValue?.value?.takeIf { it.isNotEmpty() }?.get(0) == 0x01.toByte() || sharedPreferences.getBoolean("off_listening_mode", true)
-            it.applyNoiseControlWidgetTheme(isDarkTheme, opacity, ancStatus, allowOffMode)
+            it.applyNoiseControlWidgetTheme(
+                this,
+                isDarkTheme,
+                opacity,
+                ancStatus,
+                allowOffMode
+            )
 
             val offIntent = Intent(this, providerClass).apply {
                 action = "ACTION_SET_ANC_MODE"

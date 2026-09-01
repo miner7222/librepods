@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    app:widgetSize="small"
+    app:widgetStyle="colorful"
     android:description="@string/noise_control_grid_widget_description"
     android:configure="me.kavishdevar.librepods.presentation.widgets.WidgetConfigActivity"
     android:initialKeyguardLayout="@layout/noise_control_widget_grid"
