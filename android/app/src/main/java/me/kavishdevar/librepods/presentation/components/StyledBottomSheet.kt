@@ -5,16 +5,25 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.drawscope.Stroke
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -36,6 +45,7 @@ fun StyledBottomSheet(
     if (!visible) return
 
     val isDarkTheme = isSystemInDarkTheme()
+    val isApple = LocalDesignSystem.current == DesignSystem.Apple
     val sheetState = rememberModalBottomSheetState(false) // move this to parent composable
 
     val isExpanded =  sheetState.targetValue == SheetValue.Expanded
@@ -50,8 +60,13 @@ fun StyledBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color.Transparent,
-        dragHandle = { },
+        containerColor = if (isApple) Color.Transparent else BottomSheetDefaults.ContainerColor,
+        dragHandle = if (isApple) {
+            // The iOS grabber is drawn inside the glass instead.
+            { }
+        } else {
+            { BottomSheetDefaults.DragHandle() }
+        },
         shape = RoundedCornerShape(animatedCorner),
         scrimColor = Color.Transparent,
         modifier = Modifier.padding(4.dp)
@@ -61,13 +76,14 @@ fun StyledBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(animatedCorner))
-                .drawBackdrop(
+                // Material draws its own sheet surface; the glass is the iOS look.
+                .then(if (!isApple) Modifier else Modifier.drawBackdrop(
                     backdrop = backdrop,
                     exportedBackdrop = innerBackdrop,
                     shape = { RoundedCornerShape(animatedCorner) },
                     effects = {
                         vibrancy()
-                        blur(4f.dp.toPx())
+                        blur(24f.dp.toPx())
                         lens(12f.dp.toPx(), 48f.dp.toPx(), true)
                     },
                     onDrawSurface = {
@@ -76,12 +92,36 @@ fun StyledBottomSheet(
                                 0xFFE0E0E0
                             ).copy(alpha = 0.45f)
                         )
+                        // iOS 27 separates glass from whatever sits behind it
+                        // with a subtle dark ring rather than a bare edge.
+                        drawRoundRect(
+                            color = Color.Black.copy(alpha = if (isDarkTheme) 0.35f else 0.12f),
+                            cornerRadius = CornerRadius(animatedCorner.toPx()),
+                            style = Stroke(width = 1f.dp.toPx())
+                        )
                     }
-                )
-                .padding(top = 24.dp)
+                ))
+                .padding(top = 8.dp)
                 .padding(horizontal = 16.dp)
         ) {
-            content(innerBackdrop, progress)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // The sheet resizes, and iOS puts a grabber on anything that
+                // does - it is the only cue that dragging will do something.
+                if (isApple) Box(
+                    modifier = Modifier
+                        .padding(bottom = 11.dp)
+                        .size(width = 36.dp, height = 5.dp)
+                        .background(
+                            if (isDarkTheme) Color.White.copy(alpha = 0.3f)
+                            else Color.Black.copy(alpha = 0.2f),
+                            RoundedCornerShape(2.5.dp)
+                        )
+                )
+                content(innerBackdrop, progress)
+            }
         }
     }
 }
