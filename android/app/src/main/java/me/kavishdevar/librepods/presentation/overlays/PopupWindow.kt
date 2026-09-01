@@ -19,10 +19,7 @@
 
 package me.kavishdevar.librepods.presentation.overlays
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -39,17 +36,20 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.dynamicanimation.animation.DynamicAnimation
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
+import me.kavishdevar.librepods.data.FallbackArtwork
 
 @SuppressLint("InflateParams", "ClickableViewAccessibility")
 class PopupWindow(
@@ -61,6 +61,7 @@ class PopupWindow(
     private var autoCloseHandler = Handler(Looper.getMainLooper())
     private var autoCloseRunnable: Runnable? = null
     private var batteryUpdateReceiver: BroadcastReceiver? = null
+    private var dimAnimator: ValueAnimator? = null
 
     @Suppress("DEPRECATION")
     private val mParams: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
@@ -75,7 +76,7 @@ class PopupWindow(
         type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        dimAmount = 0.3f
+        dimAmount = 0f
         flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
             WindowManager.LayoutParams.FLAG_FULLSCREEN or
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
@@ -130,7 +131,7 @@ class PopupWindow(
     }
 
     @SuppressLint("InlinedApi", "SetTextI18s")
-    fun open(name: String = "AirPods Pro", batteryNotification: AirPodsNotifications.BatteryNotification) {
+    fun open(name: String = "AirPods Pro", batteryNotification: AirPodsNotifications.BatteryNotification, videoRes: Int = FallbackArtwork.Pro.connected) {
         try {
             if (mView.windowToken == null && mView.parent == null && !isClosing) {
                 mView.findViewById<TextView>(R.id.name).text = name
@@ -143,7 +144,7 @@ class PopupWindow(
                     Log.e("PopupWindow", "Error playing popup video: what=$what extra=$extra")
                     true
                 }
-                vid.setVideoPath("android.resource://${context.packageName}/${R.raw.connected}")
+                vid.setVideoPath("android.resource://${context.packageName}/$videoRes")
                 vid.resolveAdjustedSize(vid.width, vid.height)
                 vid.start()
                 vid.setOnCompletionListener {
@@ -162,12 +163,16 @@ class PopupWindow(
                 mView.translationY = screenHeight.toFloat()
                 mView.alpha = 1f
 
-                val translationY = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, screenHeight.toFloat(), 0f)
-
-                ObjectAnimator.ofPropertyValuesHolder(mView, translationY).apply {
-                    duration = 500
-                    interpolator = DecelerateInterpolator()
-                    start()
+                mView.post {
+                    if (isClosing || mView.parent == null) return@post
+                    mView.translationY = offscreenTranslation()
+                    SpringAnimation(mView, DynamicAnimation.TRANSLATION_Y, 0f).apply {
+                        spring = SpringForce(0f)
+                            .setDampingRatio(PRESENT_DAMPING_RATIO)
+                            .setStiffness(PRESENT_STIFFNESS)
+                        start()
+                    }
+                    animateDim(DIM_AMOUNT, PRESENT_DIM_DURATION_MS)
                 }
 
                 registerBatteryUpdateReceiver()
@@ -254,6 +259,39 @@ class PopupWindow(
         updateBatteryStatusFromList(batteryStatus)
     }
 
+    /**
+     * Distance that hides the card below the screen edge. The card is bottom
+     * anchored, so its own height is the whole travel; iOS moves the card by
+     * just that much rather than across the full screen.
+     */
+    private fun offscreenTranslation(): Float {
+        val height = mView.height
+        return if (height > 0) {
+            height.toFloat()
+        } else {
+            mView.context.resources.displayMetrics.heightPixels.toFloat()
+        }
+    }
+
+    private fun animateDim(to: Float, durationMs: Long) {
+        dimAnimator?.cancel()
+        dimAnimator = ValueAnimator.ofFloat(mParams.dimAmount, to).apply {
+            duration = durationMs
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animation ->
+                mParams.dimAmount = animation.animatedValue as Float
+                try {
+                    if (mView.parent != null) {
+                        mWindowManager.updateViewLayout(mView, mParams)
+                    }
+                } catch (e: Exception) {
+                    Log.e("PopupWindow", "Error updating dim: ${e.message}")
+                }
+            }
+            start()
+        }
+    }
+
     fun close() {
         try {
             if (isClosing) return
@@ -265,24 +303,25 @@ class PopupWindow(
             val vid = mView.findViewById<VideoView>(R.id.video)
             vid.stopPlayback()
 
-            ObjectAnimator.ofFloat(mView, "translationY", mView.height.toFloat()).apply {
-                duration = 500
-                interpolator = AccelerateInterpolator()
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        try {
-                            mView.visibility = View.GONE
-                            if (mView.parent != null) {
-                                mWindowManager.removeView(mView)
-                            }
-                        } catch (e: Exception) {
-                            Log.e("PopupWindow", "Error removing view: ${e.message}")
-                        } finally {
-                            isClosing = false
-                            onCloseCallback()
+            val target = offscreenTranslation()
+            animateDim(0f, DISMISS_DIM_DURATION_MS)
+            SpringAnimation(mView, DynamicAnimation.TRANSLATION_Y, target).apply {
+                spring = SpringForce(target)
+                    .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
+                    .setStiffness(DISMISS_STIFFNESS)
+                addEndListener { _, _, _, _ ->
+                    try {
+                        mView.visibility = View.GONE
+                        if (mView.parent != null) {
+                            mWindowManager.removeView(mView)
                         }
+                    } catch (e: Exception) {
+                        Log.e("PopupWindow", "Error removing view: ${e.message}")
+                    } finally {
+                        isClosing = false
+                        onCloseCallback()
                     }
-                })
+                }
                 start()
             }
         } catch (e: Exception) {
@@ -290,5 +329,22 @@ class PopupWindow(
             isClosing = false
             onCloseCallback()
         }
+    }
+
+    private companion object {
+        /**
+         * iOS presents the connect card with a spring of roughly 0.5 s response
+         * and 0.86 damping fraction: a short travel that settles almost without
+         * a visible bounce. Stiffness is that response as (2 * PI / 0.5)^2.
+         */
+        const val PRESENT_STIFFNESS = 158f
+        const val PRESENT_DAMPING_RATIO = 0.86f
+        const val PRESENT_DIM_DURATION_MS = 320L
+
+        /** Dismissal is quicker and never overshoots past the screen edge. */
+        const val DISMISS_STIFFNESS = 900f
+        const val DISMISS_DIM_DURATION_MS = 240L
+
+        const val DIM_AMOUNT = 0.3f
     }
 }
