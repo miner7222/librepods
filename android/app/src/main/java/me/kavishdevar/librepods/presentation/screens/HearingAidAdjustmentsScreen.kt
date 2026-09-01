@@ -46,9 +46,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.Job
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.data.HearingAidSettings
 import me.kavishdevar.librepods.data.parseHearingAidSettingsResponse
@@ -63,11 +63,14 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 private const val TAG = "HearingAidAdjustments"
 
 @SuppressLint("DefaultLocale")
-@ExperimentalHazeMaterialsApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalEncodingApi::class)
 @Composable
-fun HearingAidAdjustmentsScreen(viewModel: AirPodsViewModel) {
+fun HearingAidAdjustmentsScreen(
+    viewModel: AirPodsViewModel,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val verticalScrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)
     val state by viewModel.uiState.collectAsState()
 
     val debounceJob = remember { mutableStateOf<Job?>(null) }

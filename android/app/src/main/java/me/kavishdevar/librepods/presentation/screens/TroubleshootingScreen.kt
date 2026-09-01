@@ -90,12 +90,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.utils.LogCollector
 import java.io.File
 import java.text.SimpleDateFormat
@@ -117,11 +117,12 @@ fun CustomIconButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeMaterialsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TroubleshootingScreen() {
+fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
     val coroutineScope = rememberCoroutineScope()
 
     val logCollector = remember { LogCollector(context) }

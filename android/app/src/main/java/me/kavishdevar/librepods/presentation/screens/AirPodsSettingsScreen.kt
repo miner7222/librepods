@@ -50,6 +50,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -96,7 +98,6 @@ import androidx.graphics.shapes.Morph
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.highlight.Highlight
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.delay
 import me.kavishdevar.librepods.BuildConfig
 import me.kavishdevar.librepods.R
@@ -144,7 +145,8 @@ fun AirPodsSettingsRoute(
     navigateToVersion: () -> Unit,
     navigateToTroubleshooting: () -> Unit,
     navigateToCallControlScreen: (action: String) -> Unit,
-    navigateToMicrophoneSettings: () -> Unit
+    navigateToMicrophoneSettings: () -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -162,6 +164,7 @@ fun AirPodsSettingsRoute(
 
             topPadding = topPadding,
             bottomPadding = bottomPadding,
+            onScrollStateChanged = onScrollStateChanged,
 
             setControlCommandInt = viewModel::setControlCommandInt,
             setControlCommandBoolean = viewModel::setControlCommandBoolean,
@@ -197,7 +200,7 @@ fun AirPodsSettingsRoute(
     }
 }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeMaterialsApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MissingPermission", "UnspecifiedRegisterReceiverFlag")
 @Composable
 fun AirPodsSettingsScreen(
@@ -205,6 +208,7 @@ fun AirPodsSettingsScreen(
 
         topPadding: Dp = 16.dp,
         bottomPadding: Dp = 16.dp,
+        onScrollStateChanged: (Boolean) -> Unit = {},
 
         setControlCommandInt: (AACPManager.Companion.ControlCommandIdentifiers, Int) -> Unit,
         setControlCommandBoolean: (AACPManager.Companion.ControlCommandIdentifiers, Boolean) -> Unit,
@@ -264,7 +268,11 @@ fun AirPodsSettingsScreen(
     if (state.isLocallyConnected) {
         val capabilities = state.capabilities
 
+        val listState = rememberLazyListState()
+        ReportStyledScaffoldScrollState(listState, onScrollStateChanged)
+
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(horizontal = 16.dp)

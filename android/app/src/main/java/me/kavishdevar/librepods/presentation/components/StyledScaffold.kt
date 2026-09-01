@@ -28,6 +28,8 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,7 +40,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,12 +55,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -73,13 +75,37 @@ import androidx.compose.ui.zIndex
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.vibrancy
+import com.kyant.backdrop.highlight.Highlight
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import kotlinx.coroutines.flow.collect
+
+@Composable
+internal fun ReportStyledScaffoldScrollState(
+    scrollState: ScrollState,
+    onScrollStateChanged: (Boolean) -> Unit
+) {
+    LaunchedEffect(scrollState, onScrollStateChanged) {
+        snapshotFlow { scrollState.value > 0 }
+            .collect { onScrollStateChanged(it) }
+    }
+}
+
+@Composable
+internal fun ReportStyledScaffoldScrollState(
+    listState: LazyListState,
+    onScrollStateChanged: (Boolean) -> Unit
+) {
+    LaunchedEffect(listState, onScrollStateChanged) {
+        snapshotFlow {
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+        }.collect { onScrollStateChanged(it) }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,10 +117,10 @@ fun StyledScaffold(
     onNavigateBack: () -> Unit = {},
     actionButtons: List<@Composable (backdrop: LayerBackdrop) -> Unit> = emptyList(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    isContentScrolled: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val isDarkTheme = isSystemInDarkTheme()
-    val hazeState = rememberHazeState(blurEnabled = true)
 
     when (LocalDesignSystem.current) {
         DesignSystem.Material -> {
@@ -154,7 +180,6 @@ fun StyledScaffold(
                     modifier = modifier
                         .then(if (visible) Modifier.padding(paddingValues) else Modifier)
                         .fillMaxSize()
-                        .hazeSource(hazeState)
                 ) {
                     content()
                 }
@@ -164,16 +189,6 @@ fun StyledScaffold(
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 snackbarHost = { SnackbarHost(snackbarHostState) },
-                modifier = Modifier
-                    .then(
-                        if (!isDarkTheme) Modifier.shadow(
-                            elevation = 36.dp,
-                            shape = RoundedCornerShape(52.dp),
-                            ambientColor = Color.Black,
-                            spotColor = Color.Black
-                        ) else Modifier
-                    )
-                    .clip(RoundedCornerShape(52.dp))
             ) { paddingValues ->
                 val topPadding = paddingValues.calculateTopPadding()
                 val startPadding = paddingValues.calculateLeftPadding(LocalLayoutDirection.current)
@@ -184,8 +199,8 @@ fun StyledScaffold(
                         .fillMaxSize()
                         .padding(start = startPadding, end = endPadding)
                 ) {
+                    val contentBackdrop = rememberLayerBackdrop()
                     val backdrop = rememberLayerBackdrop()
-                    val bgColor = MaterialTheme.colorScheme.surfaceContainer
                     AnimatedVisibility(
                         visible = showBackButton,
                         enter = fadeIn() + scaleIn(
@@ -222,23 +237,40 @@ fun StyledScaffold(
                             .zIndex(2f)
                             .height(64.dp + topPadding)
                             .fillMaxWidth()
-                            .layerBackdrop(backdrop)
                     ){
                         Box(
-                            modifier = Modifier.hazeEffect(
-                                state = hazeState,
-                            ) {
-                                backgroundColor = bgColor
-                                tints = listOf(
-                                    HazeTint(
-                                        if (isDarkTheme) Color.Black.copy(0.55f) else Color(
-                                            0xFFF2F2F7
-                                        ).copy(alpha = 0.85f)
-                                    )
-                                )
-                                blurRadius = 6.dp
-                            }
+                            modifier = Modifier.fillMaxSize()
                         ) {
+                            AnimatedVisibility(
+                                visible = isContentScrolled,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .drawBackdrop(
+                                            backdrop = contentBackdrop,
+                                            exportedBackdrop = backdrop,
+                                            shape = { RectangleShape },
+                                            highlight = { Highlight.Ambient.copy(alpha = 0f) },
+                                            effects = {
+                                                vibrancy()
+                                                blur(6f.dp.toPx())
+                                            },
+                                            onDrawSurface = {
+                                                // Only ever drawn once content is
+                                                // under the bar, so this cannot
+                                                // band against an empty page.
+                                                drawRect(
+                                                    if (isDarkTheme) Color.Black.copy(0.55f)
+                                                    else Color(0xFFF2F2F7).copy(alpha = 0.85f)
+                                                )
+                                            }
+                                        )
+                                )
+                            }
 
                             Column(modifier = Modifier.fillMaxSize()) {
                                 Spacer(modifier = Modifier.height(topPadding + 12.dp))
@@ -283,7 +315,7 @@ fun StyledScaffold(
 
                     Box(
                         modifier = modifier
-                            .hazeSource(hazeState)
+                            .layerBackdrop(contentBackdrop)
                             .fillMaxSize()
                     ) {
                         content()

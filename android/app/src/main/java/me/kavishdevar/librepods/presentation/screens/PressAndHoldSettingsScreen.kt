@@ -47,8 +47,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.data.StemAction
 import me.kavishdevar.librepods.presentation.components.ListItemOrientation
@@ -61,10 +61,14 @@ import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.experimental.and
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-@ExperimentalHazeMaterialsApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LongPress(viewModel: AirPodsViewModel, name: String, navigateToPurchase: () -> Unit) {
+fun LongPress(
+    viewModel: AirPodsViewModel,
+    name: String,
+    navigateToPurchase: () -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
 
     val modesByte = state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE_CONFIGS]?.get(0) ?: 0
@@ -82,6 +86,7 @@ fun LongPress(viewModel: AirPodsViewModel, name: String, navigateToPurchase: () 
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
 
     Column (
         modifier = Modifier

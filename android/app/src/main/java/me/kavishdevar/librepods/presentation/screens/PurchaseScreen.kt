@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.presentation.components.ListItemOrientation
 import me.kavishdevar.librepods.presentation.components.MaterialButtonStyle
 import me.kavishdevar.librepods.presentation.components.StyledButton
@@ -59,10 +60,12 @@ import me.kavishdevar.librepods.utils.XposedState
 @Composable
 fun PurchaseScreen(
     viewModel: PurchaseViewModel = viewModel(),
-    backStack: SnapshotStateList<Screen>
+    backStack: SnapshotStateList<Screen>,
+    onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
 
     val state by viewModel.uiState.collectAsState()
 

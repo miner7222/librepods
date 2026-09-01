@@ -54,11 +54,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.data.parseTransparencySettingsResponse
 import me.kavishdevar.librepods.data.sendTransparencySettings
@@ -74,11 +74,16 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 private const val TAG = "AccessibilitySettings"
 
 @SuppressLint("DefaultLocale")
-@ExperimentalHazeMaterialsApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalEncodingApi::class)
 @Composable
-fun HearingAidScreen(viewModel: AirPodsViewModel, onNavigateHearingAidAdjustments: () -> Unit, onNavigateHearingTest: () -> Unit) {
+fun HearingAidScreen(
+    viewModel: AirPodsViewModel,
+    onNavigateHearingAidAdjustments: () -> Unit,
+    onNavigateHearingTest: () -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val verticalScrollState  = rememberScrollState()
+    ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)
     val backdrop = rememberLayerBackdrop()
 
     val showDialog = remember { mutableStateOf(false) }

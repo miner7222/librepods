@@ -90,6 +90,7 @@ import com.kyant.backdrop.highlight.Highlight
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
@@ -104,7 +105,10 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun EqualizerRoute(viewModel: AirPodsViewModel) {
+fun EqualizerRoute(
+    viewModel: AirPodsViewModel,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
@@ -121,7 +125,8 @@ fun EqualizerRoute(viewModel: AirPodsViewModel) {
             topPadding = topPadding,
             bottomPadding = bottomPadding,
             setCustomEqEnabled = viewModel::setCustomEqEnabled,
-            setCustomEq = viewModel::setCustomEq
+            setCustomEq = viewModel::setCustomEq,
+            onScrollStateChanged = onScrollStateChanged
         )
     }
 }
@@ -133,11 +138,13 @@ fun EqualizerScreen(
     topPadding: Dp = 16.dp,
     bottomPadding: Dp = 16.dp,
     setCustomEqEnabled: (Boolean) -> Unit,
-    setCustomEq: (Int, Int, Int) -> Unit
+    setCustomEq: (Int, Int, Int) -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val customEq = state.customEq
 
     val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
 
     Column(
         modifier = Modifier
