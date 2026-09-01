@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -42,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
-import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 
 
 @Composable
@@ -154,15 +156,13 @@ fun StyledInputField(
                                         inputState.clearText()
                                     }
                                 ) {
-                                    Text(
-                                        text = "􀁡",
-                                        style = TextStyle(
-                                            fontSize = 16.sp,
-                                            fontFamily = sfSymbolsFamily,
-                                            color = if (isDarkTheme) Color.White.copy(alpha = 0.6f) else Color.Black.copy(
-                                                alpha = 0.6f
-                                            )
+                                    Icon(
+                                        painter = painterResource(R.drawable.sf_xmark_circle_fill),
+                                        contentDescription = "Clear",
+                                        tint = if (isDarkTheme) Color.White.copy(alpha = 0.6f) else Color.Black.copy(
+                                            alpha = 0.6f
                                         ),
+                                        modifier = Modifier.size(19.dp)
                                     )
                                 }
                             }
