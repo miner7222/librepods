@@ -79,6 +79,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -153,7 +154,6 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     val accentColor = if (isSystemInDarkTheme()) Color(0xFF007AFF) else Color(0xFF3C6DF5)
     val buttonBgColor = if (isSystemInDarkTheme()) Color(0xFF333333) else Color(0xFFDDDDDD)
 
-    var instructionText by remember { mutableStateOf("") }
     val isDarkTheme = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) {
@@ -177,13 +177,17 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                         outputStream.write(logContent.toByteArray())
                     }
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Log saved successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.log_saved_successfully),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
                             context,
-                            "Failed to save log: ${e.localizedMessage}",
+                            context.getString(R.string.failed_to_save_log, e.localizedMessage),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -192,15 +196,13 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
         }
     }
 
-    LaunchedEffect(currentStep) {
-        instructionText = when (currentStep) {
-            0 -> "First, let's ensure Xposed module is properly configured. Tap the button below to check Xposed scope settings."
-            1 -> "Please put your AirPods in the case and close it, so they disconnect completely."
-            2 -> "Preparing to collect logs... Please wait."
-            3 -> "Now, open the AirPods case and connect your AirPods. Logs are being collected. Connection will be detected automatically, or you can manually stop logging when you're done."
-            4 -> "Log collection complete! You can now save or share the logs."
-            else -> ""
-        }
+    val instructionText = when (currentStep) {
+        0 -> stringResource(R.string.troubleshooting_xposed_instruction)
+        1 -> stringResource(R.string.troubleshooting_disconnect_instruction)
+        2 -> stringResource(R.string.troubleshooting_preparing_instruction)
+        3 -> stringResource(R.string.troubleshooting_collecting_instruction)
+        4 -> stringResource(R.string.troubleshooting_complete_instruction)
+        else -> ""
     }
 
     fun openLogBottomSheet(file: File) {
@@ -277,7 +279,11 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Total Logs: ${savedLogs.size}",
+                            text = pluralStringResource(
+                                R.plurals.total_logs,
+                                savedLogs.size,
+                                savedLogs.size
+                            ),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = textColor
@@ -290,7 +296,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     contentColor = MaterialTheme.colorScheme.error
                                 )
                             ) {
-                                Text("Delete All")
+                                Text(stringResource(R.string.delete_all))
                             }
                         }
                     }
@@ -330,7 +336,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Delete",
+                                    contentDescription = stringResource(R.string.delete),
                                     tint = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -424,7 +430,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         contentColor = textColor
                                     )
                                 ) {
-                                    Text("Open Xposed Settings")
+                                    Text(stringResource(R.string.open_xposed_settings))
                                 }
                             }
 
@@ -481,7 +487,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                         selectedLogFile = it
                                                         Toast.makeText(
                                                             context,
-                                                            "Log saved: ${it.name}",
+                                                            context.getString(
+                                                                R.string.log_saved,
+                                                                it.name
+                                                            ),
                                                             Toast.LENGTH_SHORT
                                                         ).show()
                                                     }
@@ -490,7 +499,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                 withContext(Dispatchers.Main) {
                                                     Toast.makeText(
                                                         context,
-                                                        "Error collecting logs: ${e.message}",
+                                                        context.getString(
+                                                            R.string.error_collecting_logs,
+                                                            e.message
+                                                        ),
                                                         Toast.LENGTH_SHORT
                                                     ).show()
                                                     isCollectingLogs = false
@@ -506,7 +518,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         contentColor = textColor
                                     )
                                 ) {
-                                    Text("Continue")
+                                    Text(stringResource(R.string.continue_action))
                                 }
                             }
 
@@ -522,7 +534,11 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     Text(
-                                        text = if (currentStep == 2) "Preparing..." else "Collecting logs...",
+                                        text = if (currentStep == 2) {
+                                            stringResource(R.string.preparing)
+                                        } else {
+                                            stringResource(R.string.collecting_logs)
+                                        },
                                         fontSize = 14.sp,
                                         color = textColor
                                     )
@@ -546,7 +562,9 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                         isCollectingLogs = false
                                                         Toast.makeText(
                                                             context,
-                                                            "Log collection stopped",
+                                                            context.getString(
+                                                                R.string.log_collection_stopped
+                                                            ),
                                                             Toast.LENGTH_SHORT
                                                         ).show()
                                                     }
@@ -560,7 +578,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                         ) {
-                                            Text("Stop Collection")
+                                            Text(stringResource(R.string.stop_collection))
                                         }
                                     }
                                 }
@@ -591,7 +609,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                 context.startActivity(
                                                     Intent.createChooser(
                                                         shareIntent,
-                                                        "Share log file"
+                                                        context.getString(R.string.share_log_file)
                                                     )
                                                 )
                                             }
@@ -605,10 +623,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Share,
-                                            contentDescription = "Share"
+                                            contentDescription = stringResource(R.string.share)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Share")
+                                        Text(stringResource(R.string.share))
                                     }
 
                                     Spacer(modifier = Modifier.width(16.dp))
@@ -630,10 +648,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_save),
-                                            contentDescription = "Save"
+                                            contentDescription = stringResource(R.string.save)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Save")
+                                        Text(stringResource(R.string.save))
                                     }
                                 }
 
@@ -651,7 +669,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         contentColor = textColor
                                     )
                                 ) {
-                                    Text("Done")
+                                    Text(stringResource(R.string.widget_done))
                                 }
                             }
                         }
@@ -662,9 +680,9 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
             if (showDeleteDialog && selectedLogFile != null) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },
-                    title = { Text("Delete Log File") },
+                    title = { Text(stringResource(R.string.delete_log_file)) },
                     text = {
-                        Text("Are you sure you want to delete this log file? This action cannot be undone.")
+                        Text(stringResource(R.string.delete_log_file_confirmation))
                     },
                     confirmButton = {
                         TextButton(
@@ -674,14 +692,14 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         savedLogs.remove(file)
                                         Toast.makeText(
                                             context,
-                                            "Log file deleted",
+                                            context.getString(R.string.log_file_deleted),
                                             Toast.LENGTH_SHORT
                                         )
                                             .show()
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "Failed to delete log file",
+                                            context.getString(R.string.failed_to_delete_log_file),
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -689,12 +707,15 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                 showDeleteDialog = false
                             }
                         ) {
-                            Text("Delete", color = MaterialTheme.colorScheme.error)
+                            Text(
+                                stringResource(R.string.delete),
+                                color = MaterialTheme.colorScheme.error
+                            )
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 )
@@ -703,9 +724,15 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
             if (showDeleteAllDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteAllDialog = false },
-                    title = { Text("Delete All Logs") },
+                    title = { Text(stringResource(R.string.delete_all_logs)) },
                     text = {
-                        Text("Are you sure you want to delete all log files? This action cannot be undone and will remove ${savedLogs.size} log files.")
+                        Text(
+                            pluralStringResource(
+                                R.plurals.delete_all_logs_confirmation,
+                                savedLogs.size,
+                                savedLogs.size
+                            )
+                        )
                     },
                     confirmButton = {
                         TextButton(
@@ -722,13 +749,19 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                             savedLogs.clear()
                                             Toast.makeText(
                                                 context,
-                                                "Deleted $deletedCount log files",
+                                                context.resources.getQuantityString(
+                                                    R.plurals.deleted_log_files,
+                                                    deletedCount,
+                                                    deletedCount
+                                                ),
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                "Failed to delete log files",
+                                                context.getString(
+                                                    R.string.failed_to_delete_log_files
+                                                ),
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
@@ -737,12 +770,15 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                 showDeleteAllDialog = false
                             }
                         ) {
-                            Text("Delete All", color = MaterialTheme.colorScheme.error)
+                            Text(
+                                stringResource(R.string.delete_all),
+                                color = MaterialTheme.colorScheme.error
+                            )
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDeleteAllDialog = false }) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 )
@@ -767,7 +803,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                             logContent = try {
                                 selectedLogFile?.readText() ?: ""
                             } catch (e: Exception) {
-                                "Error loading log content: ${e.message}"
+                                context.getString(R.string.error_loading_log_content, e.message)
                             }
                             isLoadingLogContent = false
                             logContentLoaded = true
@@ -787,7 +823,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                             .padding(bottom = 12.dp),
                     ) {
                         Text(
-                            text = selectedLogFile?.name ?: "Log Content",
+                            text = selectedLogFile?.name ?: stringResource(R.string.log_content),
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
@@ -867,7 +903,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     context.startActivity(
                                         Intent.createChooser(
                                             shareIntent,
-                                            "Share log file"
+                                            context.getString(R.string.share_log_file)
                                         )
                                     )
                                 }
@@ -881,10 +917,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share"
+                                contentDescription = stringResource(R.string.share)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Share")
+                            Text(stringResource(R.string.share))
                         }
 
                         Button(
@@ -902,10 +938,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_save),
-                                contentDescription = "Save"
+                                contentDescription = stringResource(R.string.save)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Save")
+                            Text(stringResource(R.string.save))
                         }
                     }
                 }

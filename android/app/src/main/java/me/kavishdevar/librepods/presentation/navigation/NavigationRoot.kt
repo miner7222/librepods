@@ -69,7 +69,9 @@ fun NavigationRoot(
         Screen.HearingAid -> stringResource(R.string.hearing_aid)
         Screen.HearingAidAdjustments -> stringResource(R.string.adjustments)
         Screen.HearingProtection -> stringResource(R.string.hearing_protection)
-        is Screen.LongPress -> currentScreen.bud
+        is Screen.LongPress -> stringResource(
+            if (currentScreen.bud.equals("left", ignoreCase = true)) R.string.left else R.string.right
+        )
         Screen.OpenSourceLicenses -> stringResource(R.string.open_source_licenses)
         Screen.Purchase -> stringResource(R.string.unlock_advanced_features)
         Screen.Rename -> state.deviceName
@@ -96,7 +98,7 @@ fun NavigationRoot(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Settings,
-                                contentDescription = "settings",
+                                contentDescription = stringResource(R.string.settings),
                                 modifier = Modifier.size(IconButtonDefaults.mediumIconSize)
                             )
                         }
@@ -128,7 +130,7 @@ fun NavigationRoot(
                     ) {
                         Icon(
                             imageVector = if (state.headTrackingActive) MaterialIcons.pause else Icons.Default.PlayArrow,
-                            contentDescription = "Play/Pause",
+                            contentDescription = stringResource(R.string.play_pause),
                             modifier = Modifier.size(IconButtonDefaults.mediumIconSize)
                         )
                     }
@@ -144,7 +146,9 @@ fun NavigationRoot(
                             }
                         },
                         icon = if (state.headTrackingActive) R.drawable.sf_pause else R.drawable.sf_play,
-                        contentDescription = if (state.headTrackingActive) "Pause" else "Play",
+                        contentDescription = stringResource(
+                            if (state.headTrackingActive) R.string.pause else R.string.play
+                        ),
                         backdrop = scaffoldBackdrop
                     )
                 }

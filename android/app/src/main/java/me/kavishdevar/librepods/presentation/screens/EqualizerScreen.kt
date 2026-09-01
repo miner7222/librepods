@@ -548,7 +548,7 @@ fun EqualizerCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Low".uppercase(),
+                                text = stringResource(R.string.equalizer_low),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
@@ -565,7 +565,7 @@ fun EqualizerCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Mid".uppercase(),
+                                text = stringResource(R.string.equalizer_mid),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
@@ -582,7 +582,7 @@ fun EqualizerCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "High".uppercase(),
+                                text = stringResource(R.string.equalizer_high),
                                 style = TextStyle(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),

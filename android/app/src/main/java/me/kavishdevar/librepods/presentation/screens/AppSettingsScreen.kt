@@ -504,7 +504,7 @@ fun AppSettingsScreen(
                         Toast.makeText(context, successText, Toast.LENGTH_SHORT).show()
                     }) {
                     Text(
-                        "Save",
+                        stringResource(R.string.save),
                         fontFamily = FontFamily(Font(R.font.pretendard)),
                         fontWeight = FontWeight.Medium
                     )
@@ -513,7 +513,7 @@ fun AppSettingsScreen(
                 TextButton(
                     onClick = { viewModel.setShowCameraDialog(false) }) {
                     Text(
-                        "Cancel",
+                        stringResource(R.string.cancel),
                         fontFamily = FontFamily(Font(R.font.pretendard)),
                         fontWeight = FontWeight.Medium
                     )
@@ -544,7 +544,7 @@ fun AppSettingsScreen(
            ) {
                StyledIconButton(
                    icon = R.drawable.sf_xmark,
-                   contentDescription = "Close",
+                   contentDescription = stringResource(R.string.close),
                    backdrop = innerBackdrop,
                    onClick = { contactBottomSheet.value = false }
                )
@@ -560,7 +560,7 @@ fun AppSettingsScreen(
                )
                StyledIconButton(
                    icon = R.drawable.sf_paperplane,
-                   contentDescription = "Send",
+                   contentDescription = stringResource(R.string.send),
                    backdrop = innerBackdrop,
                    surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0091FF) else Color(0xFF0088FF),
                    iconTint = if (subjectState.text.isNotEmpty() && descriptionState.text.isNotEmpty()) Color.White else Color.Gray,

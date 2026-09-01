@@ -162,7 +162,7 @@ fun LongPress(
                         leadingContent = {
                             Icon(
                                 painter = painterResource(R.drawable.noise_cancellation),
-                                contentDescription = "Icon",
+                                contentDescription = stringResource(R.string.off),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .height(42.dp)
@@ -183,7 +183,7 @@ fun LongPress(
                     leadingContent = {
                         Icon(
                             painter = painterResource(R.drawable.transparency),
-                            contentDescription = "Icon",
+                            contentDescription = stringResource(R.string.transparency),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .height(42.dp)
@@ -203,7 +203,7 @@ fun LongPress(
                     leadingContent = {
                         Icon(
                             painter = painterResource(R.drawable.adaptive),
-                            contentDescription = "Icon",
+                            contentDescription = stringResource(R.string.adaptive),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .height(42.dp)
@@ -223,7 +223,7 @@ fun LongPress(
                     leadingContent = {
                         Icon(
                             painter = painterResource(R.drawable.noise_cancellation),
-                            contentDescription = "Icon",
+                            contentDescription = stringResource(R.string.noise_cancellation),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .height(42.dp)

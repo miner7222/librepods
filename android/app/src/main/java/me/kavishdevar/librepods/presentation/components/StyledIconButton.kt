@@ -68,6 +68,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -419,7 +420,7 @@ fun StyledIconButtonPreview() {
         ), contentAlignment = Alignment.Center) {
         StyledIconButton(
             icon = R.drawable.sf_gear,
-            contentDescription = "Settings",
+            contentDescription = stringResource(R.string.settings),
             onClick = { }
         )
     }
