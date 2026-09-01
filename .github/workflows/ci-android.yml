@@ -18,6 +18,13 @@ on:
         default: main
   workflow_call:
 
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NDK_VERSION: 30.0.14904198
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,8 +48,17 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: Accept Licenses
         run: yes | sdkmanager --licenses
+      # The NDK is a ~2GB download and the slowest step in the job; it never
+      # changes unless NDK_VERSION does.
+      - name: Cache NDK
+        id: ndk-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ANDROID_HOME }}/ndk/${{ env.NDK_VERSION }}
+          key: ndk-${{ runner.os }}-${{ env.NDK_VERSION }}
       - name: Install NDK
-        run: sdkmanager "ndk;30.0.14904198"
+        if: steps.ndk-cache.outputs.cache-hit != 'true'
+        run: sdkmanager "ndk;$NDK_VERSION"
       - name: Create local.properties
         if: github.event_name != 'pull_request'
         run: |
