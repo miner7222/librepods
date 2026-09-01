@@ -100,3 +100,7 @@ private fun readSystemProperty(key: String): String? {
         null
     }
 }
+
+fun removeDeviceCheckBypass(sharedPreferences: SharedPreferences) {
+    sharedPreferences.edit{ putBoolean("bypass_device_check.v2", false) }
+}
