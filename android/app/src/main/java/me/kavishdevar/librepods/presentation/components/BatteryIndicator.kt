@@ -209,7 +209,7 @@ fun BatteryIndicator(
 
             Icon(
                 painter = painterResource(R.drawable.sf_bolt_fill),
-                contentDescription = "Charging",
+                contentDescription = stringResource(R.string.charging),
                 tint = batteryFillColor,
                 modifier = Modifier.size(17.dp).scale(scaleAnim.value)
             )

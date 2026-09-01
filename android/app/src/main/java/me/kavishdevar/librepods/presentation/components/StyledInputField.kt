@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -160,7 +161,7 @@ fun StyledInputField(
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.sf_xmark_circle_fill),
-                                        contentDescription = "Clear",
+                                        contentDescription = stringResource(R.string.clear),
                                         tint = if (isDarkTheme) Color.White.copy(alpha = 0.6f) else Color.Black.copy(
                                             alpha = 0.6f
                                         ),
