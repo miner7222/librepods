@@ -96,6 +96,7 @@ import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
+import me.kavishdevar.librepods.data.FallbackArtwork
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.data.CustomEq
 import me.kavishdevar.librepods.data.StemAction
@@ -1786,6 +1787,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
 
     var popupShown = false
+
+    private fun overlayModel() = airpodsInstance?.model ?: AirPodsModels.getModelForOverlays(
+        config.airpodsModelNumber,
+        bleManager.getMostRecentStatus()?.model
+    )
+
     fun showPopup(service: Service, name: String) {
         if (!sharedPreferences.getBoolean("show_bottom_sheet_popup", true)) {
             return
@@ -1798,7 +1805,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
         val popupWindow = PopupWindow(service.applicationContext)
-        popupWindow.open(name, batteryNotification)
+        popupWindow.open(name, batteryNotification, overlayModel()?.connectedVideoRes ?: FallbackArtwork.Pro.connected)
         popupShown = true
     }
 
@@ -1829,7 +1836,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 this@AirPodsService,
                 type,
                 reversed,
-                otherDeviceName
+                otherDeviceName,
+                overlayModel()?.islandVideoRes ?: FallbackArtwork.Pro.island
             )
         }
     }

@@ -58,6 +58,7 @@ import androidx.core.net.toUri
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
+import me.kavishdevar.librepods.data.FallbackArtwork
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.Battery
@@ -129,6 +130,20 @@ class IslandWindow(private val context: Context) {
     val isVisible: Boolean
         get() = containerView.parent != null && containerView.visibility == View.VISIBLE
 
+    /**
+     * Offset that parks the overlay clear of the top edge.
+     *
+     * It has to follow the view: a fixed pixel constant leaves part of the pill
+     * showing under the status bar on some densities, and the overlay changed
+     * height when it was slimmed down. Before the first layout the height is not
+     * known yet, so a generous density-scaled guess stands in.
+     */
+    private fun hiddenTranslation(): Float {
+        val measured = containerView.height
+        if (measured > 0) return -(measured.toFloat() + containerView.paddingTop)
+        return -HIDDEN_FALLBACK_DP * context.resources.displayMetrics.density
+    }
+
     @SuppressLint("SetTextI18n")
     private fun updateBatteryDisplay(batteryList: ArrayList<Battery>?) {
         if (batteryList == null || batteryList.isEmpty()) return
@@ -165,7 +180,7 @@ class IslandWindow(private val context: Context) {
     @SuppressLint("SetTextI18s", "ClickableViewAccessibility", "UnspecifiedRegisterReceiverFlag",
         "SetTextI18n"
     )
-    fun show(name: String, batteryPercentage: Int, context: Context, type: IslandType = IslandType.CONNECTED, reversed: Boolean = false, otherDeviceName: String? = null) {
+    fun show(name: String, batteryPercentage: Int, context: Context, type: IslandType = IslandType.CONNECTED, reversed: Boolean = false, otherDeviceName: String? = null, videoRes: Int = FallbackArtwork.Pro.island) {
         if (ServiceManager.getService()?.islandOpen == true) return
         else ServiceManager.getService()?.islandOpen = true
 
@@ -374,7 +389,7 @@ class IslandWindow(private val context: Context) {
         }
 
         val videoView = islandView.findViewById<VideoView>(R.id.island_video_view)
-        val videoUri = "android.resource://${context.packageName}/${R.raw.island}".toUri()
+        val videoUri = "android.resource://${context.packageName}/$videoRes".toUri()
         videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
         videoView.setOnErrorListener { _, what, extra ->
             e("IslandWindow", "Error playing island video: what=$what extra=$extra")
@@ -385,6 +400,13 @@ class IslandWindow(private val context: Context) {
             mediaPlayer.isLooping = true
             videoView.start()
         }
+
+        // Park the overlay before it is attached. Adding it first leaves one
+        // frame drawn at the resting position, which flashes the pill below the
+        // status bar whenever a state change shows and hides it quickly.
+        containerView.translationY = hiddenTranslation()
+        containerView.scaleX = 0.5f
+        containerView.scaleY = 0.5f
 
         try {
             windowManager.addView(containerView, params)
@@ -403,13 +425,17 @@ class IslandWindow(private val context: Context) {
                 .setStiffness(SpringForce.STIFFNESS_MEDIUM)
         }
 
-        val scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X, 0.5f, 1f)
-        val scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.5f, 1f)
-        val translationY = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, -200f, 0f)
-        ObjectAnimator.ofPropertyValuesHolder(containerView, scaleX, scaleY, translationY).apply {
-            duration = 700
-            interpolator = AnticipateOvershootInterpolator()
-            start()
+        containerView.post {
+            val hidden = hiddenTranslation()
+            containerView.translationY = hidden
+            val scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X, 0.5f, 1f)
+            val scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.5f, 1f)
+            val translationY = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, hidden, 0f)
+            ObjectAnimator.ofPropertyValuesHolder(containerView, scaleX, scaleY, translationY).apply {
+                duration = 700
+                interpolator = AnticipateOvershootInterpolator()
+                start()
+            }
         }
 
         resetAutoCloseTimer()
@@ -642,10 +668,10 @@ class IslandWindow(private val context: Context) {
             deviceTextParams.topMargin = targetMargin
             deviceText.layoutParams = deviceTextParams
 
-            val baseTextSize = 24f
+            val baseTextSize = 20f
             deviceText.textSize = baseTextSize + (progress * 8f)
 
-            val baseSubTextSize = 16f
+            val baseSubTextSize = 14f
             connectedText.textSize = baseSubTextSize + (progress * 4f)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -679,12 +705,17 @@ class IslandWindow(private val context: Context) {
                 e.printStackTrace()
             }
 
+            // Anticipation here drove the pill *down* past its resting place
+            // before it left, which is what showed its bottom edge under the
+            // status bar. The exit accelerates straight out instead.
             val scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X, containerView.scaleX, 0.5f)
             val scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y, containerView.scaleY, 0.5f)
-            val translationY = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, containerView.translationY, -200f)
+            val translationY =
+                PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, containerView.translationY,
+                    hiddenTranslation())
             ObjectAnimator.ofPropertyValuesHolder(containerView, scaleX, scaleY, translationY).apply {
-                duration = 700
-                interpolator = AnticipateOvershootInterpolator()
+                duration = 320
+                interpolator = AccelerateInterpolator(1.5f)
                 addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         cleanupAndRemoveView()
@@ -758,5 +789,10 @@ class IslandWindow(private val context: Context) {
             e.printStackTrace()
             isClosing = false
         }
+    }
+
+    private companion object {
+        /** Stands in until the overlay has been measured; comfortably clears it. */
+        const val HIDDEN_FALLBACK_DP = 160f
     }
 }
