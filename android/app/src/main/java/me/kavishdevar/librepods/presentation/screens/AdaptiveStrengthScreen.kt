@@ -111,8 +111,8 @@ fun AdaptiveStrengthScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -
             },
             valueRange = 0f..100f,
             snapPoints = listOf(0f, 50f, 100f),
-            startIcon = "􀊥",
-            endIcon = "􀊩",
+            startIcon = R.drawable.sf_speaker_wave_1_fill,
+            endIcon = R.drawable.sf_speaker_wave_3_fill,
             independent = true,
             description = stringResource(R.string.adaptive_audio_description),
             enabled = state.isPremium

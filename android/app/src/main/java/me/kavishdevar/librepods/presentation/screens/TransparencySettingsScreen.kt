@@ -211,8 +211,8 @@ fun TransparencySettingsScreen(viewModel: AirPodsViewModel) {
                 onValueChange = {
                     amplificationSliderValue.floatValue = it
                 },
-                startIcon = "􀊥",
-                endIcon = "􀊩",
+                startIcon = R.drawable.sf_speaker_wave_1_fill,
+                endIcon = R.drawable.sf_speaker_wave_3_fill,
                 independent = true
             )
 

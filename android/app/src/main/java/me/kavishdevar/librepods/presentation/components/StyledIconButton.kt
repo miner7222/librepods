@@ -22,6 +22,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.RuntimeShader
 import android.os.Build
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
@@ -36,9 +37,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -66,8 +67,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -82,9 +82,9 @@ import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
 import kotlinx.coroutines.launch
+import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
-import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -95,7 +95,8 @@ import kotlin.math.tanh
 @Composable
 fun StyledIconButton(
     modifier: Modifier = Modifier,
-    icon: String,
+    @DrawableRes icon: Int,
+    contentDescription: String? = null,
     iconTint: Color = Color.Unspecified,
     surfaceColor: Color = Color.Unspecified,
     backdrop: LayerBackdrop = rememberLayerBackdrop(),
@@ -112,12 +113,10 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontFamily = sfSymbolsFamily
-                            )
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = contentDescription,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -127,12 +126,10 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontFamily = sfSymbolsFamily
-                            )
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = contentDescription,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -142,12 +139,10 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontFamily = sfSymbolsFamily
-                            )
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = contentDescription,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -157,12 +152,10 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontFamily = sfSymbolsFamily
-                            )
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = contentDescription,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -402,14 +395,11 @@ half4 main(float2 coord) {
                     }
                     .size(with(density) { 48.sp.toDp() }),
             ) {
-                Text(
-                    text = icon,
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = if (iconTint.isSpecified) iconTint else if (darkMode) Color.White else Color.Black,
-                        fontFamily = sfSymbolsFamily
-                    )
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = contentDescription,
+                    tint = if (iconTint.isSpecified) iconTint else if (darkMode) Color.White else Color.Black,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -428,7 +418,8 @@ fun StyledIconButtonPreview() {
             RoundedCornerShape(28.dp)
         ), contentAlignment = Alignment.Center) {
         StyledIconButton(
-            icon = "􀍟",
+            icon = R.drawable.sf_gear,
+            contentDescription = "Settings",
             onClick = { }
         )
     }

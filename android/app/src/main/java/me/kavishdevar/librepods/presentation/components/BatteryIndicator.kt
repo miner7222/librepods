@@ -20,6 +20,7 @@ package me.kavishdevar.librepods.presentation.components
 
 
 import android.content.res.Configuration
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -28,9 +29,13 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,30 +50,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import me.kavishdevar.librepods.R
-import me.kavishdevar.librepods.data.BatteryStatus
-import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
-import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
+import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.data.BatteryStatus
+import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 
 @Composable
 fun BatteryIndicator(
     batteryPercentage: Int,
     status: Int,
-    prefix: String = "",
+    @DrawableRes prefix: Int = 0,
     previousCharging: Boolean = false,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
@@ -81,6 +88,28 @@ fun BatteryIndicator(
     val scaleAnim = remember { Animatable(initialScale) }
     val charging = status == BatteryStatus.CHARGING || status == BatteryStatus.OPTIMIZED_CHARGING
     val targetScale = if (charging) 1f else 0f
+    val prefixContentDescription = when (prefix) {
+        R.drawable.sf_l_circle_fill -> stringResource(R.string.left)
+        R.drawable.sf_r_circle_fill -> stringResource(R.string.right)
+        R.drawable.sf_chargingcase_wireless_fill -> stringResource(R.string.case_alt)
+        else -> null
+    }
+    val prefixInlineContent = if (prefix != 0) {
+        mapOf(
+            "batteryPrefix" to InlineTextContent(
+                Placeholder(1.193.em, 1.193.em, PlaceholderVerticalAlign.TextCenter)
+            ) {
+                Icon(
+                    painter = painterResource(prefix),
+                    contentDescription = prefixContentDescription,
+                    tint = batteryTextColor,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        )
+    } else {
+        emptyMap()
+    }
 
     LaunchedEffect(previousCharging, charging) {
         scaleAnim.animateTo(targetScale, animationSpec = tween(durationMillis = 250))
@@ -178,13 +207,11 @@ fun BatteryIndicator(
                 }
             }
 
-            Text(
-                text = "\uDBC0\uDEE6", style = TextStyle(
-                    fontSize = 14.sp,
-                    fontFamily = sfSymbolsFamily,
-                    color = batteryFillColor,
-                    textAlign = TextAlign.Center
-                ), modifier = Modifier.scale(scaleAnim.value)
+            Icon(
+                painter = painterResource(R.drawable.sf_bolt_fill),
+                contentDescription = "Charging",
+                tint = batteryFillColor,
+                modifier = Modifier.size(17.dp).scale(scaleAnim.value)
             )
         }
 
@@ -192,15 +219,14 @@ fun BatteryIndicator(
 
         Text(
             text = buildAnnotatedString {
-                if (prefix.isNotEmpty()) {
-                    withStyle(SpanStyle(fontFamily = sfSymbolsFamily)) {
-                        append(prefix)
-                    }
+                if (prefix != 0) {
+                    appendInlineContent("batteryPrefix", prefixContentDescription ?: "")
                     append(" ")
                 }
                 append("$batteryPercentage%")
             },
             color = batteryTextColor,
+            inlineContent = prefixInlineContent,
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily(Font(R.font.pretendard)),
@@ -217,7 +243,7 @@ fun BatteryIndicatorPreview() {
         BatteryIndicator(
             batteryPercentage = 50,
             status = BatteryStatus.OPTIMIZED_CHARGING,
-            prefix = "\uDBC6\uDCE5",
+            prefix = R.drawable.sf_l_circle_fill,
             previousCharging = false
         )
     }

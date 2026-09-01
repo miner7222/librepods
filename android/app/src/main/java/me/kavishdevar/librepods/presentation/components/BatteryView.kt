@@ -125,7 +125,7 @@ fun BatteryView(
                             BatteryIndicator(
                                 leftLevel,
                                 left?.status ?: BatteryStatus.NOT_CHARGING,
-                                "\uDBC6\uDCE5"
+                                R.drawable.sf_l_circle_fill
                             )
                         }
 
@@ -137,7 +137,7 @@ fun BatteryView(
                             BatteryIndicator(
                                 rightLevel,
                                 right?.status ?: BatteryStatus.NOT_CHARGING,
-                                "\uDBC6\uDCE8"
+                                R.drawable.sf_r_circle_fill
                             )
                         }
                     }
@@ -162,7 +162,7 @@ fun BatteryView(
                     BatteryIndicator(
                         caseLevel,
                         case?.status ?: BatteryStatus.NOT_CHARGING,
-                        prefix = if (!singleDisplayed.value) "\uDBC3\uDE6C" else ""
+                        prefix = if (!singleDisplayed.value) R.drawable.sf_chargingcase_wireless_fill else 0
                     )
                 }
             }

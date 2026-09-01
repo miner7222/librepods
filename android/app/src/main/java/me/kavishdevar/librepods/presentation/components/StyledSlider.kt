@@ -21,6 +21,7 @@ package me.kavishdevar.librepods.presentation.components
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.util.Log
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.spring
@@ -43,6 +44,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Slider
@@ -70,6 +72,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -98,7 +101,6 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
-import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -224,8 +226,8 @@ fun StyledSlider(
     backdrop: Backdrop = rememberLayerBackdrop(),
     snapPoints: List<Float> = emptyList(),
     snapThreshold: Float = 0.05f,
-    startIcon: String? = null,
-    endIcon: String? = null,
+    @DrawableRes startIcon: Int? = null,
+    @DrawableRes endIcon: Int? = null,
     startLabel: String? = null,
     endLabel: String? = null,
     independent: Boolean = false,
@@ -319,7 +321,11 @@ fun StyledSlider(
                             ) {
 
                                 startIcon?.let {
-                                    Text(it, fontFamily = sfSymbolsFamily)
+                                    Icon(
+                                        painter = painterResource(it),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(19.dp)
+                                    )
                                     Spacer(Modifier.width(12.dp))
                                 }
 
@@ -346,7 +352,11 @@ fun StyledSlider(
 
                                 endIcon?.let {
                                     Spacer(Modifier.width(12.dp))
-                                    Text(it, fontFamily = sfSymbolsFamily)
+                                    Icon(
+                                        painter = painterResource(it),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(19.dp)
+                                    )
                                 }
                             }
                         }
@@ -453,16 +463,13 @@ fun StyledSlider(
                                     horizontalArrangement = Arrangement.spacedBy(0.dp)
                                 ) {
                                     if (startIcon != null) {
-                                        Text(
-                                            text = startIcon,
-                                            style = TextStyle(
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Normal,
-                                                color = accentColor,
-                                                fontFamily = sfSymbolsFamily
-                                            ),
+                                        Icon(
+                                            painter = painterResource(startIcon),
+                                            contentDescription = null,
+                                            tint = accentColor,
                                             modifier = Modifier
                                                 .padding(horizontal = 12.dp)
+                                                .size(21.dp)
                                                 .onGloballyPositioned {
                                                     startIconWidthState.floatValue =
                                                         it.size.width.toFloat()
@@ -505,16 +512,13 @@ fun StyledSlider(
                                         )
                                     }
                                     if (endIcon != null) {
-                                        Text(
-                                            text = endIcon,
-                                            style = TextStyle(
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Normal,
-                                                color = accentColor,
-                                                fontFamily = sfSymbolsFamily
-                                            ),
+                                        Icon(
+                                            painter = painterResource(endIcon),
+                                            contentDescription = null,
+                                            tint = accentColor,
                                             modifier = Modifier
                                                 .padding(horizontal = 12.dp)
+                                                .size(21.dp)
                                                 .onGloballyPositioned {
                                                     endIconWidthState.floatValue =
                                                         it.size.width.toFloat()
@@ -786,8 +790,8 @@ fun StyledSliderPreview() {
                     snapPoints = listOf(1f),
                     snapThreshold = 0.1f,
                     independent = true,
-                    startIcon = "A",
-                    endIcon = "B",
+                    startIcon = R.drawable.sf_speaker_wave_1_fill,
+                    endIcon = R.drawable.sf_speaker_wave_3_fill,
                 )
                 StyledSlider(
                     label = "Small label",
@@ -800,8 +804,8 @@ fun StyledSliderPreview() {
                     snapPoints = listOf(1f),
                     snapThreshold = 0.1f,
                     independent = true,
-                    startIcon = "A",
-                    endIcon = "B",
+                    startIcon = R.drawable.sf_speaker_wave_1_fill,
+                    endIcon = R.drawable.sf_speaker_wave_3_fill,
                 )
             }
         }
