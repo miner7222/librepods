@@ -53,6 +53,8 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -149,7 +151,7 @@ fun ConfirmationDialog(
                                     shape = { RoundedCornerShape(48.dp) },
                                     effects = {
                                         vibrancy()
-                                        blur(4f.dp.toPx())
+                                        blur(24f.dp.toPx())
                                         lens(12f.dp.toPx(), 48f.dp.toPx(), true)
                                     },
                                     onDrawSurface = {
@@ -158,6 +160,13 @@ fun ConfirmationDialog(
                                                 0xFFE0E0E0
                                             ).copy(alpha = 0.7f)
                                         )
+                        // iOS 27 separates glass from whatever sits behind it
+                        // with a subtle dark ring rather than a bare edge.
+                        drawRoundRect(
+                            color = Color.Black.copy(alpha = if (isDarkTheme) 0.35f else 0.12f),
+                            cornerRadius = CornerRadius(48f.dp.toPx()),
+                            style = Stroke(width = 1f.dp.toPx())
+                        )
                                     })
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
