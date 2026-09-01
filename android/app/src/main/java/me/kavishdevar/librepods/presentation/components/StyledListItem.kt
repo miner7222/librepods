@@ -70,6 +70,14 @@ import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.theme.sfSymbolsFamily
 
+/**
+ * iOS secondaryLabel, measured off clean captures: about 0.46 of the label on
+ * a light card and about 0.6 on a dark one. A single figure made the light
+ * theme's descriptions read almost as dark as their titles.
+ */
+private const val SECONDARY_LABEL_ALPHA_LIGHT = 0.46f
+private const val SECONDARY_LABEL_ALPHA_DARK = 0.6f
+
 @Composable
 fun StyledListItem(
     modifier: Modifier = Modifier,
@@ -302,7 +310,7 @@ private fun StyledListItemContent(
                             Text(
                                 text = descriptionText,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) 0.6f else 0.8f), // TODO: move to color scheme
+                                color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT),
                             )
                         }
                     }
@@ -313,7 +321,7 @@ private fun StyledListItemContent(
                         Text(
                             text = descriptionText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) 0.6f else 0.8f) // TODO: move to color scheme
+                            color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT)
                         )
                     }
 
