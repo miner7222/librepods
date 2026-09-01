@@ -204,7 +204,7 @@
         <string name="ppe">Protezione EN 352</string>
         <string name="workspace_use_description">La protezione EN 352 limita il livello massimo dei media a 82 dBA e soddisfa i requisiti applicabili dello standard EN 352 per la protezione individuale dell\'udito.</string>
         <string name="environmental_noise">Rumore Ambientale</string>
-        <string name="reconnect_to_last_device">Riconnetti all\'ultimo dispositivo connesso</string>
+        <string name="reconnect_to_last_device">Riconnetti</string>
         <string name="disconnect">Disconnetti</string>
         <string name="listening_mode_off_description">Disattiva la gestione del rumore</string>
         <string name="listening_mode_transparency_description">Lascia entrare i suoni esterni</string>

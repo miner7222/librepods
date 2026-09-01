@@ -204,7 +204,7 @@
     <string name="ppe">Bảo vệ EN 352</string>
     <string name="workspace_use_description">Bảo vệ EN 352 giới hạn mức tối đa của Media ở 82 dBA và đáp ứng các yêu cầu Tiêu chuẩn EN 352 hiện hành về bảo vệ thính giác cá nhân.</string>
     <string name="environmental_noise">Tiếng ồn môi trường</string>
-    <string name="reconnect_to_last_device">Kết nối lại với thiết bị được kết nối lần cuối</string>
+    <string name="reconnect_to_last_device">Kết nối lại</string>
     <string name="disconnect">Ngắt kết nối</string>
     <string name="listening_mode_off_description">Tắt quản lý tiếng ồn</string>
     <string name="listening_mode_transparency_description">Cho phép âm thanh bên ngoài</string>

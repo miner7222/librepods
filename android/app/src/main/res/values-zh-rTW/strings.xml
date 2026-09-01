@@ -206,7 +206,7 @@
     <string name="ppe">EN 352 防護</string>
     <string name="workspace_use_description">EN 352 防護將媒體的最大音量限制為 82 dBA，並符合個人聽力保護的適用 EN 352 標準要求。</string>
     <string name="environmental_noise">環境噪音</string>
-    <string name="reconnect_to_last_device">重新連接至上次連接的裝置</string>
+    <string name="reconnect_to_last_device">重新連接</string>
     <string name="disconnect">中斷連線</string>
     <string name="listening_mode_off_description">關閉噪音管理</string>
     <string name="listening_mode_transparency_description">允許外部聲音</string>

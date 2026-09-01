@@ -204,7 +204,7 @@
     <string name="ppe">EN 352 Koruması</string>
     <string name="workspace_use_description">EN 352 Koruması, medyanın maksimum seviyesini 82 dBA ile sınırlar ve kişisel işitme koruması için geçerli EN 352 Standart gereksinimlerini karşılar.</string>
     <string name="environmental_noise">Çevresel Gürültü</string>
-    <string name="reconnect_to_last_device">Son bağlanan cihaza yeniden bağlan</string>
+    <string name="reconnect_to_last_device">Yeniden Bağlan</string>
     <string name="disconnect">Bağlantıyı Kes</string>
     <string name="listening_mode_off_description">Gürültü yönetimini kapatır</string>
     <string name="listening_mode_transparency_description">Dış sesleri içeri alır</string>
