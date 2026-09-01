@@ -65,14 +65,14 @@ class BatteryGridWidget : AppWidgetProvider() {
         opacity: Int
     ): RemoteViews {
         return RemoteViews(context.packageName, R.layout.battery_widget_grid).also { views ->
-            views.applyBatteryWidgetTheme(isDarkTheme, opacity)
+            views.applyBatteryWidgetTheme(context, isDarkTheme, opacity)
             val openActivityIntent = PendingIntent.getActivity(
                 context,
                 0,
                 Intent(context, MainActivity::class.java),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            views.setOnClickPendingIntent(R.id.battery_widget, openActivityIntent)
+            views.setOnClickPendingIntent(android.R.id.background, openActivityIntent)
         }
     }
 }

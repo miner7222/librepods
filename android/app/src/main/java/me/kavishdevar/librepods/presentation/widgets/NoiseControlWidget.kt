@@ -90,7 +90,7 @@ internal fun populateNoiseControlWidgetFallback(
     providerClass: Class<out AppWidgetProvider>
 ): RemoteViews {
     return RemoteViews(context.packageName, layoutId).also { views ->
-        views.applyNoiseControlWidgetTheme(isDarkTheme, opacity)
+        views.applyNoiseControlWidgetTheme(context, isDarkTheme, opacity)
         intArrayOf(1, 3, 4, 2).zip(
             intArrayOf(
                 R.id.widget_off_button,
