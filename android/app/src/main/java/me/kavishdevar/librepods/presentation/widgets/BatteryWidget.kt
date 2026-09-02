@@ -25,7 +25,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.util.SizeF
 import android.widget.RemoteViews
 import androidx.compose.material3.ExperimentalMaterial3Api
 import me.kavishdevar.librepods.MainActivity
@@ -52,22 +51,15 @@ class BatteryWidget : AppWidgetProvider() {
         appWidgetIds.forEach { appWidgetId ->
             val isDarkTheme = WidgetThemePreferences.isDark(context, appWidgetId)
             val opacity = WidgetThemePreferences.getOpacity(context, appWidgetId)
-            val remoteViews = RemoteViews(
-                mapOf(
-                    SizeF(110f, 50f) to populateFallback(
-                        context,
-                        R.layout.battery_widget_compact,
-                        isDarkTheme,
-                        opacity
-                    ),
-                    SizeF(300f, 120f) to populateFallback(
-                        context,
-                        R.layout.battery_widget,
-                        isDarkTheme,
-                        opacity
-                    )
+            val remoteViews = appWidgetManager.sizedRemoteViewsFor(context, appWidgetId, 250, 110) { dimensions ->
+                populateFallback(
+                    context,
+                    R.layout.battery_widget,
+                    isDarkTheme,
+                    opacity,
+                    wideBatteryRingSize(dimensions)
                 )
-            )
+            }
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
     }
@@ -77,9 +69,11 @@ class BatteryWidget : AppWidgetProvider() {
         context: Context,
         layoutId: Int,
         isDarkTheme: Boolean,
-        opacity: Int
+        opacity: Int,
+        ringSizeDp: Int
     ): RemoteViews {
         return RemoteViews(context.packageName, layoutId).also { views ->
+            views.applyWideBatteryRingSize(ringSizeDp)
             views.applyBatteryWidgetTheme(context, isDarkTheme, opacity)
             val openActivityIntent = PendingIntent.getActivity(
                 context,
@@ -89,5 +83,15 @@ class BatteryWidget : AppWidgetProvider() {
             )
             views.setOnClickPendingIntent(android.R.id.background, openActivityIntent)
         }
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
     }
 }
