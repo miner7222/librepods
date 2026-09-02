@@ -71,7 +71,7 @@
                     android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/smartphone"
+                    android:src="@drawable/sf_iphone_gen3"
                     android:tint="@color/white" />
             </FrameLayout>
 
@@ -141,7 +141,7 @@
                     android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/airpods_pro_left_notification"
+                    android:src="@drawable/sf_airpods_pro_left"
                     android:tint="@color/white" />
             </FrameLayout>
 
@@ -211,7 +211,7 @@
                     android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/airpods_pro_right_notification"
+                    android:src="@drawable/sf_airpods_pro_right"
                     android:tint="@color/white" />
             </FrameLayout>
 
@@ -281,7 +281,7 @@
                     android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/airpods_pro_case_notification"
+                    android:src="@drawable/sf_airpods_pro_chargingcase_wireless_fill"
                     android:tint="@color/white" />
             </FrameLayout>
 

@@ -83,7 +83,7 @@
                     android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/airpods_pro_left_notification"
+                    android:src="@drawable/sf_iphone_gen3"
                     android:tint="@color/black" />
             </FrameLayout>
 
@@ -154,7 +154,7 @@
                     android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/airpods_pro_right_notification"
+                    android:src="@drawable/sf_airpods_pro"
                     android:tint="@color/black" />
             </FrameLayout>
 
@@ -246,7 +246,7 @@
                     android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/airpods_pro_case_notification"
+                    android:src="@drawable/sf_airpods_pro_chargingcase_wireless_fill"
                     android:tint="@color/black" />
             </FrameLayout>
 
@@ -288,7 +288,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/widget_ring_preview"
+                    android:src="@drawable/widget_ring_empty_preview"
                     android:importantForAccessibility="no" />
 
                 <ImageView
@@ -317,8 +317,9 @@
                     android:layout_height="18dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/smartphone"
-                    android:tint="@color/black" />
+                    android:src="@drawable/sf_airpods_pro"
+                    android:tint="@color/black"
+                    android:visibility="gone" />
             </FrameLayout>
 
             <TextView

@@ -122,6 +122,7 @@ import me.kavishdevar.librepods.presentation.widgets.applyNoiseGridItemSize
 import me.kavishdevar.librepods.presentation.widgets.applyNoiseControlWidgetTheme
 import me.kavishdevar.librepods.presentation.widgets.applyWideBatteryRingSize
 import me.kavishdevar.librepods.presentation.widgets.applyWideNoiseContentSize
+import me.kavishdevar.librepods.presentation.widgets.batteryWidgetIcons
 import me.kavishdevar.librepods.presentation.widgets.batteryWidgetSlots
 import me.kavishdevar.librepods.presentation.widgets.sizedRemoteViewsFor
 import me.kavishdevar.librepods.presentation.widgets.gridItemSize
@@ -2282,6 +2283,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 batteryForWidget(),
                 phoneBattery
             )
+            val icons = batteryWidgetIcons(overlayModel())
             val slotViews = if (layoutId == R.layout.battery_widget_grid) {
                 GRID_BATTERY_WIDGET_VIEWS
             } else {
@@ -2296,14 +2298,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 it.setViewVisibility(views.container, View.VISIBLE)
                 it.setImageViewResource(
                     views.icon,
-                    when (slot.device) {
-                        BatteryWidgetDevice.PHONE -> R.drawable.smartphone
-                        BatteryWidgetDevice.BUDS -> R.drawable.airpods
-                        BatteryWidgetDevice.LEFT_BUD -> R.drawable.airpods_pro_left_notification
-                        BatteryWidgetDevice.RIGHT_BUD -> R.drawable.airpods_pro_right_notification
-                        BatteryWidgetDevice.CASE -> R.drawable.airpods_pro_case_notification
-                        BatteryWidgetDevice.EMPTY -> R.drawable.airpods
-                    }
+                    icons.forDevice(slot.device)
                 )
                 it.setTextViewText(views.label, slot.level?.let { level -> "$level%" } ?: "")
                 setChargingBolt(
