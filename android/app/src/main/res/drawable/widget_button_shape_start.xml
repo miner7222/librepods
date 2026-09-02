@@ -2,15 +2,13 @@
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <solid android:color="#3A3A3C" />
-            <corners android:topLeftRadius="18dp" android:topRightRadius="6dp" android:bottomLeftRadius="18dp" android:bottomRightRadius="6dp" />
-            <padding android:left="8dp" android:top="8dp" android:right="8dp" android:bottom="8dp" />
+            <corners android:topLeftRadius="16dp" android:topRightRadius="6dp" android:bottomLeftRadius="16dp" android:bottomRightRadius="6dp" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <solid android:color="#2C2C2E" />
-            <corners android:topLeftRadius="18dp" android:topRightRadius="6dp" android:bottomLeftRadius="18dp" android:bottomRightRadius="6dp" />
-            <padding android:left="8dp" android:top="8dp" android:right="8dp" android:bottom="8dp" />
+            <corners android:topLeftRadius="16dp" android:topRightRadius="6dp" android:bottomLeftRadius="16dp" android:bottomRightRadius="6dp" />
         </shape>
     </item>
 </selector>

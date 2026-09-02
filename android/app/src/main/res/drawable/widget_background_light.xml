@@ -1,9 +1,8 @@
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <padding android:bottom="0dp" android:left="0dp" android:right="0dp" android:top="0dp" />
-            <solid android:color="#FFFFFF" />
-            <corners android:radius="24dp" />
-        </shape>
-    </item>
-</layer-list>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A bare shape, not a layer-list: One UI only recognises the plate as
+     blurrable when it can read the background as a single shape. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFF" />
+    <corners android:radius="24dp" />
+</shape>

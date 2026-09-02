@@ -53,7 +53,14 @@ class BatteryGridWidget : AppWidgetProvider() {
             val opacity = WidgetThemePreferences.getOpacity(context, appWidgetId)
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                populateFallback(context, isDarkTheme, opacity)
+                appWidgetManager.sizedRemoteViewsFor(context, appWidgetId, 110, 110) { dimensions ->
+                    populateFallback(
+                        context,
+                        isDarkTheme,
+                        opacity,
+                        gridItemSize(dimensions)
+                    )
+                }
             )
         }
     }
@@ -62,9 +69,11 @@ class BatteryGridWidget : AppWidgetProvider() {
     private fun populateFallback(
         context: Context,
         isDarkTheme: Boolean,
-        opacity: Int
+        opacity: Int,
+        ringSizeDp: Int
     ): RemoteViews {
         return RemoteViews(context.packageName, R.layout.battery_widget_grid).also { views ->
+            views.applyBatteryGridItemSize(ringSizeDp)
             views.applyBatteryWidgetTheme(context, isDarkTheme, opacity)
             val openActivityIntent = PendingIntent.getActivity(
                 context,
@@ -74,5 +83,15 @@ class BatteryGridWidget : AppWidgetProvider() {
             )
             views.setOnClickPendingIntent(android.R.id.background, openActivityIntent)
         }
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
     }
 }
