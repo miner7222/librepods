@@ -48,7 +48,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -83,6 +82,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -107,6 +107,7 @@ import me.kavishdevar.librepods.data.AirPodsPro3
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.components.AboutCard
+import me.kavishdevar.librepods.presentation.components.AppleDisconnectedContent
 import me.kavishdevar.librepods.presentation.components.AudioSettings
 import me.kavishdevar.librepods.presentation.components.BatteryView
 import me.kavishdevar.librepods.presentation.components.CallControlSettings
@@ -249,19 +250,25 @@ fun AirPodsSettingsScreen(
         )
     }
 
-    val nameChangeListener = remember {
+    var lastConnectedModelNumber by remember(sharedPreferences) {
+        mutableStateOf(sharedPreferences.getString("airpods_model_number", null))
+    }
+
+    val preferenceChangeListener = remember {
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "name") {
-                deviceName =
+            when (key) {
+                "name" -> deviceName =
                     TextFieldValue(sharedPreferences.getString("name", "AirPods Pro").toString())
+                "airpods_model_number" -> lastConnectedModelNumber =
+                    sharedPreferences.getString("airpods_model_number", null)
             }
         }
     }
 
     DisposableEffect(Unit) {
-        sharedPreferences.registerOnSharedPreferenceChangeListener(nameChangeListener)
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
         onDispose {
-            sharedPreferences.unregisterOnSharedPreferenceChangeListener(nameChangeListener)
+            sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
         }
     }
 
@@ -875,80 +882,33 @@ fun AirPodsSettingsScreen(
                 }
 
                 DesignSystem.Apple -> {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(top = topPadding),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onTap = {
-                                            val now = System.currentTimeMillis()
-
-                                            if (now - lastTapTime.longValue > 400) {
-                                                tapCount.intValue = 0
-                                            }
-
-                                            tapCount.intValue++
-                                            lastTapTime.longValue = now
-
-                                            if (tapCount.intValue >= 5) {
-                                                tapCount.intValue = 0
-                                                activateDemoMode()
-                                            }
-                                        })
-                                }) {
-                            Text(
-                                text = stringResource(R.string.airpods_not_connected),
-                                style = MaterialTheme.typography.displaySmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(Modifier.height(24.dp))
-                            Text(
-                                text = stringResource(R.string.airpods_not_connected_description),
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-
-                        if (state.connectionSuccessful) {
-                            StyledButton(
-                                onClick = { reconnectFromSavedMac(); reconnecting = true },
-                                backdrop = backdrop,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .widthIn(max = 200.dp),
-                                enabled = !reconnecting
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.reconnect_to_last_device),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
-
-                    if (!BuildConfig.PLAY_BUILD) {
-                        StyledButton(
-                            onClick = navigateToTroubleshooting,
-                            backdrop = backdrop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp)
-                                .widthIn(max = 200.dp),
-                            materialButtonStyle = MaterialButtonStyle.Outlined,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.troubleshooting),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+                        AppleDisconnectedContent(
+                            canReconnect = state.connectionSuccessful,
+                            reconnecting = reconnecting,
+                            showTroubleshooting = !BuildConfig.PLAY_BUILD,
+                            onReconnect = { reconnectFromSavedMac(); reconnecting = true },
+                            onTroubleshooting = navigateToTroubleshooting,
+                            lastConnectedModelNumber = lastConnectedModelNumber,
+                            modifier = Modifier.fillMaxWidth(),
+                            messageModifier = Modifier.pointerInput(Unit) {
+                                detectTapGestures(onTap = {
+                                    val now = System.currentTimeMillis()
+                                    if (now - lastTapTime.longValue > 400) {
+                                        tapCount.intValue = 0
+                                    }
+                                    tapCount.intValue++
+                                    lastTapTime.longValue = now
+                                    if (tapCount.intValue >= 5) {
+                                        tapCount.intValue = 0
+                                        activateDemoMode()
+                                    }
+                                })
+                            },
+                        )
                     }
                 }
             }

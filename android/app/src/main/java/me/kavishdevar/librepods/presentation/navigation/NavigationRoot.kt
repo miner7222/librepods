@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.MaterialIcons
+import me.kavishdevar.librepods.presentation.components.AppleDisconnectedSettingsButton
 import me.kavishdevar.librepods.presentation.components.StyledIconButton
 import me.kavishdevar.librepods.presentation.components.StyledScaffold
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
@@ -96,6 +97,11 @@ fun NavigationRoot(
                                 modifier = Modifier.size(IconButtonDefaults.mediumIconSize)
                             )
                         }
+                    } else if (!state.isLocallyConnected) {
+                        AppleDisconnectedSettingsButton(
+                            backdrop = scaffoldBackdrop,
+                            onClick = { backStack.add(Screen.AppSettings) },
+                        )
                     } else {
                         StyledIconButton(
                             onClick = { backStack.add(Screen.AppSettings) },
