@@ -62,8 +62,6 @@ import android.telecom.TelecomManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
-import android.util.SizeF
-import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.Toast
@@ -114,9 +112,17 @@ import me.kavishdevar.librepods.presentation.widgets.BatteryRing
 import me.kavishdevar.librepods.presentation.widgets.BatteryWidget
 import me.kavishdevar.librepods.presentation.widgets.NoiseControlGridWidget
 import me.kavishdevar.librepods.presentation.widgets.NoiseControlWidget
+import me.kavishdevar.librepods.presentation.widgets.WidgetDimensions
 import me.kavishdevar.librepods.presentation.widgets.WidgetThemePreferences
+import me.kavishdevar.librepods.presentation.widgets.applyBatteryGridItemSize
 import me.kavishdevar.librepods.presentation.widgets.applyBatteryWidgetTheme
+import me.kavishdevar.librepods.presentation.widgets.applyNoiseGridItemSize
 import me.kavishdevar.librepods.presentation.widgets.applyNoiseControlWidgetTheme
+import me.kavishdevar.librepods.presentation.widgets.applyWideBatteryRingSize
+import me.kavishdevar.librepods.presentation.widgets.applyWideNoiseContentSize
+import me.kavishdevar.librepods.presentation.widgets.sizedRemoteViewsFor
+import me.kavishdevar.librepods.presentation.widgets.gridItemSize
+import me.kavishdevar.librepods.presentation.widgets.wideBatteryRingSize
 import me.kavishdevar.librepods.utils.GestureDetector
 import me.kavishdevar.librepods.utils.HeadTracking
 import me.kavishdevar.librepods.utils.MediaController
@@ -2052,23 +2058,19 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         widgetIds.forEach { appWidgetId ->
             val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
             val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
-            val showPhoneBattery = WidgetThemePreferences.getShowPhoneBattery(sharedPreferences, appWidgetId)
-            val remoteViews = RemoteViews(
-                mapOf(
-                    SizeF(110f, 50f) to populateBatteryWidget(
-                        R.layout.battery_widget_compact,
-                        isDarkTheme,
-                        opacity,
-                        showPhoneBattery
-                    ),
-                    SizeF(300f, 120f) to populateBatteryWidget(
-                        R.layout.battery_widget,
-                        isDarkTheme,
-                        opacity,
-                        showPhoneBattery
-                    )
-                )
+            val showPhoneBattery = WidgetThemePreferences.getShowPhoneBattery(
+                sharedPreferences,
+                appWidgetId
             )
+            val remoteViews = appWidgetManager.sizedRemoteViewsFor(this, appWidgetId, 250, 110) { dimensions ->
+                populateBatteryWidget(
+                    R.layout.battery_widget,
+                    isDarkTheme,
+                    opacity,
+                    wideBatteryRingSize(dimensions),
+                    showPhoneBattery
+                )
+            }
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
     }
@@ -2081,10 +2083,21 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         widgetIds.forEach { appWidgetId ->
             val isDarkTheme = WidgetThemePreferences.isDark(this, appWidgetId)
             val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
-            val showPhoneBattery = WidgetThemePreferences.getShowPhoneBattery(sharedPreferences, appWidgetId)
+            val showPhoneBattery = WidgetThemePreferences.getShowPhoneBattery(
+                sharedPreferences,
+                appWidgetId
+            )
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                populateBatteryWidget(R.layout.battery_widget_grid, isDarkTheme, opacity, showPhoneBattery)
+                appWidgetManager.sizedRemoteViewsFor(this, appWidgetId, 110, 110) { dimensions ->
+                    populateBatteryWidget(
+                        R.layout.battery_widget_grid,
+                        isDarkTheme,
+                        opacity,
+                        gridItemSize(dimensions),
+                        showPhoneBattery
+                    )
+                }
             )
         }
     }
@@ -2094,14 +2107,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         @LayoutRes layoutId: Int,
         isDarkTheme: Boolean,
         opacity: Int,
+        ringDp: Int,
         showPhoneBattery: Boolean
     ): RemoteViews {
-        val ringDp = when (layoutId) {
-            R.layout.battery_widget_compact -> 48
-            R.layout.battery_widget_grid -> 76
-            else -> 78
-        }
         return RemoteViews(packageName, layoutId).also { it ->
+            if (layoutId == R.layout.battery_widget_grid) {
+                it.applyBatteryGridItemSize(ringDp)
+            } else {
+                it.applyWideBatteryRingSize(ringDp)
+            }
             it.applyBatteryWidgetTheme(this, isDarkTheme, opacity)
 
             fun setChargingBolt(
@@ -2238,22 +2252,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                RemoteViews(
-                    mapOf(
-                        SizeF(180f, 40f) to populateNoiseControlWidget(
-                            R.layout.noise_control_widget,
-                            isDarkTheme,
-                            opacity,
-                            NoiseControlWidget::class.java
-                        ),
-                        SizeF(250f, 40f) to populateNoiseControlWidget(
-                            R.layout.noise_control_widget_wide,
-                            isDarkTheme,
-                            opacity,
-                            NoiseControlWidget::class.java
-                        )
+                appWidgetManager.sizedRemoteViewsFor(this, appWidgetId, 250, 40) { dimensions ->
+                    populateNoiseControlWidget(
+                        R.layout.noise_control_widget_wide,
+                        isDarkTheme,
+                        opacity,
+                        NoiseControlWidget::class.java,
+                        dimensions
                     )
-                )
+                }
             )
         }
     }
@@ -2267,12 +2274,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             val opacity = WidgetThemePreferences.getOpacity(this, appWidgetId)
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                populateNoiseControlWidget(
-                    R.layout.noise_control_widget_grid,
-                    isDarkTheme,
-                    opacity,
-                    NoiseControlGridWidget::class.java
-                )
+                appWidgetManager.sizedRemoteViewsFor(this, appWidgetId, 110, 110) { dimensions ->
+                    populateNoiseControlWidget(
+                        R.layout.noise_control_widget_grid,
+                        isDarkTheme,
+                        opacity,
+                        NoiseControlGridWidget::class.java,
+                        dimensions
+                    )
+                }
             )
         }
     }
@@ -2281,7 +2291,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         @LayoutRes layoutId: Int,
         isDarkTheme: Boolean,
         opacity: Int,
-        providerClass: Class<out AppWidgetProvider>
+        providerClass: Class<out AppWidgetProvider>,
+        dimensions: WidgetDimensions
     ): RemoteViews {
         return RemoteViews(packageName, layoutId).also { it ->
             // With nothing connected there is no mode in effect, so leave every
@@ -2295,6 +2306,11 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 aacpManager.controlCommandStatusList.find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION }
             val allowOffMode =
                 allowOffModeValue?.value?.takeIf { it.isNotEmpty() }?.get(0) == 0x01.toByte() || sharedPreferences.getBoolean("off_listening_mode", true)
+            if (layoutId == R.layout.noise_control_widget_grid) {
+                it.applyNoiseGridItemSize(gridItemSize(dimensions))
+            } else {
+                it.applyWideNoiseContentSize(this, dimensions, allowOffMode)
+            }
             it.applyNoiseControlWidgetTheme(
                 this,
                 isDarkTheme,
@@ -2359,22 +2375,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             it.setViewVisibility(
                 R.id.widget_off_button, if (allowOffMode) View.VISIBLE else View.GONE
             )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                it.setViewLayoutMargin(
-                    R.id.widget_transparency_button,
-                    RemoteViews.MARGIN_START,
-                    if (allowOffMode) 2f else 12f,
-                    TypedValue.COMPLEX_UNIT_DIP
-                )
-            } else {
-                it.setViewPadding(
-                    R.id.widget_transparency_button,
-                    if (allowOffMode) 2.dpToPx() else 12.dpToPx(),
-                    12.dpToPx(),
-                    2.dpToPx(),
-                    12.dpToPx()
-                )
-            }
         }
     }
 

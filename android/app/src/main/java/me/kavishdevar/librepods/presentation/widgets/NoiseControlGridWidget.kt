@@ -46,13 +46,16 @@ class NoiseControlGridWidget : AppWidgetProvider() {
             val opacity = WidgetThemePreferences.getOpacity(context, appWidgetId)
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                populateNoiseControlWidgetFallback(
-                    context,
-                    R.layout.noise_control_widget_grid,
-                    isDarkTheme,
-                    opacity,
-                    NoiseControlGridWidget::class.java
-                )
+                appWidgetManager.sizedRemoteViewsFor(context, appWidgetId, 110, 110) { dimensions ->
+                    populateNoiseControlWidgetFallback(
+                        context,
+                        R.layout.noise_control_widget_grid,
+                        isDarkTheme,
+                        opacity,
+                        NoiseControlGridWidget::class.java,
+                        gridItemSize(dimensions)
+                    )
+                }
             )
         }
     }
@@ -60,5 +63,15 @@ class NoiseControlGridWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         handleNoiseControlWidgetIntent(context, intent, "NoiseControlGridWidget")
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
     }
 }

@@ -115,6 +115,7 @@ private val DARK_BUTTON_BACKGROUND = 0xFF2C2C2E.toInt()
 private val DARK_CHECKED_BUTTON_BACKGROUND = 0xFF90A8F6.toInt()
 private val LIGHT_BUTTON_BACKGROUND = 0xFFF2F2F7.toInt()
 private val LIGHT_CHECKED_BUTTON_BACKGROUND = 0xFF90A8F6.toInt()
+private val GRID_CHECKED_ICON_COLOR = 0xFF6DAEFA.toInt()
 private const val ONE_UI_HOME_PACKAGE = "com.sec.android.app.launcher"
 
 private fun argbWithOpacity(color: Int, opacity: Int): Int {
@@ -159,8 +160,13 @@ internal fun RemoteViews.applyBatteryWidgetTheme(
     if (isOneUiHomeActive(context)) {
         setInt(
             android.R.id.background,
-            "setBackgroundColor",
-            argbWithBlurOpacity(backgroundColor, opacity)
+            "setBackgroundResource",
+            if (isDarkTheme) R.drawable.widget_background else R.drawable.widget_background_light
+        )
+        setColorStateList(
+            android.R.id.background,
+            "setBackgroundTintList",
+            ColorStateList.valueOf(argbWithBlurOpacity(backgroundColor, opacity))
         )
         setInt(R.id.battery_widget_surface, "setBackgroundResource", 0)
     } else {
@@ -211,6 +217,8 @@ private data class NoiseControlWidgetThemeResources(
     val checkedButtonShapeStart: Int,
     val checkedButtonShapeMiddle: Int,
     val checkedButtonShapeEnd: Int,
+    val gridButtonShape: Int,
+    val checkedGridButtonShape: Int,
     val buttonColor: Int,
     val checkedButtonColor: Int
 )
@@ -224,35 +232,66 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
 ) {
     val primaryColor = if (isDarkTheme) Color.WHITE else Color.BLACK
     val backgroundColor = if (isDarkTheme) DARK_WIDGET_BACKGROUND else LIGHT_WIDGET_BACKGROUND
+    val isBlurred = isOneUiHomeActive(context)
     val resources = if (isDarkTheme) {
         NoiseControlWidgetThemeResources(
-            buttonShapeStart = R.drawable.widget_button_shape_start,
+            buttonShapeStart = if (isBlurred) {
+                R.drawable.widget_button_shape_start_blur
+            } else {
+                R.drawable.widget_button_shape_start
+            },
             buttonShapeMiddle = R.drawable.widget_button_shape_middle,
-            buttonShapeEnd = R.drawable.widget_button_shape_end,
+            buttonShapeEnd = if (isBlurred) {
+                R.drawable.widget_button_shape_end_blur
+            } else {
+                R.drawable.widget_button_shape_end
+            },
             checkedButtonShapeStart = R.drawable.widget_button_checked_shape_start,
             checkedButtonShapeMiddle = R.drawable.widget_button_checked_shape_middle,
             checkedButtonShapeEnd = R.drawable.widget_button_checked_shape_end,
+            gridButtonShape = R.drawable.widget_grid_button,
+            checkedGridButtonShape = R.drawable.widget_grid_button_checked,
             buttonColor = DARK_BUTTON_BACKGROUND,
             checkedButtonColor = DARK_CHECKED_BUTTON_BACKGROUND
         )
     } else {
         NoiseControlWidgetThemeResources(
-            buttonShapeStart = R.drawable.widget_button_shape_start_light,
+            buttonShapeStart = if (isBlurred) {
+                R.drawable.widget_button_shape_start_blur_light
+            } else {
+                R.drawable.widget_button_shape_start_light
+            },
             buttonShapeMiddle = R.drawable.widget_button_shape_middle_light,
-            buttonShapeEnd = R.drawable.widget_button_shape_end_light,
+            buttonShapeEnd = if (isBlurred) {
+                R.drawable.widget_button_shape_end_blur_light
+            } else {
+                R.drawable.widget_button_shape_end_light
+            },
             checkedButtonShapeStart = R.drawable.widget_button_checked_shape_start_light,
             checkedButtonShapeMiddle = R.drawable.widget_button_checked_shape_middle_light,
             checkedButtonShapeEnd = R.drawable.widget_button_checked_shape_end_light,
+            gridButtonShape = R.drawable.widget_grid_button_light,
+            checkedGridButtonShape = R.drawable.widget_grid_button_checked_light,
             buttonColor = LIGHT_BUTTON_BACKGROUND,
             checkedButtonColor = LIGHT_CHECKED_BUTTON_BACKGROUND
         )
     }
+    val isGrid = layoutId == R.layout.noise_control_widget_grid
 
-    if (isOneUiHomeActive(context)) {
+    if (isBlurred) {
         setInt(
             android.R.id.background,
-            "setBackgroundColor",
-            argbWithBlurOpacity(backgroundColor, opacity)
+            "setBackgroundResource",
+            if (isDarkTheme) {
+                R.drawable.noise_control_widget_background
+            } else {
+                R.drawable.noise_control_widget_background_light
+            }
+        )
+        setColorStateList(
+            android.R.id.background,
+            "setBackgroundTintList",
+            ColorStateList.valueOf(argbWithBlurOpacity(backgroundColor, opacity))
         )
         setInt(R.id.noise_control_widget, "setBackgroundResource", 0)
     } else {
@@ -286,7 +325,13 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
     val buttonThemes = arrayOf(
         Triple(
             R.id.widget_off_button,
-            if (selectedMode == 1) {
+            if (isGrid) {
+                if (selectedMode == 1) {
+                    resources.checkedGridButtonShape
+                } else {
+                    resources.gridButtonShape
+                }
+            } else if (selectedMode == 1) {
                 resources.checkedButtonShapeStart
             } else {
                 resources.buttonShapeStart
@@ -295,7 +340,13 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
         ),
         Triple(
             R.id.widget_transparency_button,
-            if (selectedMode == 3) {
+            if (isGrid) {
+                if (selectedMode == 3) {
+                    resources.checkedGridButtonShape
+                } else {
+                    resources.gridButtonShape
+                }
+            } else if (selectedMode == 3) {
                 if (allowOffMode) {
                     resources.checkedButtonShapeMiddle
                 } else {
@@ -308,7 +359,13 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
         ),
         Triple(
             R.id.widget_adaptive_button,
-            if (selectedMode == 4) {
+            if (isGrid) {
+                if (selectedMode == 4) {
+                    resources.checkedGridButtonShape
+                } else {
+                    resources.gridButtonShape
+                }
+            } else if (selectedMode == 4) {
                 resources.checkedButtonShapeMiddle
             } else {
                 resources.buttonShapeMiddle
@@ -317,7 +374,13 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
         ),
         Triple(
             R.id.widget_anc_button,
-            if (selectedMode == 2) {
+            if (isGrid) {
+                if (selectedMode == 2) {
+                    resources.checkedGridButtonShape
+                } else {
+                    resources.gridButtonShape
+                }
+            } else if (selectedMode == 2) {
                 resources.checkedButtonShapeEnd
             } else {
                 resources.buttonShapeEnd
@@ -325,25 +388,47 @@ internal fun RemoteViews.applyNoiseControlWidgetTheme(
             selectedMode == 2
         )
     )
-    buttonThemes.forEach { (viewId, _, checked) ->
-        // The shape comes from each layout - the wide row uses start/middle/end
-        // pills, the 2x2 uses quarters of a rounded square - and selection is
-        // now purely a tint, so the drawable is left as the layout declared it.
-        // The tiles sit on top of an already translucent container, so giving
-        // them the user's opacity too stacks two layers and makes this widget
-        // read as far more opaque than the battery one at the same setting.
-        // They get a thin fixed alpha instead, enough to segment the row.
-        // iOS fills only the selected segment; the rest carry no fill at all, so
-        // the widget composites to exactly the container's opacity the way the
-        // battery widget does instead of stacking a second layer on top.
-        setColorStateList(
-            viewId,
-            "setBackgroundTintList",
-            if (checked) {
-                ColorStateList.valueOf(resources.checkedButtonColor)
-            } else {
-                ColorStateList.valueOf(Color.TRANSPARENT)
+    val iconIds = intArrayOf(
+        R.id.widget_off_icon,
+        R.id.widget_transparency_icon,
+        R.id.widget_adaptive_icon,
+        R.id.widget_anc_icon
+    )
+    buttonThemes.forEachIndexed { index, (viewId, shape, checked) ->
+        if (isGrid) {
+            setInt(viewId, "setBackgroundResource", shape)
+            setInt(
+                iconIds[index],
+                "setColorFilter",
+                if (checked) GRID_CHECKED_ICON_COLOR else primaryColor
+            )
+        } else {
+            if (isBlurred) {
+                val buttonShape = when (index) {
+                    0 -> resources.buttonShapeStart
+                    1 -> if (allowOffMode) {
+                        resources.buttonShapeMiddle
+                    } else {
+                        resources.buttonShapeStart
+                    }
+                    3 -> resources.buttonShapeEnd
+                    else -> resources.buttonShapeMiddle
+                }
+                setInt(viewId, "setBackgroundResource", buttonShape)
             }
-        )
+            // Clear padding retained by a reused host view from older selectors.
+            // The responsive layout already accounts for all content spacing.
+            setViewPadding(viewId, 0, 0, 0, 0)
+            // Selection remains a tint so pressed-state selectors still work.
+            setColorStateList(
+                viewId,
+                "setBackgroundTintList",
+                if (checked) {
+                    ColorStateList.valueOf(resources.checkedButtonColor)
+                } else {
+                    ColorStateList.valueOf(Color.TRANSPARENT)
+                }
+            )
+        }
     }
 }

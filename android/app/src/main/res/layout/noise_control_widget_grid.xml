@@ -4,43 +4,47 @@
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="6dp"
     android:background="@android:color/transparent"
-    android:padding="0dp"
     android:theme="@style/Theme.LibrePods.AppWidgetContainer"
-    tools:ignore="ContentDescription,NestedWeights">
+    tools:ignore="ContentDescription,NestedWeights,UseAppTint">
 
     <LinearLayout
         android:id="@+id/noise_control_widget"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@drawable/noise_control_widget_background"
-        android:padding="6dp"
         android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <LinearLayout
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+            <FrameLayout
                 android:id="@+id/widget_off_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/widget_grid_button_tl"
-                android:clickable="true"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:background="@drawable/widget_grid_button"
+                android:clickable="true">
 
                 <ImageView
                     android:id="@+id/widget_off_icon"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/noise_control_off"
                     android:tint="@color/white" />
 
@@ -48,32 +52,27 @@
                     android:id="@+id/widget_off_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="6dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:text="@string/off"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                android:visibility="gone" />
-            </LinearLayout>
+                    android:visibility="gone" />
+            </FrameLayout>
 
-            <LinearLayout
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+            <FrameLayout
                 android:id="@+id/widget_transparency_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/widget_grid_button_tr"
-                android:clickable="true"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:background="@drawable/widget_grid_button"
+                android:clickable="true">
 
                 <ImageView
                     android:id="@+id/widget_transparency_icon"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/transparency"
                     android:tint="@color/white" />
 
@@ -81,40 +80,46 @@
                     android:id="@+id/widget_transparency_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="6dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:text="@string/transparency"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                android:visibility="gone" />
-            </LinearLayout>
+                    android:visibility="gone" />
+            </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <LinearLayout
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+            <FrameLayout
                 android:id="@+id/widget_adaptive_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/widget_grid_button_bl"
-                android:clickable="true"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:background="@drawable/widget_grid_button"
+                android:clickable="true">
 
                 <ImageView
                     android:id="@+id/widget_adaptive_icon"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/adaptive"
                     android:tint="@color/white" />
 
@@ -122,32 +127,27 @@
                     android:id="@+id/widget_adaptive_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="6dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:text="@string/adaptive"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                android:visibility="gone" />
-            </LinearLayout>
+                    android:visibility="gone" />
+            </FrameLayout>
 
-            <LinearLayout
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+            <FrameLayout
                 android:id="@+id/widget_anc_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/widget_grid_button_br"
-                android:clickable="true"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:background="@drawable/widget_grid_button"
+                android:clickable="true">
 
                 <ImageView
                     android:id="@+id/widget_anc_icon"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/noise_cancellation"
                     android:tint="@color/white" />
 
@@ -155,16 +155,20 @@
                     android:id="@+id/widget_anc_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="6dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:text="@string/noise_cancellation"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                android:visibility="gone" />
-            </LinearLayout>
+                    android:visibility="gone" />
+            </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
     </LinearLayout>
 </RelativeLayout>

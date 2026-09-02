@@ -4,39 +4,39 @@
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="0dp"
     android:background="@android:color/transparent"
-    android:padding="0dp"
-    android:theme="@style/Theme.LibrePods.AppWidgetContainer">
+    android:theme="@style/Theme.LibrePods.AppWidgetContainer"
+    tools:ignore="ContentDescription,NestedWeights,UseAppTint">
 
     <LinearLayout
         android:id="@+id/battery_widget_surface"
-        android:layout_width="450dp"
-        android:layout_height="180dp"
-        android:layout_centerInParent="true"
-        android:layout_margin="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@drawable/widget_background"
         android:baselineAligned="false"
         android:clipChildren="false"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
 
         <LinearLayout
             android:id="@+id/phone_battery_widget_container"
-            android:layout_width="0dp"
+            android:layout_width="66dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:clipChildren="false"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
-                android:layout_gravity="center"
+                android:id="@+id/phone_battery_ring_container"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
                 android:clipChildren="false">
 
                 <ImageView
@@ -47,63 +47,66 @@
 
                 <ImageView
                     android:id="@+id/phone_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="17dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/phone_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="11dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/phone_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="27dp"
+                    android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/smartphone"
-                    android:tint="@color/white"
-                    tools:ignore="HardcodedText" />
+                    android:tint="@color/white" />
             </FrameLayout>
 
             <TextView
                 android:id="@+id/phone_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
-                android:text="Phone"
+                android:text="97%"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="1dp"
             android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+        <LinearLayout
+            android:id="@+id/left_battery_widget_container"
+            android:layout_width="66dp"
+            android:layout_height="wrap_content"
             android:clipChildren="false"
             android:gravity="center"
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
-                android:layout_gravity="center"
+                android:id="@+id/left_battery_ring_container"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
                 android:clipChildren="false">
 
                 <ImageView
@@ -114,63 +117,66 @@
 
                 <ImageView
                     android:id="@+id/left_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="17dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/left_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="11dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/left_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="27dp"
+                    android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_left_notification"
-                    android:tint="@color/white"
-                    tools:ignore="HardcodedText" />
+                    android:tint="@color/white" />
             </FrameLayout>
 
             <TextView
                 android:id="@+id/left_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
-                android:text="Left"
+                android:text="100%"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="1dp"
             android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+        <LinearLayout
+            android:id="@+id/right_battery_widget_container"
+            android:layout_width="66dp"
+            android:layout_height="wrap_content"
             android:clipChildren="false"
             android:gravity="center"
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
-                android:layout_gravity="center"
+                android:id="@+id/right_battery_ring_container"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
                 android:clipChildren="false">
 
                 <ImageView
@@ -181,63 +187,66 @@
 
                 <ImageView
                     android:id="@+id/right_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="17dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/right_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="11dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/right_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="27dp"
+                    android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_right_notification"
-                    android:tint="@color/white"
-                    tools:ignore="HardcodedText" />
+                    android:tint="@color/white" />
             </FrameLayout>
 
             <TextView
                 android:id="@+id/right_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
-                android:text="Right"
+                android:text="100%"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="1dp"
             android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
+
+        <LinearLayout
+            android:id="@+id/case_battery_widget_container"
+            android:layout_width="66dp"
+            android:layout_height="wrap_content"
             android:clipChildren="false"
             android:gravity="center"
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="78dp"
-                android:layout_height="78dp"
-                android:layout_gravity="center"
+                android:id="@+id/case_battery_ring_container"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
                 android:clipChildren="false">
 
                 <ImageView
@@ -248,49 +257,52 @@
 
                 <ImageView
                     android:id="@+id/case_charging_icon_outline"
-                    android:layout_width="15dp"
-                    android:layout_height="25dp"
+                    android:layout_width="10dp"
+                    android:layout_height="17dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/case_charging_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="21dp"
+                    android:layout_width="11dp"
+                    android:layout_height="18dp"
                     android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="-6dp"
+                    android:layout_marginTop="-5dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_power"
-                    android:visibility="gone"
-                    tools:ignore="HardcodedText" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/case_battery_icon"
-                    android:layout_width="33dp"
-                    android:layout_height="33dp"
+                    android:layout_width="27dp"
+                    android:layout_height="27dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_case_notification"
-                    android:tint="@color/white"
-                    tools:ignore="HardcodedText" />
+                    android:tint="@color/white" />
             </FrameLayout>
 
             <TextView
                 android:id="@+id/case_battery_widget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/pretendard"
                 android:gravity="center"
-                android:text="Case"
+                android:text="84%"
                 android:textColor="@color/white"
                 android:textFontWeight="300"
-                android:textSize="26sp"
+                android:textSize="20sp"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            tools:ignore="UselessLeaf" />
     </LinearLayout>
 </RelativeLayout>

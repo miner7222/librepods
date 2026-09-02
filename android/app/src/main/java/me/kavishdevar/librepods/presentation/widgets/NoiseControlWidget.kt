@@ -26,7 +26,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.util.SizeF
 import android.widget.RemoteViews
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
@@ -54,24 +53,15 @@ class NoiseControlWidget : AppWidgetProvider() {
             val opacity = WidgetThemePreferences.getOpacity(context, appWidgetId)
             appWidgetManager.updateAppWidget(
                 appWidgetId,
-                RemoteViews(
-                    mapOf(
-                        SizeF(180f, 40f) to populateNoiseControlWidgetFallback(
-                            context,
-                            R.layout.noise_control_widget,
-                            isDarkTheme,
-                            opacity,
-                            NoiseControlWidget::class.java
-                        ),
-                        SizeF(250f, 40f) to populateNoiseControlWidgetFallback(
-                            context,
-                            R.layout.noise_control_widget_wide,
-                            isDarkTheme,
-                            opacity,
-                            NoiseControlWidget::class.java
-                        )
-                    )
-                )
+                appWidgetManager.sizedRemoteViewsFor(context, appWidgetId, 250, 40) { dimensions ->
+                    populateNoiseControlWidgetFallback(
+                        context,
+                        R.layout.noise_control_widget_wide,
+                        isDarkTheme,
+                        opacity,
+                        NoiseControlWidget::class.java
+                    ).also { it.applyWideNoiseContentSize(context, dimensions) }
+                }
             )
         }
     }
@@ -80,6 +70,16 @@ class NoiseControlWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
         handleNoiseControlWidgetIntent(context, intent, "NoiseControlWidget")
     }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
+    }
 }
 
 internal fun populateNoiseControlWidgetFallback(
@@ -87,9 +87,11 @@ internal fun populateNoiseControlWidgetFallback(
     layoutId: Int,
     isDarkTheme: Boolean,
     opacity: Int,
-    providerClass: Class<out AppWidgetProvider>
+    providerClass: Class<out AppWidgetProvider>,
+    gridItemSizeDp: Int? = null
 ): RemoteViews {
     return RemoteViews(context.packageName, layoutId).also { views ->
+        gridItemSizeDp?.let(views::applyNoiseGridItemSize)
         views.applyNoiseControlWidgetTheme(context, isDarkTheme, opacity)
         intArrayOf(1, 3, 4, 2).zip(
             intArrayOf(

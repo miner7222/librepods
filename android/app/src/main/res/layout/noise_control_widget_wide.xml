@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:theme="@style/Theme.LibrePods.AppWidgetContainer"
-    tools:ignore="ContentDescription,NestedWeights">
+    tools:ignore="ContentDescription,NestedWeights,UseAppTint">
 
     <LinearLayout
         android:id="@+id/noise_control_widget"
@@ -14,15 +14,14 @@
         android:layout_height="match_parent"
         android:background="@drawable/noise_control_widget_background"
         android:baselineAligned="false"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="4dp">
 
         <LinearLayout
             android:id="@+id/widget_off_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginVertical="8dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="2dp"
+            android:layout_margin="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_button_shape_start"
             android:clickable="true"
@@ -31,31 +30,31 @@
 
             <ImageView
                 android:id="@+id/widget_off_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:src="@drawable/noise_control_off"
                 android:tint="@color/white" />
 
             <TextView
                 android:id="@+id/widget_off_label"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
+                android:includeFontPadding="false"
                 android:gravity="center"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:text="@string/off"
                 android:textColor="@color/white"
-                android:textSize="14sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/widget_transparency_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginVertical="8dp"
-            android:layout_marginEnd="2dp"
+            android:layout_margin="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_button_shape_middle"
             android:clickable="true"
@@ -64,23 +63,24 @@
 
             <ImageView
                 android:id="@+id/widget_transparency_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:src="@drawable/transparency"
                 android:tint="@color/white" />
 
             <TextView
                 android:id="@+id/widget_transparency_label"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
+                android:includeFontPadding="false"
                 android:gravity="center"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:text="@string/transparency"
                 android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 tools:ignore="NestedWeights" />
         </LinearLayout>
 
@@ -88,9 +88,7 @@
             android:id="@+id/widget_adaptive_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginVertical="8dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
+            android:layout_margin="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_button_shape_middle"
             android:clickable="true"
@@ -99,23 +97,24 @@
 
             <ImageView
                 android:id="@+id/widget_adaptive_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:src="@drawable/adaptive"
                 android:tint="@color/white" />
 
             <TextView
                 android:id="@+id/widget_adaptive_label"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
+                android:includeFontPadding="false"
                 android:gravity="center"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:text="@string/adaptive"
                 android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 tools:ignore="NestedWeights" />
         </LinearLayout>
 
@@ -123,9 +122,7 @@
             android:id="@+id/widget_anc_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginVertical="8dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="12dp"
+            android:layout_margin="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_button_shape_end"
             android:clickable="true"
@@ -134,23 +131,24 @@
 
             <ImageView
                 android:id="@+id/widget_anc_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:src="@drawable/noise_cancellation"
                 android:tint="@color/white" />
 
             <TextView
                 android:id="@+id/widget_anc_label"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
+                android:includeFontPadding="false"
                 android:gravity="center"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:text="@string/noise_cancellation"
                 android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 tools:ignore="NestedWeights" />
         </LinearLayout>
     </LinearLayout>
