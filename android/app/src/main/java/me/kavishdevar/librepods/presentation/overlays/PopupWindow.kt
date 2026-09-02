@@ -59,6 +59,7 @@ import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.data.FallbackArtwork
 import me.kavishdevar.librepods.data.OverlayRingLayout
+import me.kavishdevar.librepods.data.unifiedBudBattery
 import me.kavishdevar.librepods.presentation.widgets.BatteryRing
 
 // 93% of a turn leaves about 25 degrees open just before twelve o'clock,
@@ -278,22 +279,7 @@ class PopupWindow(
         val left = batteryList.find { it.component == BatteryComponent.LEFT }
         val right = batteryList.find { it.component == BatteryComponent.RIGHT }
         val case = batteryList.find { it.component == BatteryComponent.CASE }
-        val combinedBuds = if (
-            left != null &&
-            right != null &&
-            left.status != BatteryStatus.DISCONNECTED &&
-            right.status != BatteryStatus.DISCONNECTED &&
-            left.status == right.status &&
-            (left.level - right.level) in -3..3
-        ) {
-            Battery(
-                BatteryComponent.LEFT,
-                left.level.coerceAtMost(right.level),
-                left.status
-            )
-        } else {
-            null
-        }
+        val combinedBuds = unifiedBudBattery(batteryList)
         val showCombinedBuds = combinedBuds != null
 
         val badgeVisibility = if (showCombinedBuds) View.GONE else View.VISIBLE

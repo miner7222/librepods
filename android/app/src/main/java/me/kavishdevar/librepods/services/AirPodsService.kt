@@ -110,6 +110,8 @@ import me.kavishdevar.librepods.presentation.overlays.PopupWindow
 import me.kavishdevar.librepods.presentation.widgets.BatteryGridWidget
 import me.kavishdevar.librepods.presentation.widgets.BatteryRing
 import me.kavishdevar.librepods.presentation.widgets.BatteryWidget
+import me.kavishdevar.librepods.presentation.widgets.BatteryWidgetDevice
+import me.kavishdevar.librepods.presentation.widgets.BatteryWidgetSlot
 import me.kavishdevar.librepods.presentation.widgets.NoiseControlGridWidget
 import me.kavishdevar.librepods.presentation.widgets.NoiseControlWidget
 import me.kavishdevar.librepods.presentation.widgets.WidgetDimensions
@@ -120,6 +122,7 @@ import me.kavishdevar.librepods.presentation.widgets.applyNoiseGridItemSize
 import me.kavishdevar.librepods.presentation.widgets.applyNoiseControlWidgetTheme
 import me.kavishdevar.librepods.presentation.widgets.applyWideBatteryRingSize
 import me.kavishdevar.librepods.presentation.widgets.applyWideNoiseContentSize
+import me.kavishdevar.librepods.presentation.widgets.batteryWidgetSlots
 import me.kavishdevar.librepods.presentation.widgets.sizedRemoteViewsFor
 import me.kavishdevar.librepods.presentation.widgets.gridItemSize
 import me.kavishdevar.librepods.presentation.widgets.wideBatteryRingSize
@@ -164,6 +167,67 @@ private const val NO_LISTENING_MODE = 0
 
 private val BATTERY_RING_TRACK = 0x40808080
 private val BATTERY_PROGRESS_GREEN = 0xFF67CE68.toInt()
+
+private data class BatteryWidgetViewIds(
+    val container: Int,
+    val ring: Int,
+    val icon: Int,
+    val label: Int,
+    val chargingIcon: Int,
+    val chargingOutline: Int
+)
+
+private val PHONE_BATTERY_WIDGET_VIEWS = BatteryWidgetViewIds(
+    R.id.phone_battery_widget_container,
+    R.id.phone_battery_ring,
+    R.id.phone_battery_icon,
+    R.id.phone_battery_widget,
+    R.id.phone_charging_icon,
+    R.id.phone_charging_icon_outline
+)
+
+private val LEFT_BATTERY_WIDGET_VIEWS = BatteryWidgetViewIds(
+    R.id.left_battery_widget_container,
+    R.id.left_battery_ring,
+    R.id.left_battery_icon,
+    R.id.left_battery_widget,
+    R.id.left_charging_icon,
+    R.id.left_charging_icon_outline
+)
+
+private val RIGHT_BATTERY_WIDGET_VIEWS = BatteryWidgetViewIds(
+    R.id.right_battery_widget_container,
+    R.id.right_battery_ring,
+    R.id.right_battery_icon,
+    R.id.right_battery_widget,
+    R.id.right_charging_icon,
+    R.id.right_charging_icon_outline
+)
+
+private val CASE_BATTERY_WIDGET_VIEWS = BatteryWidgetViewIds(
+    R.id.case_battery_widget_container,
+    R.id.case_battery_ring,
+    R.id.case_battery_icon,
+    R.id.case_battery_widget,
+    R.id.case_charging_icon,
+    R.id.case_charging_icon_outline
+)
+
+private val WIDE_BATTERY_WIDGET_VIEWS = listOf(
+    PHONE_BATTERY_WIDGET_VIEWS,
+    LEFT_BATTERY_WIDGET_VIEWS,
+    RIGHT_BATTERY_WIDGET_VIEWS,
+    CASE_BATTERY_WIDGET_VIEWS
+)
+
+// The 2x2 XML is laid out in this row-major order even though its historical
+// IDs describe the values that used to occupy each fixed position.
+private val GRID_BATTERY_WIDGET_VIEWS = listOf(
+    LEFT_BATTERY_WIDGET_VIEWS,
+    RIGHT_BATTERY_WIDGET_VIEWS,
+    CASE_BATTERY_WIDGET_VIEWS,
+    PHONE_BATTERY_WIDGET_VIEWS
+)
 
 object ServiceManager {
     private var service: AirPodsService? = null
@@ -1565,8 +1629,27 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         batteryNotification.markAllDisconnected()
         applyRememberedBattery()
         updateBatteryWidget()
+        updateBatteryGridWidget()
         updateNoiseControlWidget()
+        updateNoiseControlGridWidget()
         sendBatteryBroadcast()
+    }
+
+    /**
+     * What the battery widgets may show. BLE keeps reporting levels after the
+     * socket drops, so the widget emptied on disconnect and then filled straight
+     * back in on the next advertisement. Its toggle asks for no battery while
+     * disconnected, and which radio the number arrived on is not a distinction the
+     * user drew. Only the widgets are filtered - the connect popup and the ongoing
+     * notification still want whatever is known.
+     */
+    private fun batteryForWidget(): List<Battery> {
+        val batteries = batteryNotification.getBattery()
+        val live = BluetoothConnectionManager.aacpSocket?.isConnected == true
+        if (live || config.bleOnlyMode || config.rememberBatteryWhenDisconnected) {
+            return batteries
+        }
+        return batteries.map { Battery(it.component, 0, BatteryStatus.DISCONNECTED) }
     }
 
     private fun applyRememberedBattery() {
@@ -2121,36 +2204,47 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             fun setChargingBolt(
                 chargingIconId: Int,
                 chargingOutlineId: Int,
+                batteryIconId: Int,
+                batteryLabelId: Int,
                 level: Int?,
                 isCharging: Boolean,
-                ringId: Int
+                ringId: Int,
+                hasValue: Boolean
             ) {
+                val charging = hasValue && isCharging
                 it.setImageViewBitmap(
                     ringId,
                     BatteryRing.bitmap(
                         this,
                         ringDp,
-                        level ?: 0,
+                        if (hasValue) level ?: 0 else 0,
                         BATTERY_RING_TRACK,
                         BATTERY_PROGRESS_GREEN
                     )
                 )
-                val visibility = if (isCharging) View.VISIBLE else View.GONE
-                it.setViewVisibility(chargingIconId, visibility)
-                // The gap in the ring replaces the outline that used to separate
-                // the bolt from the stroke.
-                it.setViewVisibility(chargingOutlineId, View.GONE)
-                it.setInt(
+                it.setViewVisibility(
                     chargingIconId,
-                    "setColorFilter",
-                    if (level == 100) {
-                        BATTERY_PROGRESS_GREEN
-                    } else if (isDarkTheme) {
-                        Color.WHITE
+                    if (charging) View.VISIBLE else View.GONE
+                )
+                it.setViewVisibility(chargingOutlineId, View.GONE)
+                it.setViewVisibility(
+                    batteryIconId,
+                    if (hasValue) View.VISIBLE else View.GONE
+                )
+                it.setViewVisibility(
+                    batteryLabelId,
+                    if (layoutId == R.layout.battery_widget) {
+                        // Keep the label's space when there is nothing to put
+                        // in it, or the ring drops below the row.
+                        if (hasValue) View.VISIBLE else View.INVISIBLE
                     } else {
-                        Color.BLACK
+                        View.GONE
                     }
                 )
+                // White in every theme: the bolt sits on the ring, not on the
+                // plate, so it needs to read against the stroke rather than
+                // against the background behind it.
+                it.setInt(chargingIconId, "setColorFilter", Color.WHITE)
             }
 
             val openActivityIntent = PendingIntent.getActivity(
@@ -2161,54 +2255,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             )
             it.setOnClickPendingIntent(android.R.id.background, openActivityIntent)
 
-            val leftBattery =
-                batteryNotification.getBattery().find { it.component == BatteryComponent.LEFT }
-            val rightBattery =
-                batteryNotification.getBattery().find { it.component == BatteryComponent.RIGHT }
-            val caseBattery =
-                batteryNotification.getBattery().find { it.component == BatteryComponent.CASE }
-
-            it.setTextViewText(R.id.left_battery_widget, leftBattery?.let {
-                "${it.level}%"
-            } ?: "")
-            setChargingBolt(
-                R.id.left_charging_icon,
-                R.id.left_charging_icon_outline,
-                leftBattery?.level,
-                leftBattery?.status == BatteryStatus.CHARGING ||
-                    leftBattery?.status == BatteryStatus.OPTIMIZED_CHARGING,
-                R.id.left_battery_ring
-            )
-
-            it.setTextViewText(R.id.right_battery_widget, rightBattery?.let {
-                "${it.level}%"
-            } ?: "")
-            setChargingBolt(
-                R.id.right_charging_icon,
-                R.id.right_charging_icon_outline,
-                rightBattery?.level,
-                rightBattery?.status == BatteryStatus.CHARGING ||
-                    rightBattery?.status == BatteryStatus.OPTIMIZED_CHARGING,
-                R.id.right_battery_ring
-            )
-
-            it.setTextViewText(R.id.case_battery_widget, caseBattery?.let {
-                "${it.level}%"
-            } ?: "")
-            setChargingBolt(
-                R.id.case_charging_icon,
-                R.id.case_charging_icon_outline,
-                caseBattery?.level,
-                caseBattery?.status == BatteryStatus.CHARGING ||
-                    caseBattery?.status == BatteryStatus.OPTIMIZED_CHARGING,
-                R.id.case_battery_ring
-            )
-
-            it.setViewVisibility(
-                R.id.phone_battery_widget_container,
-                if (showPhoneBattery) View.VISIBLE else View.GONE
-            )
-            if (showPhoneBattery) {
+            val phoneBattery = if (showPhoneBattery) {
                 val batteryManager = getSystemService(BatteryManager::class.java)
                 val batteryLevel =
                     batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
@@ -2219,15 +2266,55 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     null,
                     IntentFilter(Intent.ACTION_BATTERY_CHANGED)
                 )?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0
-                it.setTextViewText(
-                    R.id.phone_battery_widget, "$batteryLevel%"
+                BatteryWidgetSlot(
+                    device = BatteryWidgetDevice.PHONE,
+                    level = batteryLevel,
+                    status = if (charging != 0) {
+                        BatteryStatus.CHARGING
+                    } else {
+                        BatteryStatus.NOT_CHARGING
+                    }
                 )
+            } else {
+                null
+            }
+            val slots = batteryWidgetSlots(
+                batteryForWidget(),
+                phoneBattery
+            )
+            val slotViews = if (layoutId == R.layout.battery_widget_grid) {
+                GRID_BATTERY_WIDGET_VIEWS
+            } else {
+                WIDE_BATTERY_WIDGET_VIEWS
+            }
+            // A late packet can land after the socket is gone and leave a
+            // stale charging flag behind, so only the phone may show charging
+            // without a live AirPods connection.
+            val connected = BluetoothConnectionManager.aacpSocket?.isConnected == true
+
+            slots.zip(slotViews).forEach { (slot, views) ->
+                it.setViewVisibility(views.container, View.VISIBLE)
+                it.setImageViewResource(
+                    views.icon,
+                    when (slot.device) {
+                        BatteryWidgetDevice.PHONE -> R.drawable.smartphone
+                        BatteryWidgetDevice.BUDS -> R.drawable.airpods
+                        BatteryWidgetDevice.LEFT_BUD -> R.drawable.airpods_pro_left_notification
+                        BatteryWidgetDevice.RIGHT_BUD -> R.drawable.airpods_pro_right_notification
+                        BatteryWidgetDevice.CASE -> R.drawable.airpods_pro_case_notification
+                        BatteryWidgetDevice.EMPTY -> R.drawable.airpods
+                    }
+                )
+                it.setTextViewText(views.label, slot.level?.let { level -> "$level%" } ?: "")
                 setChargingBolt(
-                    R.id.phone_charging_icon,
-                    R.id.phone_charging_icon_outline,
-                    batteryLevel,
-                    charging != 0,
-                    R.id.phone_battery_ring
+                    views.chargingIcon,
+                    views.chargingOutline,
+                    views.icon,
+                    views.label,
+                    slot.level,
+                    slot.isCharging && (slot.device == BatteryWidgetDevice.PHONE || connected),
+                    views.ring,
+                    slot.hasValue
                 )
             }
         }

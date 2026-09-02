@@ -52,6 +52,24 @@ fun batteryStatusForDisconnectedRestore(status: Int): Int {
     }
 }
 
+fun unifiedBudBattery(batteries: List<Battery>): Battery? {
+    val left = batteries.find { it.component == BatteryComponent.LEFT } ?: return null
+    val right = batteries.find { it.component == BatteryComponent.RIGHT } ?: return null
+    if (
+        left.status == BatteryStatus.DISCONNECTED ||
+        right.status == BatteryStatus.DISCONNECTED ||
+        left.status != right.status ||
+        (left.level - right.level) !in -3..3
+    ) {
+        return null
+    }
+    return Battery(
+        component = BatteryComponent.LEFT,
+        level = left.level.coerceAtMost(right.level),
+        status = left.status
+    )
+}
+
 @Parcelize
 data class Battery(val component: Int, val level: Int, val status: Int) : Parcelable {
     fun getComponentName(): String? {
