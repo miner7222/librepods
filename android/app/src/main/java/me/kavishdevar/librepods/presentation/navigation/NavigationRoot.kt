@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +52,12 @@ fun NavigationRoot(
     var isContentScrolled by remember(currentScreen) { mutableStateOf(false) }
 
     val state by airPodsViewModel.uiState.collectAsState()
+
+    LaunchedEffect(state.isLocallyConnected) {
+        if (!state.isLocallyConnected) {
+            backStack.removeAll { it.requiresConnectedAirPods }
+        }
+    }
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 
