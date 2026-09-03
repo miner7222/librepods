@@ -74,7 +74,6 @@ import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
 
-private var phoneMediaDebounceJob: Job? = null
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalEncodingApi::class, FlowPreview::class)
@@ -181,31 +180,6 @@ fun AccessibilitySettingsScreen(
                 volumeSwipeSpeedOptions[selectedVolumeSwipeSpeedValue]
                     ?: volumeSwipeSpeedOptions[1]
             )
-        }
-
-        val phoneMediaEQ = remember { mutableStateOf(FloatArray(8) { 0.5f }) }
-        val phoneEQEnabled = remember { mutableStateOf(false) }
-        val mediaEQEnabled = remember { mutableStateOf(false) }
-
-        LaunchedEffect(phoneMediaEQ.value, phoneEQEnabled.value, mediaEQEnabled.value) {
-            phoneMediaDebounceJob?.cancel()
-            phoneMediaDebounceJob = CoroutineScope(Dispatchers.IO).launch {
-                delay(150.milliseconds)
-                try {
-                    val phoneByte = if (phoneEQEnabled.value) 0x01.toByte() else 0x02.toByte()
-                    val mediaByte = if (mediaEQEnabled.value) 0x01.toByte() else 0x02.toByte()
-                    Log.d(
-                        "AccessibilitySettingsScreen",
-                        "Sending phone/media EQ (phoneEnabled=${phoneEQEnabled.value}, mediaEnabled=${mediaEQEnabled.value})"
-                    )
-                    viewModel.sendPhoneMediaEQ(phoneMediaEQ.value, phoneByte, mediaByte)
-                } catch (e: Exception) {
-                    Log.w(
-                        "AccessibilitySettingsScreen",
-                        "Error sending phone/media EQ: ${e.message}"
-                    )
-                }
-            }
         }
 
         if (state.capabilities.contains(Capability.PRESS_CONFIG)) {
