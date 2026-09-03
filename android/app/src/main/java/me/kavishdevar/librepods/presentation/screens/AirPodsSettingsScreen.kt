@@ -490,7 +490,7 @@ fun AirPodsSettingsScreen(
                     val loudSoundReductionCapability =
                         model.capabilities.contains(Capability.LOUD_SOUND_REDUCTION)
                     val adaptiveAudioCapability =
-                        model.capabilities.contains(Capability.ADAPTIVE_VOLUME)
+                        model.capabilities.contains(Capability.ADAPTIVE_AUDIO)
 
                     val adaptiveVolumeChecked =
                         state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ADAPTIVE_VOLUME_CONFIG]?.getOrNull(
@@ -590,14 +590,16 @@ fun AirPodsSettingsScreen(
                     }
                 }
 
-                item(key = "spacer_dynamic_end_of_charge") { Spacer(modifier = Modifier.height(16.dp)) }
-                item(key = "dynamic_end_of_charge") {
-                    StyledToggle(
-                        label = stringResource(R.string.optimized_charging),
-                        description = stringResource(R.string.optimized_charging_description),
-                        checked = state.dynamicEndOfCharge,
-                        onCheckedChange = setDynamicEndOfCharge
-                    )
+                if (capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
+                    item(key = "spacer_dynamic_end_of_charge") { Spacer(modifier = Modifier.height(16.dp)) }
+                    item(key = "dynamic_end_of_charge") {
+                        StyledToggle(
+                            label = stringResource(R.string.optimized_charging),
+                            description = stringResource(R.string.optimized_charging_description),
+                            checked = state.dynamicEndOfCharge,
+                            onCheckedChange = setDynamicEndOfCharge
+                        )
+                    }
                 }
 
                 item(key = "spacer_accessibility") { Spacer(modifier = Modifier.height(16.dp)) }
@@ -643,19 +645,21 @@ fun AirPodsSettingsScreen(
                     }
                 }
 
-                item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(16.dp)) }
-                item(key = "battery_settings") {
-                    StyledList {
-                        StyledListItem(
-                            name = stringResource(R.string.battery),
-                            onClick = navigateToBattery,
-                            leadingContent = {
-                                AppleSettingsIconTile(
-                                    drawableRes = R.drawable.sf_battery_100percent,
-                                    containerColor = AppleDesignMetrics.batteryIconTileColor
-                                )
-                            }
-                        )
+                if (capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
+                    item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(16.dp)) }
+                    item(key = "battery_settings") {
+                        StyledList {
+                            StyledListItem(
+                                name = stringResource(R.string.battery),
+                                onClick = navigateToBattery,
+                                leadingContent = {
+                                    AppleSettingsIconTile(
+                                        drawableRes = R.drawable.sf_battery_100percent,
+                                        containerColor = AppleDesignMetrics.batteryIconTileColor
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }

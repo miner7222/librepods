@@ -89,7 +89,9 @@ enum class Capability {
     ADAPTIVE_AUDIO,
     ADAPTIVE_VOLUME,
     SWIPE_FOR_VOLUME,
-    HRM
+    HRM,
+    PRESS_CONFIG,
+    OPTIMIZED_CHARGE_LIMIT
 }
 
 class AirPods: AirPodsBase(
@@ -131,7 +133,8 @@ class AirPods3: AirPodsBase(
     connectedVideoRes = FallbackArtwork.Standard.connected,
     islandVideoRes = FallbackArtwork.Standard.island,
     capabilities = setOf(
-        Capability.HEAD_GESTURES
+        Capability.HEAD_GESTURES,
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -148,7 +151,8 @@ class AirPods4: AirPodsBase(
     capabilities = setOf(
         Capability.HEAD_GESTURES,
         Capability.SLEEP_DETECTION,
-        Capability.ADAPTIVE_VOLUME
+        Capability.ADAPTIVE_VOLUME,
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -169,7 +173,8 @@ class AirPods4ANC: AirPodsBase(
         Capability.ADAPTIVE_AUDIO,
         Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME,
-        Capability.STEM_CONFIG
+        Capability.STEM_CONFIG,
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -185,7 +190,8 @@ class AirPodsPro1: AirPodsBase(
     connectedVideoRes = FallbackArtwork.Pro.connected,
     islandVideoRes = FallbackArtwork.Pro.island,
     capabilities = setOf(
-        Capability.LISTENING_MODE
+        Capability.LISTENING_MODE,
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -215,7 +221,8 @@ class AirPodsPro2Lightning: AirPodsBase(
         Capability.ADAPTIVE_AUDIO,
         Capability.ADAPTIVE_VOLUME,
         Capability.SWIPE_FOR_VOLUME,
-        Capability.HEAD_GESTURES
+        Capability.HEAD_GESTURES,
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -245,7 +252,8 @@ class AirPodsPro2USBC: AirPodsBase(
         Capability.ADAPTIVE_AUDIO,
         Capability.ADAPTIVE_VOLUME,
         Capability.SWIPE_FOR_VOLUME,
-        Capability.HEAD_GESTURES
+        Capability.HEAD_GESTURES,
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -273,7 +281,9 @@ class AirPodsPro3: AirPodsBase(
         Capability.ADAPTIVE_AUDIO,
         Capability.ADAPTIVE_VOLUME,
         Capability.SWIPE_FOR_VOLUME,
-        Capability.HRM
+        Capability.HRM,
+        Capability.PRESS_CONFIG,
+        Capability.OPTIMIZED_CHARGE_LIMIT
     )
 )
 

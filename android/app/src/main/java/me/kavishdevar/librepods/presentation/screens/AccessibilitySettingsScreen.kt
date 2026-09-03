@@ -208,43 +208,47 @@ fun AccessibilitySettingsScreen(
             }
         }
 
-        StyledList(
-            title = stringResource(R.string.press_speed),
-            description = stringResource(R.string.press_speed_description)
-        ) {
-            pressSpeedOptions.forEach { (value, label) ->
-                StyledListItem(
-                    name = label,
-                    selected = selectedPressSpeed == label,
-                    onClick = {
-                        selectedPressSpeed = label
+        if (state.capabilities.contains(Capability.PRESS_CONFIG)) {
+            StyledList(
+                title = stringResource(R.string.press_speed),
+                description = stringResource(R.string.press_speed_description)
+            ) {
+                pressSpeedOptions.forEach { (value, label) ->
+                    StyledListItem(
+                        name = label,
+                        selected = selectedPressSpeed == label,
+                        onClick = {
+                            selectedPressSpeed = label
 
-                        viewModel.setControlCommandByte(
-                            identifier = AACPManager.Companion.ControlCommandIdentifiers.DOUBLE_CLICK_INTERVAL,
-                            value = value
-                        )
-                    }
-                )
+                            viewModel.setControlCommandByte(
+                                identifier = AACPManager.Companion.ControlCommandIdentifiers.DOUBLE_CLICK_INTERVAL,
+                                value = value
+                            )
+                        }
+                    )
+                }
             }
         }
 
-        StyledList(
-            title = stringResource(R.string.press_and_hold_duration),
-            description = stringResource(R.string.press_and_hold_duration_description)
-        ) {
-            pressAndHoldDurationOptions.forEach { (value, label) ->
-                StyledListItem(
-                    name = label,
-                    selected = selectedPressAndHoldDuration == label,
-                    onClick = {
-                        selectedPressAndHoldDuration = label
+        if (state.capabilities.contains(Capability.PRESS_CONFIG)) {
+            StyledList(
+                title = stringResource(R.string.press_and_hold_duration),
+                description = stringResource(R.string.press_and_hold_duration_description)
+            ) {
+                pressAndHoldDurationOptions.forEach { (value, label) ->
+                    StyledListItem(
+                        name = label,
+                        selected = selectedPressAndHoldDuration == label,
+                        onClick = {
+                            selectedPressAndHoldDuration = label
 
-                        viewModel.setControlCommandByte(
-                            identifier = AACPManager.Companion.ControlCommandIdentifiers.CLICK_HOLD_INTERVAL,
-                            value = value
-                        )
-                    }
-                )
+                            viewModel.setControlCommandByte(
+                                identifier = AACPManager.Companion.ControlCommandIdentifiers.CLICK_HOLD_INTERVAL,
+                                value = value
+                            )
+                        }
+                    )
+                }
             }
         }
 

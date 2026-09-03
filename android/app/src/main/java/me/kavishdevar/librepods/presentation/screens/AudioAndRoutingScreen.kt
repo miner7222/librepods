@@ -93,7 +93,7 @@ fun AudioAndRoutingScreen(
         val loudSoundReductionCapability =
             model.capabilities.contains(Capability.LOUD_SOUND_REDUCTION)
         val adaptiveAudioCapability =
-            model.capabilities.contains(Capability.ADAPTIVE_VOLUME)
+            model.capabilities.contains(Capability.ADAPTIVE_AUDIO)
 
         val adaptiveVolumeChecked =
             state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ADAPTIVE_VOLUME_CONFIG]?.getOrNull(
