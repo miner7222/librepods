@@ -97,6 +97,7 @@ data class AirPodsUiState(
     val vendorIdHook: Boolean = false,
 
     val dynamicEndOfCharge: Boolean = false,
+    val chargeNotifications: Boolean = true,
 
     val connectionSuccessful: Boolean = false,
     val timeUntilFOSSPremiumExpiry: Long = 0L,
@@ -507,6 +508,7 @@ class AirPodsViewModel(
         )
         val vendorIdHook = xposedRemotePref.getBoolean("vendor_id_hook", false)
         val dynamicEndOfCharge = sharedPreferences.getBoolean("dynamic_end_of_charge", false)
+        val chargeNotifications = sharedPreferences.getBoolean("charge_notifications", true)
 
         val connectionSuccessful = sharedPreferences.getBoolean("connection_successful", false)
 
@@ -520,6 +522,7 @@ class AirPodsViewModel(
                 rightAction = rightAction,
                 vendorIdHook = vendorIdHook,
                 dynamicEndOfCharge = dynamicEndOfCharge,
+                chargeNotifications = chargeNotifications,
                 connectionSuccessful = connectionSuccessful,
             )
         }
@@ -594,6 +597,13 @@ class AirPodsViewModel(
         sharedPreferences.edit { putBoolean("dynamic_end_of_charge", enabled) }
         _uiState.update {
             it.copy(dynamicEndOfCharge = enabled)
+        }
+    }
+
+    fun setChargeNotifications(enabled: Boolean) {
+        sharedPreferences.edit { putBoolean("charge_notifications", enabled) }
+        _uiState.update {
+            it.copy(chargeNotifications = enabled)
         }
     }
 

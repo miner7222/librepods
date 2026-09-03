@@ -334,6 +334,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         init {
             System.loadLibrary("bluetooth_socket")
         }
+
+        /** iOS warns at 20% and treats 100% as charged; both are our choice, not protocol values. */
+        private const val LOW_BATTERY_THRESHOLD = 20
+        private const val FULL_BATTERY_THRESHOLD = 100
     }
 
     private val bleStatusListener = object : BLEManager.AirPodsStatusListener {
@@ -980,6 +984,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     setPackage(packageName)
                 })
                 updateBattery()
+                maybePostChargeNotification()
                 updateNotificationContent(
                     true,
                     this@AirPodsService.getSharedPreferences("settings", MODE_PRIVATE)
@@ -1998,7 +2003,14 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             enableVibration(true)
         }
 
+        val chargeNotificationChannel = NotificationChannel(
+            "airpods_charging_status",
+            "AirPods Charging Notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+
         val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(chargeNotificationChannel)
         notificationManager.createNotificationChannel(disconnectedNotificationChannel)
         notificationManager.createNotificationChannel(connectedNotificationChannel)
         notificationManager.createNotificationChannel(socketFailureChannel)
@@ -2458,6 +2470,94 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 R.id.widget_off_button, if (allowOffMode) View.VISIBLE else View.GONE
             )
         }
+    }
+
+    /**
+     * iOS notifies once when the AirPods get low and once when they finish charging.
+     * Both edges are latched so a battery packet arriving every few seconds cannot
+     * re-post the same notification; the latch clears when the level moves back out
+     * of range.
+     */
+    private var lowBatteryNotified = false
+    private var chargedNotified = false
+
+    /**
+     * "Charged" only says something as a transition. Connecting to buds that are
+     * already full is not news, so the notification stays disarmed until a reading
+     * below full has actually been seen. A low battery is worth saying straight
+     * away, so it has no such gate.
+     */
+    private var chargedNotificationArmed = false
+
+    @SuppressLint("MissingPermission")
+    private fun maybePostChargeNotification() {
+        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        if (!prefs.getBoolean("charge_notifications", true)) {
+            lowBatteryNotified = false
+            chargedNotified = false
+            chargedNotificationArmed = false
+            return
+        }
+
+        val buds = batteryNotification.getBattery().filter {
+            it.component != BatteryComponent.CASE && it.status != BatteryStatus.DISCONNECTED
+        }
+        if (buds.isEmpty()) return
+
+        val name = prefs.getString("name", device?.name) ?: return
+        val icon = batteryWidgetIcons(overlayModel()).buds
+
+        val lowest = buds.minOf { it.level }
+        val anyCharging = buds.any { it.status == BatteryStatus.CHARGING }
+
+        if (!anyCharging && lowest <= LOW_BATTERY_THRESHOLD) {
+            if (!lowBatteryNotified) {
+                lowBatteryNotified = true
+                postChargeNotification(
+                    id = 3,
+                    icon = icon,
+                    title = getString(R.string.battery_low_title),
+                    text = getString(R.string.battery_low_text, name)
+                )
+            }
+        } else if (lowest > LOW_BATTERY_THRESHOLD) {
+            lowBatteryNotified = false
+        }
+
+        val allFull = buds.all { it.level >= FULL_BATTERY_THRESHOLD }
+        if (allFull && anyCharging) {
+            if (!chargedNotified && chargedNotificationArmed) {
+                chargedNotified = true
+                postChargeNotification(
+                    id = 4,
+                    icon = icon,
+                    title = getString(R.string.battery_charged_title),
+                    text = getString(R.string.battery_charged_text, name)
+                )
+            }
+        } else if (!allFull) {
+            chargedNotified = false
+            chargedNotificationArmed = true
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @SuppressLint("MissingPermission")
+    private fun postChargeNotification(id: Int, icon: Int, title: String, text: String) {
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(this, "airpods_charging_status")
+            .setSmallIcon(icon)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        getSystemService(NotificationManager::class.java).notify(id, notification)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

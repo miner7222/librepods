@@ -644,21 +644,19 @@ fun AirPodsSettingsScreen(
                     }
                 }
 
-                if (capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
-                    item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(16.dp)) }
-                    item(key = "battery_settings") {
-                        StyledList {
-                            StyledListItem(
-                                name = stringResource(R.string.battery),
-                                onClick = navigateToBattery,
-                                leadingContent = {
-                                    AppleSettingsIconTile(
-                                        drawableRes = R.drawable.sf_battery_100percent,
-                                        containerColor = AppleDesignMetrics.batteryIconTileColor
-                                    )
-                                }
-                            )
-                        }
+                item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(16.dp)) }
+                item(key = "battery_settings") {
+                    StyledList {
+                        StyledListItem(
+                            name = stringResource(R.string.battery),
+                            onClick = navigateToBattery,
+                            leadingContent = {
+                                AppleSettingsIconTile(
+                                    drawableRes = R.drawable.sf_battery_100percent,
+                                    containerColor = AppleDesignMetrics.batteryIconTileColor
+                                )
+                            }
+                        )
                     }
                 }
             }
