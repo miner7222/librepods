@@ -69,13 +69,13 @@ fun NavigationRoot(
         is Screen.LongPress -> currentScreen.bud
         Screen.OpenSourceLicenses -> stringResource(R.string.open_source_licenses)
         Screen.Purchase -> stringResource(R.string.unlock_advanced_features)
-        Screen.Rename -> stringResource(R.string.name)
+        Screen.Rename -> state.deviceName
         Screen.TransparencyCustomization -> stringResource(R.string.customize_transparency_mode)
         Screen.Troubleshooting -> stringResource(R.string.troubleshooting)
         Screen.UpdateHearingTest -> stringResource(R.string.update_hearing_test)
         Screen.VersionInfo -> stringResource(R.string.version)
         is Screen.CallControl -> currentScreen.action
-        Screen.MicrophoneSettings -> stringResource(R.string.microphone_mode)
+        Screen.MicrophoneSettings -> stringResource(R.string.microphone)
         Screen.ReleaseNotes -> ""
     }
 

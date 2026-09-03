@@ -152,8 +152,8 @@ fun AccessibilitySettingsScreen(
 
         val pressAndHoldDurationOptions = mapOf(
             0.toByte() to stringResource(R.string.default_option),
-            1.toByte() to stringResource(R.string.slower),
-            2.toByte() to stringResource(R.string.slowest)
+            1.toByte() to stringResource(R.string.shorter),
+            2.toByte() to stringResource(R.string.shortest)
         )
 
         val selectedPressAndHoldDurationValue =
@@ -249,7 +249,7 @@ fun AccessibilitySettingsScreen(
         }
 
         StyledToggle(
-            title = stringResource(R.string.noise_control),
+            title = stringResource(R.string.noise_control_section),
             label = stringResource(R.string.noise_cancellation_single_airpod),
             description = stringResource(R.string.noise_cancellation_single_airpod_description),
             checked = state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE]?.getOrNull(

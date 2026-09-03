@@ -89,15 +89,15 @@ fun MicrophoneSettingsScreen(
             )
 
             StyledListItem(
-                name = stringResource(R.string.microphone_always_right),
-                selected = selectedMode == 1,
-                onClick = { onMicrophoneSettingsChanged(1) }
-            )
-
-            StyledListItem(
                 name = stringResource(R.string.microphone_always_left),
                 selected = selectedMode == 2,
                 onClick = { onMicrophoneSettingsChanged(2) }
+            )
+
+            StyledListItem(
+                name = stringResource(R.string.microphone_always_right),
+                selected = selectedMode == 1,
+                onClick = { onMicrophoneSettingsChanged(1) }
             )
         }
 
