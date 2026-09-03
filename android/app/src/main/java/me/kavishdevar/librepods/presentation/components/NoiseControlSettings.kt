@@ -77,6 +77,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.NoiseControlMode
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -187,6 +188,7 @@ fun NoiseControlSettings(
         }
 
         DesignSystem.Apple -> {
+            val appleMetrics = LocalAppleDesignMetrics.current
             val isDarkTheme = isSystemInDarkTheme()
             val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFE3E3E8)
             val textColor = if (isDarkTheme) Color.White else Color.Black
@@ -247,13 +249,13 @@ fun NoiseControlSettings(
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = appleMetrics.cardHorizontalInset)
                     .padding(top = 4.dp, bottom = 4.dp)
             ) {
                 Text(
                     text = stringResource(R.string.noise_control),
                     color = MaterialTheme.colorScheme.sectionHeader,
-                    style = MaterialTheme.typography.labelSmallEmphasized
+                    style = appleMetrics.sectionHeaderStyle
                 )
             }
             BoxWithConstraints(

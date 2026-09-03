@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 
 
@@ -74,10 +75,11 @@ fun StyledInputField(
         )
     }
     else {
+        val appleMetrics = LocalAppleDesignMetrics.current
         val isDarkTheme = isSystemInDarkTheme()
         val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
         val textColor = if (isDarkTheme) Color.White else Color.Black
-        val minHeight = if (singleLine) 58.dp else 120.dp
+        val minHeight = if (singleLine) appleMetrics.listRowMinHeight else 120.dp
         val verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
         val hasText = inputState.text.isNotEmpty()
         val density = LocalDensity.current
@@ -103,9 +105,9 @@ fun StyledInputField(
                     .heightIn(min = minHeight)
                     .background(
                         backgroundColor,
-                        RoundedCornerShape(28.dp)
+                        RoundedCornerShape(appleMetrics.cardCornerRadius)
                     )
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = appleMetrics.cardHorizontalInset, vertical = 8.dp)
                     .pointerInput(Unit) {
                         detectTapGestures {
                             focusRequester.requestFocus()
