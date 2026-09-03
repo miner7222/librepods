@@ -48,13 +48,17 @@ fun AudioSettings(
     navigateToEqualizer: () -> Unit,
 
     vendorIdHook: Boolean,
-    isPremium: Boolean
+    isPremium: Boolean,
+    firstInColumn: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 
     if (m3eEnabled) {
         if (adaptiveVolumeCapability || conversationalAwarenessCapability || loudSoundReductionCapability || adaptiveAudioCapability) {
-            StyledList(title = stringResource(R.string.audio)) {
+            StyledList(
+                title = stringResource(R.string.audio),
+                firstInColumn = firstInColumn
+            ) {
                 if (adaptiveVolumeCapability) {
                     StyledToggle(
                         label = stringResource(R.string.personalized_volume),
@@ -112,6 +116,7 @@ fun AudioSettings(
             checked = adaptiveVolumeChecked,
             onCheckedChange = onAdaptiveVolumeCheckedChange,
             enabled = isPremium,
+            firstInColumn = firstInColumn,
         )
     }
 
@@ -122,6 +127,7 @@ fun AudioSettings(
             checked = conversationalAwarenessChecked,
             onCheckedChange = onConversationalAwarenessCheckedChange,
             enabled = isPremium,
+            firstInColumn = firstInColumn && !adaptiveVolumeCapability,
         )
     }
 
@@ -132,11 +138,19 @@ fun AudioSettings(
             checked = loudSoundReductionChecked,
             onCheckedChange = onLoudSoundReductionCheckedChange,
             enabled = isPremium,
+            firstInColumn = firstInColumn &&
+                !adaptiveVolumeCapability &&
+                !conversationalAwarenessCapability,
         )
     }
 
     if (adaptiveAudioCapability) {
-        StyledList {
+        StyledList(
+            firstInColumn = firstInColumn &&
+                !adaptiveVolumeCapability &&
+                !conversationalAwarenessCapability &&
+                !(loudSoundReductionCapability && vendorIdHook)
+        ) {
             StyledListItem(
                 name = stringResource(R.string.adaptive_audio),
                 onClick = navigateToAdaptiveStrength,
@@ -145,7 +159,13 @@ fun AudioSettings(
     }
 
     if (customEqCapability) {
-        StyledList {
+        StyledList(
+            firstInColumn = firstInColumn &&
+                !adaptiveVolumeCapability &&
+                !conversationalAwarenessCapability &&
+                !(loudSoundReductionCapability && vendorIdHook) &&
+                !adaptiveAudioCapability
+        ) {
             StyledListItem(
                 name = stringResource(R.string.equalizer),
                 onClick = navigateToEqualizer,

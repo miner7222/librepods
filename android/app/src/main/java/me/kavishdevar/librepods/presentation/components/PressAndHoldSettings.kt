@@ -28,7 +28,8 @@ fun PressAndHoldSettings(
     leftAction: StemAction,
     rightAction: StemAction,
     navigateToLeftLongPress: () -> Unit,
-    navigateToRightLongPress: () -> Unit
+    navigateToRightLongPress: () -> Unit,
+    firstInColumn: Boolean = false
 ) {
     val leftActionText = when (leftAction) {
         StemAction.CYCLE_NOISE_CONTROL_MODES -> stringResource(R.string.noise_control)
@@ -43,7 +44,8 @@ fun PressAndHoldSettings(
     }
 
     StyledList(
-        title = stringResource(R.string.press_and_hold_airpod)
+        title = stringResource(R.string.press_and_hold_airpod),
+        firstInColumn = firstInColumn
     ) {
         StyledListItem(
             name = stringResource(R.string.left),

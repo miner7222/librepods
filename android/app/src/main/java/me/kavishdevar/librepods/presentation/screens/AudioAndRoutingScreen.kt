@@ -70,8 +70,9 @@ fun AudioAndRoutingScreen(
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
-    val topPadding =
-        if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+            appleMetrics.navigationBarHeight
     val bottomPadding =
         if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
@@ -134,10 +135,11 @@ fun AudioAndRoutingScreen(
             navigateToAdaptiveStrength = navigateToAdaptiveStrength,
             navigateToEqualizer = navigateToEqualizer,
             vendorIdHook = state.vendorIdHook,
-            isPremium = state.isPremium
+            isPremium = state.isPremium,
+            firstInColumn = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         ConnectionSettings(
             automaticEarDetectionEnabled = state.automaticEarDetectionEnabled,
             onAutomaticEarDetectionChanged = viewModel::setAutomaticEarDetectionEnabled,
@@ -145,7 +147,7 @@ fun AudioAndRoutingScreen(
             onAutomaticConnectionChanged = viewModel::setAutomaticConnectionEnabled
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         val microphoneModeId = AACPManager.Companion.ControlCommandIdentifiers.MIC_MODE
         val selectedModeText =
             when (state.controlStates[microphoneModeId]?.getOrNull(0) ?: 0x00.toByte()) {
@@ -161,7 +163,7 @@ fun AudioAndRoutingScreen(
         )
 
         if (capabilities.contains(Capability.SLEEP_DETECTION)) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             val id = AACPManager.Companion.ControlCommandIdentifiers.SLEEP_DETECTION_CONFIG
             StyledToggle(
                 label = stringResource(R.string.sleep_detection),

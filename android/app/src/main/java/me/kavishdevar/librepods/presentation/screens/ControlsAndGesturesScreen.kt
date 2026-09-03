@@ -71,8 +71,9 @@ fun ControlsAndGesturesScreen(
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
-    val topPadding =
-        if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+            appleMetrics.navigationBarHeight
     val bottomPadding =
         if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
@@ -91,9 +92,10 @@ fun ControlsAndGesturesScreen(
                 leftAction = state.leftAction,
                 rightAction = state.rightAction,
                 navigateToLeftLongPress = navigateToLeftLongPress,
-                navigateToRightLongPress = navigateToRightLongPress
+                navigateToRightLongPress = navigateToRightLongPress,
+                firstInColumn = true
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         }
 
         val bytes =
@@ -107,11 +109,12 @@ fun ControlsAndGesturesScreen(
         }
         CallControlSettings(
             flipped = flipped,
-            navigateToCallControlScreen = navigateToCallControlScreen
+            navigateToCallControlScreen = navigateToCallControlScreen,
+            firstInColumn = !capabilities.contains(Capability.STEM_CONFIG)
         )
 
         if (capabilities.contains(Capability.HEAD_GESTURES)) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             StyledListItem(
                 name = stringResource(R.string.head_gestures),
                 description = if (sharedPreferences.getBoolean(

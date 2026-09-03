@@ -45,6 +45,7 @@ import me.kavishdevar.librepods.bluetooth.ATTHandles
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 
@@ -54,7 +55,10 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
     val state by viewModel.uiState.collectAsState()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val opensWithPremiumBanner = !state.isPremium
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight +
+        if (opensWithPremiumBanner) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -62,7 +66,7 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .layerBackdrop(backdrop)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
         if (!state.isPremium) {
@@ -94,10 +98,11 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
                         byteArrayOf(if (it) 1.toByte() else 0.toByte())
                     )
                 },
-                enabled = state.isPremium
+                enabled = state.isPremium,
+                firstInColumn = !opensWithPremiumBanner
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 12.dp else 0.dp))
         }
         StyledToggle(
             title = stringResource(R.string.workspace_use),
@@ -111,7 +116,8 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
                     AACPManager.Companion.ControlCommandIdentifiers.PPE_TOGGLE_CONFIG, it
                 )
             },
-            enabled = state.isPremium
+            enabled = state.isPremium,
+            firstInColumn = !opensWithPremiumBanner && !state.vendorIdHook
         )
         Spacer(modifier = Modifier.height(bottomPadding))
     }

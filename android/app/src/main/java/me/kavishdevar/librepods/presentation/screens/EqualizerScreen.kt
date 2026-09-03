@@ -95,6 +95,7 @@ import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsUiState
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
@@ -108,7 +109,8 @@ fun EqualizerRoute(viewModel: AirPodsViewModel) {
     val state by viewModel.uiState.collectAsState()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Box (
@@ -136,14 +138,15 @@ fun EqualizerScreen(
     setCustomEq: (Int, Int, Int) -> Unit
 ) {
     val customEq = state.customEq
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 
     val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 16.dp else 0.dp)
     ) {
         val height = 200.dp
         val maxOffset = with(LocalDensity.current) { height.toPx() } / 2
@@ -181,7 +184,10 @@ fun EqualizerScreen(
 
         val enabled = customEq.isEnabled()
 
-        StyledList(description = stringResource(R.string.equalizer_description)) {
+        StyledList(
+            description = stringResource(R.string.equalizer_description),
+            firstInColumn = true
+        ) {
             StyledListItem(
                 name = stringResource(R.string.recommended),
                 selected = !enabled,
@@ -195,7 +201,7 @@ fun EqualizerScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 12.dp else 0.dp))
 
         Crossfade (
             customEq.isEnabled()
@@ -203,6 +209,9 @@ fun EqualizerScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    // Not a card group, so the gap above it no longer arrives from
+                    // the list before it.
+                    .padding(top = LocalAppleDesignMetrics.current.cardGap)
                     .visible(visible),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -251,7 +260,7 @@ fun EqualizerCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
     ) {
         val dashColor = if (isSystemInDarkTheme()) Color(0x80AAAAAA) else Color(0x809D9D9D)
 
@@ -259,7 +268,7 @@ fun EqualizerCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
         ) {
             Spacer(modifier = Modifier.height(42.dp))
             //                Row(

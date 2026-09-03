@@ -52,6 +52,8 @@ import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.components.ListItemOrientation
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -136,7 +138,9 @@ fun PermissionsPage(
                 .padding(16.dp)
                 .fillMaxSize()
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(
+                if (LocalDesignSystem.current == DesignSystem.Material) 12.dp else 0.dp
+            )
         ) {
             StyledList(title = stringResource(R.string.permissions_required_title)) {
                 val animatedBluetoothIconColor by animateColorAsState(if (bluetoothPermissionsState.allPermissionsGranted) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface)

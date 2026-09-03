@@ -51,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -60,6 +59,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.ATTHandles
 import me.kavishdevar.librepods.data.Capability
@@ -69,6 +69,7 @@ import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -76,10 +77,14 @@ import kotlin.time.Duration.Companion.milliseconds
 
 
 @SuppressLint("DefaultLocale")
-@ExperimentalHazeMaterialsApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalEncodingApi::class, FlowPreview::class)
 @Composable
-fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -> Unit, navigateToTransparencyCustomization: () -> Unit) {
+fun AccessibilitySettingsScreen(
+    viewModel: AirPodsViewModel,
+    navigateToPurchase: () -> Unit,
+    navigateToTransparencyCustomization: () -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
 
     val hearingAidEnabled =
@@ -92,16 +97,22 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase:
 
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val opensWithPremiumBanner = !state.isPremium
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight +
+        if (opensWithPremiumBanner) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+
+    val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .verticalScroll(scrollState)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 8.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
@@ -178,7 +189,8 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase:
         if (state.capabilities.contains(Capability.PRESS_CONFIG)) {
             StyledList(
                 title = stringResource(R.string.press_speed),
-                description = stringResource(R.string.press_speed_description)
+                description = stringResource(R.string.press_speed_description),
+                firstInColumn = !opensWithPremiumBanner
             ) {
                 pressSpeedOptions.forEach { (value, label) ->
                     StyledListItem(
@@ -231,7 +243,9 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToPurchase:
                     AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE, it
                 )
             },
-            enabled = state.isPremium
+            enabled = state.isPremium,
+            firstInColumn = !opensWithPremiumBanner &&
+                !state.capabilities.contains(Capability.PRESS_CONFIG)
         )
 
         if (state.capabilities.contains(Capability.LOUD_SOUND_REDUCTION) && state.vendorIdHook) {

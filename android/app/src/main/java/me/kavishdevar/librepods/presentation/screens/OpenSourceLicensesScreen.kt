@@ -45,6 +45,7 @@ import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.Job
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -58,7 +59,8 @@ fun OpenSourceLicensesScreen() {
     val backdrop = rememberLayerBackdrop()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight + LocalAppleDesignMetrics.current.cardColumnTopInset
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -66,7 +68,7 @@ fun OpenSourceLicensesScreen() {
             .fillMaxSize()
             .layerBackdrop(backdrop)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
