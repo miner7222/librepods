@@ -23,6 +23,8 @@ package me.kavishdevar.librepods.presentation.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
@@ -48,51 +50,106 @@ fun AudioSettings(
     vendorIdHook: Boolean,
     isPremium: Boolean
 ) {
-    if (adaptiveVolumeCapability || conversationAwarenessCapability || loudSoundReductionCapability || adaptiveAudioCapability) {
-        StyledList(title = stringResource(R.string.audio)) {
-            if (adaptiveVolumeCapability) {
-                StyledToggle(
-                    label = stringResource(R.string.personalized_volume),
-                    description = stringResource(R.string.personalized_volume_description),
-                    checked = adaptiveVolumeChecked,
-                    onCheckedChange = onAdaptiveVolumeCheckedChange,
-                    enabled = isPremium,
-                )
-            }
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 
-            if (conversationAwarenessCapability) {
-                StyledToggle(
-                    label = stringResource(R.string.conversation_awareness),
-                    description = stringResource(R.string.conversation_awareness_description),
-                    checked = conversationAwarenessChecked,
-                    onCheckedChange = onConversationAwarenessCheckedChange,
-                    enabled = isPremium,
-                )
-            }
+    if (m3eEnabled) {
+        if (adaptiveVolumeCapability || conversationAwarenessCapability || loudSoundReductionCapability || adaptiveAudioCapability) {
+            StyledList(title = stringResource(R.string.audio)) {
+                if (adaptiveVolumeCapability) {
+                    StyledToggle(
+                        label = stringResource(R.string.personalized_volume),
+                        description = stringResource(R.string.personalized_volume_description),
+                        checked = adaptiveVolumeChecked,
+                        onCheckedChange = onAdaptiveVolumeCheckedChange,
+                        enabled = isPremium,
+                    )
+                }
 
-            if (loudSoundReductionCapability && vendorIdHook) {
-                StyledToggle(
-                    label = stringResource(R.string.loud_sound_reduction),
-                    description = stringResource(R.string.loud_sound_reduction_description),
-                    checked = loudSoundReductionChecked,
-                    onCheckedChange = onLoudSoundReductionCheckedChange,
-                    enabled = isPremium,
-                )
-            }
+                if (conversationAwarenessCapability) {
+                    StyledToggle(
+                        label = stringResource(R.string.conversation_awareness),
+                        description = stringResource(R.string.conversation_awareness_description),
+                        checked = conversationAwarenessChecked,
+                        onCheckedChange = onConversationAwarenessCheckedChange,
+                        enabled = isPremium,
+                    )
+                }
 
-            if (adaptiveAudioCapability) {
-                StyledListItem(
-                    name = stringResource(R.string.adaptive_audio),
-                    onClick = navigateToAdaptiveStrength,
-                )
-            }
+                if (loudSoundReductionCapability && vendorIdHook) {
+                    StyledToggle(
+                        label = stringResource(R.string.loud_sound_reduction),
+                        description = stringResource(R.string.loud_sound_reduction_description),
+                        checked = loudSoundReductionChecked,
+                        onCheckedChange = onLoudSoundReductionCheckedChange,
+                        enabled = isPremium,
+                    )
+                }
 
-            if (customEqCapability) {
-                StyledListItem(
-                    name = stringResource(R.string.equalizer),
-                    onClick = navigateToEqualizer,
-                )
+                if (adaptiveAudioCapability) {
+                    StyledListItem(
+                        name = stringResource(R.string.adaptive_audio),
+                        onClick = navigateToAdaptiveStrength,
+                    )
+                }
+
+                if (customEqCapability) {
+                    StyledListItem(
+                        name = stringResource(R.string.equalizer),
+                        onClick = navigateToEqualizer,
+                    )
+                }
             }
+        }
+        return
+    }
+
+    // iOS gives each of these its own card and puts the explanation underneath it
+    // on the grouped background, rather than stacking them inside one card.
+    if (adaptiveVolumeCapability) {
+        StyledToggle(
+            label = stringResource(R.string.personalized_volume),
+            description = stringResource(R.string.personalized_volume_description),
+            checked = adaptiveVolumeChecked,
+            onCheckedChange = onAdaptiveVolumeCheckedChange,
+            enabled = isPremium,
+        )
+    }
+
+    if (conversationAwarenessCapability) {
+        StyledToggle(
+            label = stringResource(R.string.conversation_awareness),
+            description = stringResource(R.string.conversation_awareness_description),
+            checked = conversationAwarenessChecked,
+            onCheckedChange = onConversationAwarenessCheckedChange,
+            enabled = isPremium,
+        )
+    }
+
+    if (loudSoundReductionCapability && vendorIdHook) {
+        StyledToggle(
+            label = stringResource(R.string.loud_sound_reduction),
+            description = stringResource(R.string.loud_sound_reduction_description),
+            checked = loudSoundReductionChecked,
+            onCheckedChange = onLoudSoundReductionCheckedChange,
+            enabled = isPremium,
+        )
+    }
+
+    if (adaptiveAudioCapability) {
+        StyledList {
+            StyledListItem(
+                name = stringResource(R.string.adaptive_audio),
+                onClick = navigateToAdaptiveStrength,
+            )
+        }
+    }
+
+    if (customEqCapability) {
+        StyledList {
+            StyledListItem(
+                name = stringResource(R.string.equalizer),
+                onClick = navigateToEqualizer,
+            )
         }
     }
 }
