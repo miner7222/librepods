@@ -91,3 +91,23 @@ sealed interface Screen: NavKey {
         override val showTopBar: Boolean = false
     }
 }
+
+/**
+ * Whether this destination reads or writes AirPods state and therefore stops making sense
+ * once the buds disconnect. App-level destinations stay put; everything else is popped so
+ * the user lands back on the not-connected screen rather than on a dead settings page.
+ *
+ * New destinations default to true: a screen that survives a disconnect has to say so.
+ */
+val Screen.requiresConnectedAirPods: Boolean
+    get() = when (this) {
+        Screen.Onboarding,
+        Screen.ReleaseNotes,
+        Screen.AirPodsSettings,
+        Screen.AppSettings,
+        Screen.Troubleshooting,
+        Screen.OpenSourceLicenses,
+        Screen.Purchase -> false
+
+        else -> true
+    }
