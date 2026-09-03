@@ -43,7 +43,7 @@ fun PressAndHoldSettings(
     }
 
     StyledList(
-        title = stringResource(R.string.press_and_hold_airpods)
+        title = stringResource(R.string.press_and_hold_airpod)
     ) {
         StyledListItem(
             name = stringResource(R.string.left),
