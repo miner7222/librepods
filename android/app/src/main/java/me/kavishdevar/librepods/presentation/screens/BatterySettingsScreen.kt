@@ -46,6 +46,7 @@ import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScro
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 
@@ -61,8 +62,9 @@ fun BatterySettingsScreen(
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
-    val topPadding =
-        if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+            appleMetrics.navigationBarHeight + appleMetrics.cardColumnTopInset
     val bottomPadding =
         if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
@@ -79,20 +81,21 @@ fun BatterySettingsScreen(
         Text(
             text = stringResource(R.string.battery_intro),
             style = appleMetrics.sectionFooterStyle,
-            color = MaterialTheme.colorScheme.onBackground.copy(0.6f)
+            color = MaterialTheme.colorScheme.secondaryLabel
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // No spacer: the toggle is the first card here, and asking for the column
+        // inset lands it iOS's 27.5 below the paragraph.
         StyledToggle(
             label = stringResource(R.string.charge_notifications),
             description = stringResource(R.string.charge_notifications_description),
             checked = state.chargeNotifications,
-            onCheckedChange = viewModel::setChargeNotifications
+            onCheckedChange = viewModel::setChargeNotifications,
+            firstInColumn = true
         )
 
         if (state.capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             StyledToggle(
                 label = stringResource(R.string.optimized_charging),
                 description = stringResource(R.string.optimized_charging_description),

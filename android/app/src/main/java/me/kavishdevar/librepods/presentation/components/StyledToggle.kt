@@ -79,14 +79,21 @@ fun StyledToggle(
     checked: Boolean = false,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
-    header: Boolean = false
+    header: Boolean = false,
+    firstInColumn: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
+    val appleTopPadding = when {
+        title != null && firstInColumn -> appleMetrics.sectionHeaderColumnTopInset
+        title != null -> appleMetrics.sectionHeaderTopGap
+        firstInColumn -> appleMetrics.cardColumnTopInset
+        else -> appleMetrics.cardGap
+    }
     Column(
         modifier = Modifier.padding(
-            top = if (m3eEnabled) 12.dp else 0.dp,
-            bottom = if (m3eEnabled) 12.dp else appleMetrics.cardGap
+            top = if (m3eEnabled) 12.dp else appleTopPadding,
+            bottom = if (m3eEnabled) 12.dp else 0.dp
         )
     ) {
         title?.let {
@@ -94,7 +101,10 @@ fun StyledToggle(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
                     .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
-                    .padding(top = 4.dp, bottom = if (m3eEnabled) 12.dp else 4.dp)
+                    .padding(
+                        top = 4.dp,
+                        bottom = if (m3eEnabled) 12.dp else appleMetrics.sectionHeaderBottomGap
+                    )
             ) {
                 Text(
                     text = it,
@@ -303,11 +313,16 @@ private fun StyledToggleContent(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 4.dp)
+                        // 4dp let the description run right up to the switch; the
+                        // extra room makes it wrap before it gets there.
+                        .padding(end = 16.dp)
                 ) {
                     Text(
+                        // bodyMedium, not labelMedium: same size, but labelMedium
+                        // inherits Medium weight and made these read bolder than
+                        // the list rows beside them.
                         text = label,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = textColor,
                     )
 

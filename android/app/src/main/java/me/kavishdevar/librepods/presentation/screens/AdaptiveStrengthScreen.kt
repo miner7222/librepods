@@ -53,6 +53,7 @@ import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 
@@ -62,7 +63,10 @@ fun AdaptiveStrengthScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -
     val backdrop = rememberLayerBackdrop()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    // Without the banner the slider opens the column and carries the inset itself.
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight +
+        if (!state.isPremium) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -70,8 +74,8 @@ fun AdaptiveStrengthScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -
             .fillMaxSize()
             .layerBackdrop(backdrop)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 16.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
         if (!state.isPremium) {
@@ -97,6 +101,7 @@ fun AdaptiveStrengthScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -
         val scope = rememberCoroutineScope()
         StyledSlider(
             label = stringResource(R.string.customize_adaptive_audio),
+            firstInColumn = state.isPremium,
             value = sliderValue.floatValue,
             onValueChange = {
                 sliderValue.floatValue = it

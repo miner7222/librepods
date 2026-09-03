@@ -32,6 +32,7 @@ fun StyledList(
     modifier: Modifier = Modifier,
     title: String? = null,
     description: String? = null,
+    firstInColumn: Boolean = false,
     content: @Composable StyledListScope.() -> Unit
 ) {
     val scope = StyledListScope()
@@ -39,16 +40,25 @@ fun StyledList(
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
+    val appleTopPadding = when {
+        title != null && firstInColumn -> appleMetrics.sectionHeaderColumnTopInset
+        title != null -> appleMetrics.sectionHeaderTopGap
+        firstInColumn -> appleMetrics.cardColumnTopInset
+        else -> appleMetrics.cardGap
+    }
 
     Column(
-        modifier = modifier.padding(bottom = if (m3eEnabled) 0.dp else appleMetrics.cardGap)
+        modifier = modifier.padding(top = if (m3eEnabled) 0.dp else appleTopPadding)
     ) {
         title?.let {
             Box(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
                     .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
-                    .padding(top = 4.dp, bottom = if (m3eEnabled) 12.dp else 4.dp)
+                    .padding(
+                        top = 4.dp,
+                        bottom = if (m3eEnabled) 12.dp else appleMetrics.sectionHeaderBottomGap
+                    )
             ) {
                 Text(
                     text = it,
