@@ -93,6 +93,7 @@ import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.MaterialTypography
 import me.kavishdevar.librepods.presentation.viewmodel.AppSettingsViewModel
@@ -123,7 +124,11 @@ fun AppSettingsScreen(
     val descriptionFocusRequester = remember { FocusRequester() }
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 16.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val opensWithPremiumBanner =
+        (!state.isPremium && state.connectionSuccessful) || state.timeUntilFOSSPremiumExpiry > 0L
+    val topPadding = if (m3eEnabled) 16.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight +
+        if (opensWithPremiumBanner) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -132,7 +137,7 @@ fun AppSettingsScreen(
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .layerBackdrop(backdrop)
             .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
@@ -157,8 +162,8 @@ fun AppSettingsScreen(
         if (state.timeUntilFOSSPremiumExpiry > 0L) {
             Box(
                 modifier = Modifier
-                    .background(Color(0xFF32829B), RoundedCornerShape(28.dp))
-                    .clip(RoundedCornerShape(28.dp))
+                    .background(Color(0xFF32829B), RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
+                    .clip(RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
                     .clickable {
                         val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                             data = "mailto:".toUri()
@@ -193,7 +198,8 @@ fun AppSettingsScreen(
             label = stringResource(R.string.use_material3e),
             checked = state.m3eEnabled,
             onCheckedChange = viewModel::setm3eEnabled,
-            enabled = state.isPremium
+            enabled = state.isPremium,
+            firstInColumn = !opensWithPremiumBanner
         )
 
         if (state.connectionSuccessful) {
@@ -214,7 +220,7 @@ fun AppSettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             StyledList (title = stringResource(R.string.conversational_awareness)) {
                 StyledToggle(
@@ -242,7 +248,7 @@ fun AppSettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             val conversationalAwarenessVolume = state.conversationalAwarenessVolume
             LaunchedEffect(conversationalAwarenessVolume) {
@@ -325,7 +331,7 @@ fun AppSettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             StyledList(title = stringResource(R.string.takeover_phone_state)) {
                 StyledToggle(
@@ -352,12 +358,12 @@ fun AppSettingsScreen(
                 onCheckedChange = viewModel::setUseAlternateHeadTrackingPackets,
                 enabled = state.isPremium
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         } else {
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
                     .padding(top = 16.dp, bottom = 2.dp)
             ) {
                 Text(
@@ -387,7 +393,7 @@ fun AppSettingsScreen(
         }
 
         if (!BuildConfig.PLAY_BUILD) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             StyledList {
                 StyledListItem(
                     name = stringResource(R.string.troubleshooting),
@@ -396,7 +402,7 @@ fun AppSettingsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 8.dp else 0.dp))
 
         StyledList(title = stringResource(R.string.contact)) {
             StyledListItem(
@@ -439,12 +445,12 @@ fun AppSettingsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 20.dp else 0.dp))
         DeviceInfoCard()
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         AppInfoCard(navigateToReleaseNotesScreen)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
         StyledListItem(
             name = stringResource(R.string.open_source_licenses),

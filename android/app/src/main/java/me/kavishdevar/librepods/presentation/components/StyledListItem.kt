@@ -86,19 +86,29 @@ fun StyledListItem(
     enabled: Boolean = true,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
     leadingContent: (@Composable () -> Unit)? = null,
-    trailingContent: (@Composable () -> Unit)? = null
+    trailingContent: (@Composable () -> Unit)? = null,
+    firstInColumn: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
+    val appleTopPadding = when {
+        title != null && firstInColumn -> appleMetrics.sectionHeaderColumnTopInset
+        title != null -> appleMetrics.sectionHeaderTopGap
+        firstInColumn -> appleMetrics.cardColumnTopInset
+        else -> appleMetrics.cardGap
+    }
     Column(
-        modifier = Modifier.padding(bottom = if (m3eEnabled) 0.dp else appleMetrics.cardGap)
+        modifier = Modifier.padding(top = if (m3eEnabled) 0.dp else appleTopPadding)
     ) {
         title?.let {
             Box(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
                     .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
-                    .padding(top = 4.dp, bottom = if (m3eEnabled) 8.dp else 4.dp)
+                    .padding(
+                        top = 4.dp,
+                        bottom = if (m3eEnabled) 8.dp else appleMetrics.sectionHeaderBottomGap
+                    )
             ) {
                 Text(
                     text = it,

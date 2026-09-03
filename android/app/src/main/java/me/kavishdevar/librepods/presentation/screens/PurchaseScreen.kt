@@ -53,6 +53,7 @@ import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.navigation.Screen
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.PurchaseViewModel
 import me.kavishdevar.librepods.utils.XposedState
@@ -72,7 +73,8 @@ fun PurchaseScreen(
     val backdrop = rememberLayerBackdrop()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -80,7 +82,7 @@ fun PurchaseScreen(
             .layerBackdrop(backdrop)
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
@@ -92,7 +94,10 @@ fun PurchaseScreen(
             }
         }
         if (!state.isPremium) {
-            StyledList(title = stringResource(R.string.free_features)) {
+            StyledList(
+                title = stringResource(R.string.free_features),
+                firstInColumn = true
+            ) {
                 StyledListItem(
                     name = stringResource(R.string.ear_detection),
                     description = stringResource(R.string.ear_detection_description),
@@ -125,7 +130,7 @@ fun PurchaseScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 24.dp else 0.dp))
 
             StyledList(title = stringResource(R.string.advanced_features), description = stringResource(R.string.feature_availability_disclaimer)) {
                 StyledListItem(

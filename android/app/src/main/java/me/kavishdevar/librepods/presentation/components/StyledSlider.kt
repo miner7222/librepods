@@ -80,6 +80,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers.GREEN_DOMINATED_EXAMPLE
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,9 +100,11 @@ import com.kyant.backdrop.shadow.Shadow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.theme.AppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
+import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
@@ -235,6 +238,7 @@ fun StyledSlider(
     independent: Boolean = false,
     /** iOS reserves the filled capsule for the AirPods volume control. */
     prominent: Boolean = false,
+    firstInColumn: Boolean = false,
     description: String? = null,
     enabled: Boolean = true,
     index: Int = 0,
@@ -524,17 +528,11 @@ fun StyledSlider(
                 if (independent) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                            .fillMaxWidth()
+                            .padding(top = appleSliderTopGap(appleMetrics, label, firstInColumn))
                     ) {
                         if (label != null) {
-                            Text(
-                                text = label,
-                                style = appleMetrics.sectionHeaderStyle.copy(
-                                    color = labelTextColor.copy(alpha = 0.6f)
-                                ),
-                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
-                            )
+                            AppleSliderLabel(label)
                         }
 
                         Box(
@@ -559,7 +557,8 @@ fun StyledSlider(
                                     fontFamily = FontFamily(Font(R.font.pretendard))
                                 ),
                                 modifier = Modifier
-                                    .padding(horizontal = 18.dp, vertical = 4.dp)
+                                    .padding(top = appleMetrics.cardFooterGap)
+                                    .padding(horizontal = appleMetrics.cardHorizontalInset)
                             )
                         }
                     }
@@ -907,17 +906,11 @@ fun StyledSlider(
                 if (independent) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                            .fillMaxWidth()
+                            .padding(top = appleSliderTopGap(appleMetrics, label, firstInColumn))
                     ) {
                         if (label != null) {
-                            Text(
-                                text = label,
-                                style = appleMetrics.sectionHeaderStyle.copy(
-                                    color = labelTextColor.copy(alpha = 0.6f)
-                                ),
-                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
-                            )
+                            AppleSliderLabel(label)
                         }
 
                         Box(
@@ -943,7 +936,8 @@ fun StyledSlider(
                                     fontFamily = FontFamily(Font(R.font.pretendard))
                                 ),
                                 modifier = Modifier
-                                    .padding(horizontal = 18.dp, vertical = 4.dp)
+                                    .padding(top = appleMetrics.cardFooterGap)
+                                    .padding(horizontal = appleMetrics.cardHorizontalInset)
                             )
                         }
                     }
@@ -960,6 +954,37 @@ fun StyledSlider(
                 }
             }
         }
+    }
+}
+
+// A labelled slider reads as its own section, so its label has to be built like a
+// real section header - same gap above, same tinted grey, same card inset - or it
+// sits flush against whatever precedes it in a colour no other header uses. An
+// unlabelled slider carries no header of its own and is placed by its caller.
+private fun appleSliderTopGap(
+    metrics: AppleDesignMetrics,
+    label: String?,
+    firstInColumn: Boolean
+): Dp = when {
+    label != null && firstInColumn -> metrics.sectionHeaderColumnTopInset
+    label != null -> metrics.sectionHeaderTopGap
+    firstInColumn -> metrics.cardColumnTopInset
+    else -> 0.dp
+}
+
+@Composable
+private fun AppleSliderLabel(label: String) {
+    val metrics = LocalAppleDesignMetrics.current
+    Box(
+        modifier = Modifier
+            .padding(horizontal = metrics.cardHorizontalInset)
+            .padding(top = 4.dp, bottom = metrics.sectionHeaderBottomGap)
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.sectionHeader,
+            style = metrics.sectionHeaderStyle
+        )
     }
 }
 

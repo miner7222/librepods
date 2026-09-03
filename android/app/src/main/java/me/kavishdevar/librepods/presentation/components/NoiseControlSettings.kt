@@ -219,8 +219,11 @@ fun NoiseControlSettings(
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceContainer)
+                    // Not one of the card groups, so it has to ask for the gap above
+                    // its header itself.
+                    .padding(top = appleMetrics.sectionHeaderTopGap)
                     .padding(horizontal = appleMetrics.cardHorizontalInset)
-                    .padding(top = 4.dp, bottom = 4.dp)
+                    .padding(top = 4.dp, bottom = appleMetrics.sectionHeaderBottomGap)
             ) {
                 Text(
                     text = stringResource(R.string.noise_control),
@@ -231,7 +234,13 @@ fun NoiseControlSettings(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    // This block is not a card, so it was ending flush against the
+                    // next one; iOS leaves the same gap here that it leaves between
+                    // cards.
+                    // No top padding: the header above already carries the common
+                    // sectionHeaderBottomGap, and adding to it set this section's
+                    // buttons 8dp lower than every other header's card.
+                    .padding(bottom = appleMetrics.cardGap)
             ) {
                 val density = LocalDensity.current
                 val buttonCount = if (showOffListeningMode) 4 else 3

@@ -96,6 +96,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.utils.LogCollector
 import java.io.File
@@ -151,6 +154,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
 
     val backgroundColor = if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
     val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val accentColor = if (isSystemInDarkTheme()) Color(0xFF007AFF) else Color(0xFF3C6DF5)
     val buttonBgColor = if (isSystemInDarkTheme()) Color(0xFF333333) else Color(0xFFDDDDDD)
 
@@ -218,7 +222,9 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+        val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+            LocalAppleDesignMetrics.current.navigationBarHeight +
+            if (m3eEnabled) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
         val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
         Column(
@@ -227,19 +233,30 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                 .layerBackdrop(backdrop)
                 .verticalScroll(scrollState)
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
         ) {
             Spacer(modifier = Modifier.height(topPadding))
+            Spacer(
+                modifier = Modifier.height(
+                    if (m3eEnabled) 0.dp else LocalAppleDesignMetrics.current.sectionHeaderColumnTopInset
+                )
+            )
 
             Text(
                 text = stringResource(R.string.saved_logs),
-                style = TextStyle(
+                style = if (m3eEnabled) TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor.copy(alpha = 0.6f),
                     fontFamily = FontFamily(Font(R.font.pretendard))
+                ) else LocalAppleDesignMetrics.current.sectionHeaderStyle.copy(
+                    color = textColor.copy(alpha = 0.6f)
                 ),
-                modifier = Modifier.padding(16.dp, bottom = 4.dp, top = 8.dp)
+                modifier = Modifier.padding(
+                    start = LocalAppleDesignMetrics.current.cardHorizontalInset,
+                    top = if (m3eEnabled) 8.dp else 4.dp,
+                    bottom = 4.dp
+                )
             )
 
             Spacer(modifier = Modifier.height(2.dp))
@@ -250,7 +267,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                         .fillMaxWidth()
                         .background(
                             backgroundColor,
-                            RoundedCornerShape(28.dp)
+                            RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius)
                         )
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -267,7 +284,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                         .fillMaxWidth()
                         .background(
                             backgroundColor,
-                            RoundedCornerShape(28.dp)
+                            RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius)
                         )
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
@@ -378,13 +395,15 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
 
                     Text(
                         text = stringResource(R.string.troubleshooting_steps),
-                        style = TextStyle(
+                        style = if (m3eEnabled) TextStyle(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             color = textColor.copy(alpha = 0.6f),
                             fontFamily = FontFamily(Font(R.font.pretendard))
+                        ) else LocalAppleDesignMetrics.current.sectionFooterStyle.copy(
+                            color = textColor.copy(alpha = 0.6f)
                         ),
-                        modifier = Modifier.padding(16.dp, bottom = 2.dp, top = 8.dp)
+                        modifier = Modifier.padding(LocalAppleDesignMetrics.current.cardHorizontalInset, bottom = 2.dp, top = 8.dp)
                     )
 
                     Spacer(modifier = Modifier.height(2.dp))
@@ -394,7 +413,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                             .fillMaxWidth()
                             .background(
                                 backgroundColor,
-                                RoundedCornerShape(28.dp)
+                                RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius)
                             )
                             .padding(16.dp)
                     ) {

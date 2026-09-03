@@ -18,6 +18,8 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.components.AppInfoCard
 import me.kavishdevar.librepods.presentation.components.DeviceInfoCard
 import me.kavishdevar.librepods.presentation.components.StyledListItem
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.utils.isSamsungDevice
 
 @Composable
@@ -36,7 +38,9 @@ fun NotSupportedPage(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(
+                if (LocalDesignSystem.current == DesignSystem.Material) 16.dp else 0.dp
+            )
         ) {
             Text(
                 text = stringResource(

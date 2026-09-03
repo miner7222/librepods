@@ -56,6 +56,7 @@ import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.experimental.and
@@ -82,7 +83,8 @@ fun LongPress(
     val longPressAction = if (name.lowercase() == "left") state.leftAction else state.rightAction
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     val scrollState = rememberScrollState()
@@ -93,12 +95,12 @@ fun LongPress(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
-            .padding(top = 8.dp)
-            .padding(horizontal = 16.dp)
+            .padding(top = if (m3eEnabled) 8.dp else 0.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        StyledList {
+        StyledList(firstInColumn = true) {
             StyledListItem(
                 name = stringResource(R.string.noise_control),
                 selected = longPressAction == StemAction.CYCLE_NOISE_CONTROL_MODES,
@@ -142,7 +144,7 @@ fun LongPress(
         }
 
         if (longPressAction == StemAction.CYCLE_NOISE_CONTROL_MODES) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 32.dp else 0.dp))
 
             val currentByte = state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE_CONFIGS]?.get(0)?.toInt() ?: 0
 

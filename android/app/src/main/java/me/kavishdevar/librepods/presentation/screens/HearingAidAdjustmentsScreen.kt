@@ -56,6 +56,7 @@ import me.kavishdevar.librepods.data.sendHearingAidSettings
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -147,7 +148,10 @@ fun HearingAidAdjustmentsScreen(
     }
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    // The first slider is a labelled section and now opens the column itself, so the
+    // inset belongs to it rather than to this padding.
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -155,8 +159,8 @@ fun HearingAidAdjustmentsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 16.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
@@ -170,6 +174,7 @@ fun HearingAidAdjustmentsScreen(
             startIcon = R.drawable.sf_speaker_wave_1_fill,
             endIcon = R.drawable.sf_speaker_wave_3_fill,
             independent = true,
+            firstInColumn = true,
         )
 
         StyledToggle(

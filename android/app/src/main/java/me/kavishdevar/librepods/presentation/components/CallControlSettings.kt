@@ -33,6 +33,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 fun CallControlSettings(
     flipped: Boolean,
     navigateToCallControlScreen: (action: String) -> Unit,
+    firstInColumn: Boolean = false,
 ) {
     val pressOnceText = stringResource(R.string.press_once)
     val pressTwiceText = stringResource(R.string.press_twice)
@@ -43,7 +44,10 @@ fun CallControlSettings(
     val muteUnmuteText = stringResource(R.string.mute_unmute)
     val hangUpText = stringResource(R.string.hang_up)
 
-    StyledList(title = stringResource(R.string.call_controls)) {
+    StyledList(
+        title = stringResource(R.string.call_controls),
+        firstInColumn = firstInColumn
+    ) {
         StyledListItem(
             name = stringResource(R.string.answer_call),
             description = stringResource(R.string.press_once),

@@ -57,6 +57,7 @@ import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import kotlin.math.roundToInt
 
@@ -173,7 +174,8 @@ private fun WidgetConfigScreen(
     val topPadding = if (materialDesign) {
         16.dp
     } else {
-        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+            LocalAppleDesignMetrics.current.navigationBarHeight
     }
     val bottomPadding = if (materialDesign) {
         16.dp
@@ -209,10 +211,10 @@ private fun WidgetConfigScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
         ) {
             Spacer(modifier = Modifier.height(topPadding))
-            StyledList {
+            StyledList(firstInColumn = true) {
                 StyledListItem(
                     name = stringResource(R.string.widget_theme_system),
                     selected = theme == WidgetTheme.SYSTEM,
@@ -236,7 +238,7 @@ private fun WidgetConfigScreen(
                 )
             }
             if (isBatteryWidget) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(if (materialDesign) 16.dp else 0.dp))
                 StyledToggle(
                     label = stringResource(R.string.show_phone_battery_in_widget),
                     description = stringResource(R.string.show_phone_battery_in_widget_description),
@@ -254,7 +256,7 @@ private fun WidgetConfigScreen(
                     }
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (materialDesign) 16.dp else 0.dp))
             StyledSlider(
                 label = stringResource(R.string.widget_background_opacity, opacity.roundToInt()),
                 value = opacity,

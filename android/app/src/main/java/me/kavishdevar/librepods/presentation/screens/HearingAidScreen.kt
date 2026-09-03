@@ -67,6 +67,7 @@ import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -99,7 +100,8 @@ fun HearingAidScreen(
 
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -108,8 +110,8 @@ fun HearingAidScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 8.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
@@ -136,7 +138,10 @@ fun HearingAidScreen(
 //                // TODO
 //            }
 
-        StyledList (title = stringResource(R.string.hearing_aid)) {
+        StyledList(
+            title = stringResource(R.string.hearing_aid),
+            firstInColumn = true
+        ) {
             StyledToggle(
                 label = stringResource(R.string.hearing_aid),
                 checked = hearingAidEnabled.value,
@@ -156,7 +161,7 @@ fun HearingAidScreen(
                 color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(alpha = 0.6f),
                 fontFamily = FontFamily(Font(R.font.pretendard))
             ),
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
         )
         Spacer(modifier = Modifier.height(16.dp))
 

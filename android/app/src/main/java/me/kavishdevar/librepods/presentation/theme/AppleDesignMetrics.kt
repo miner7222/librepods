@@ -19,6 +19,14 @@ object AppleDesignMetrics {
     val cardFooterGap = 8.dp
     // iOS's measured gap between adjacent cards.
     val cardGap = 35.dp
+    // The header box already adds 4dp above its text, and the style contributes
+    // about 3.3dp of line leading: these land header ink 33.5pt below a preceding
+    // card and 43.75pt below the navigation bar when the group opens a column.
+    val sectionHeaderTopGap = 26.dp
+    val sectionHeaderColumnTopInset = 36.5.dp
+    // iOS sets a section header 9.5pt above the card beneath it; Compose already
+    // contributes about 2.5dp of that as line leading, so the header box adds 7.
+    val sectionHeaderBottomGap = 7.dp
     val cardCornerRadius = 28.dp
     val cardHorizontalInset = 16.dp
 
@@ -40,7 +48,11 @@ object AppleDesignMetrics {
     val batteryIconTileColor = Color(0xFF41D565)
 
     val navigationBarHeight = 44.dp
-    val cardColumnTopInset = 17.5.dp
+    // Measured from the navigation bar's bottom, taken as the back button's centre
+    // plus half its 44pt height: iOS opens its content 27.5pt below the bar. This
+    // also sets how far content may scroll before the bar draws its divider, since
+    // that is the same distance.
+    val cardColumnTopInset = 27.5.dp
     val navigationBarTitleStyle by lazy {
         TextStyle(
             fontFamily = pretendardFamily,

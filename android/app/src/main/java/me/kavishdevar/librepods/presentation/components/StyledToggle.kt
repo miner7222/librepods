@@ -78,14 +78,21 @@ fun StyledToggle(
     checked: Boolean = false,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
-    header: Boolean = false
+    header: Boolean = false,
+    firstInColumn: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
+    val appleTopPadding = when {
+        title != null && firstInColumn -> appleMetrics.sectionHeaderColumnTopInset
+        title != null -> appleMetrics.sectionHeaderTopGap
+        firstInColumn -> appleMetrics.cardColumnTopInset
+        else -> appleMetrics.cardGap
+    }
     Column(
         modifier = Modifier.padding(
-            top = if (m3eEnabled) 12.dp else 0.dp,
-            bottom = if (m3eEnabled) 12.dp else appleMetrics.cardGap
+            top = if (m3eEnabled) 12.dp else appleTopPadding,
+            bottom = if (m3eEnabled) 12.dp else 0.dp
         )
     ) {
         title?.let {
@@ -93,7 +100,10 @@ fun StyledToggle(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
                     .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
-                    .padding(top = 4.dp, bottom = if (m3eEnabled) 12.dp else 4.dp)
+                    .padding(
+                        top = 4.dp,
+                        bottom = if (m3eEnabled) 12.dp else appleMetrics.sectionHeaderBottomGap
+                    )
             ) {
                 Text(
                     text = it,

@@ -88,6 +88,7 @@ import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScro
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import me.kavishdevar.librepods.services.ServiceManager
@@ -116,7 +117,8 @@ fun HeadTrackingScreen(
     val backdrop = rememberLayerBackdrop()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight + LocalAppleDesignMetrics.current.cardColumnTopInset
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     var gestureText by remember { mutableStateOf("") }
@@ -141,8 +143,8 @@ fun HeadTrackingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .layerBackdrop(backdrop)
-                .padding(top = 8.dp)
-                .padding(horizontal = 16.dp)
+                .padding(top = if (m3eEnabled) 8.dp else 0.dp)
+                .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
         ) {
 
             if (!state.isPremium) {
@@ -176,13 +178,15 @@ fun HeadTrackingScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 stringResource(R.string.velocity),
-                style = TextStyle(
+                style = if (m3eEnabled) TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor.copy(alpha = 0.6f),
                     fontFamily = FontFamily(Font(R.font.pretendard))
+                ) else LocalAppleDesignMetrics.current.sectionHeaderStyle.copy(
+                    color = textColor.copy(alpha = 0.6f)
                 ),
-                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
+                modifier = Modifier.padding(start = LocalAppleDesignMetrics.current.cardHorizontalInset, bottom = 8.dp, top = 8.dp)
             )
             Plot()
 
@@ -303,7 +307,7 @@ private fun Plot() {
             .fillMaxWidth()
             .height(300.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(28.dp)
+        shape = RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius)
     ) {
         val horizontalColor = MaterialTheme.colorScheme.primary
         val verticalColor = MaterialTheme.colorScheme.onPrimary

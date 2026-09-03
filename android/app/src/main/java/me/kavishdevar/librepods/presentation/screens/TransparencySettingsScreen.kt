@@ -74,6 +74,7 @@ import me.kavishdevar.librepods.data.sendTransparencySettings
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -99,7 +100,8 @@ fun TransparencySettingsScreen(
     val state by viewModel.uiState.collectAsState()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Column(
@@ -107,8 +109,8 @@ fun TransparencySettingsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 16.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
         val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
@@ -204,7 +206,8 @@ fun TransparencySettingsScreen(
                 label = stringResource(R.string.transparency_mode),
                 checked = enabled.value,
                 description = stringResource(R.string.customize_transparency_mode_description),
-                onCheckedChange = { enabled.value = it }
+                onCheckedChange = { enabled.value = it },
+                firstInColumn = true
             )
             Spacer(modifier = Modifier.height(4.dp))
             StyledSlider(
@@ -265,19 +268,21 @@ fun TransparencySettingsScreen(
 
             Text(
                 text = stringResource(R.string.equalizer),
-                style = TextStyle(
+                style = if (m3eEnabled) TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColor.copy(alpha = 0.6f),
                     fontFamily = FontFamily(Font(R.font.pretendard))
+                ) else LocalAppleDesignMetrics.current.sectionHeaderStyle.copy(
+                    color = textColor.copy(alpha = 0.6f)
                 ),
-                modifier = Modifier.padding(16.dp, bottom = 4.dp)
+                modifier = Modifier.padding(LocalAppleDesignMetrics.current.cardHorizontalInset, bottom = 4.dp)
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(backgroundColor, RoundedCornerShape(28.dp))
+                    .background(backgroundColor, RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween

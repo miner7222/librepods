@@ -69,6 +69,7 @@ import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -96,7 +97,10 @@ fun AccessibilitySettingsScreen(
 
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
+    val opensWithPremiumBanner = !state.isPremium
+    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        LocalAppleDesignMetrics.current.navigationBarHeight +
+        if (opensWithPremiumBanner) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
     val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     val scrollState = rememberScrollState()
@@ -107,8 +111,8 @@ fun AccessibilitySettingsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset),
+        verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 8.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
@@ -185,7 +189,8 @@ fun AccessibilitySettingsScreen(
         if (state.capabilities.contains(Capability.PRESS_CONFIG)) {
             StyledList(
                 title = stringResource(R.string.press_speed),
-                description = stringResource(R.string.press_speed_description)
+                description = stringResource(R.string.press_speed_description),
+                firstInColumn = !opensWithPremiumBanner
             ) {
                 pressSpeedOptions.forEach { (value, label) ->
                     StyledListItem(
@@ -238,7 +243,9 @@ fun AccessibilitySettingsScreen(
                     AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE, it
                 )
             },
-            enabled = state.isPremium
+            enabled = state.isPremium,
+            firstInColumn = !opensWithPremiumBanner &&
+                !state.capabilities.contains(Capability.PRESS_CONFIG)
         )
 
         if (state.capabilities.contains(Capability.LOUD_SOUND_REDUCTION) && state.vendorIdHook) {

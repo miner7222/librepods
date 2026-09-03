@@ -131,6 +131,7 @@ import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.AppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsUiState
@@ -167,7 +168,9 @@ fun AirPodsSettingsRoute(
     val state by viewModel.uiState.collectAsState()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + if (m3eEnabled) 0.dp else 84.dp
+    val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        if (m3eEnabled) 0.dp else LocalAppleDesignMetrics.current.navigationBarHeight +
+            LocalAppleDesignMetrics.current.cardColumnTopInset
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
 
     Box (
@@ -392,7 +395,7 @@ fun AirPodsSettingsScreen(
             state = listState,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
         ) {
             item(key = "top_padding") { Spacer(modifier = Modifier.height(topPadding)) }
             item(key = "play_update_banner") {
@@ -400,8 +403,8 @@ fun AirPodsSettingsScreen(
                     val context = LocalContext.current
                     Box(
                         modifier = Modifier
-                            .background(Color(0xFF32829B), RoundedCornerShape(28.dp))
-                            .clip(RoundedCornerShape(28.dp))
+                            .background(Color(0xFF32829B), RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
+                            .clip(RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
                             .clickable {
                                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                                     data = "mailto:".toUri()
@@ -460,7 +463,7 @@ fun AirPodsSettingsScreen(
             if (hasHearingAidCapability || hasPPECapability) {
                 if (hasPPECapability || state.vendorIdHook) {
                     item(key = "spacer_hearing_health") {
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(if (m3eEnabled) 24.dp else 0.dp))
                     }
                 }
                 item(key = "hearing_health") {
@@ -476,7 +479,7 @@ fun AirPodsSettingsScreen(
 
             if (capabilities.contains(Capability.LISTENING_MODE)) {
                 item(key = "spacer_noise") {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
                 }
                 item(key = "noise_control") {
                     NoiseControlSettings(
@@ -499,7 +502,7 @@ fun AirPodsSettingsScreen(
 
             if (!m3eEnabled) {
                 if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
-                    item(key = "spacer_off_listening") { Spacer(modifier = Modifier.height(16.dp)) }
+                    item(key = "spacer_off_listening") { Spacer(modifier = Modifier.height(0.dp)) }
                     item(key = "off_listening") {
                         StyledToggle(
                             label = stringResource(R.string.off_listening_mode),
@@ -709,7 +712,7 @@ fun AirPodsSettingsScreen(
                     )
                 }
             } else {
-                item(key = "spacer_settings_hub") { Spacer(modifier = Modifier.height(16.dp)) }
+                item(key = "spacer_settings_hub") { Spacer(modifier = Modifier.height(0.dp)) }
                 item(key = "settings_hub") {
                     StyledList {
                         StyledListItem(
@@ -745,7 +748,7 @@ fun AirPodsSettingsScreen(
                     }
                 }
 
-                item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(16.dp)) }
+                item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(0.dp)) }
                 item(key = "battery_settings") {
                     StyledList {
                         StyledListItem(
@@ -776,7 +779,9 @@ fun AirPodsSettingsScreen(
                 }
             }
 
-            item(key = "spacer_about") { Spacer(modifier = Modifier.height(32.dp)) }
+            item(key = "spacer_about") {
+                Spacer(modifier = Modifier.height(if (m3eEnabled) 32.dp else 0.dp))
+            }
             item(key = "about") {
                 AboutCard(
                     modelName = state.modelName,
