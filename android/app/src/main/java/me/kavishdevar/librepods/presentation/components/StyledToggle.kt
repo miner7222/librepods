@@ -64,8 +64,10 @@ import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
@@ -79,18 +81,24 @@ fun StyledToggle(
     header: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
+    val appleMetrics = LocalAppleDesignMetrics.current
+    Column(
+        modifier = Modifier.padding(
+            top = if (m3eEnabled) 12.dp else 0.dp,
+            bottom = if (m3eEnabled) 12.dp else appleMetrics.cardGap
+        )
+    ) {
         title?.let {
             Box(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
                     .padding(top = 4.dp, bottom = if (m3eEnabled) 12.dp else 4.dp)
             ) {
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = MaterialTheme.typography.labelSmallEmphasized
+                    style = if (m3eEnabled) MaterialTheme.typography.labelSmallEmphasized else appleMetrics.sectionHeaderStyle
                 )
             }
         }
@@ -99,9 +107,9 @@ fun StyledToggle(
                 .fillMaxWidth()
                 .background(
                     if (m3eEnabled) if (header) MaterialTheme.colorScheme.primaryContainer else Color.Transparent else MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(if (m3eEnabled) (if (header) 64.dp else 16.dp) else 28.dp)
+                    RoundedCornerShape(if (m3eEnabled) (if (header) 64.dp else 16.dp) else appleMetrics.cardCornerRadius)
                 )
-                .clip(RoundedCornerShape(if (m3eEnabled) (if (header) 64.dp else 16.dp) else 28.dp))
+                .clip(RoundedCornerShape(if (m3eEnabled) (if (header) 64.dp else 16.dp) else appleMetrics.cardCornerRadius))
         ) {
             if (m3eEnabled) {
                 StyledToggleContent(
@@ -126,13 +134,12 @@ fun StyledToggle(
             }
         }
         if (description != null && !m3eEnabled) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(appleMetrics.cardFooterGap))
             Text(
-                text = description, style = TextStyle(
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-                    fontFamily = FontFamily(Font(R.font.pretendard)),
-                ), modifier = Modifier.padding(horizontal = 16.dp)
+                text = description,
+                style = appleMetrics.sectionFooterStyle,
+                color = MaterialTheme.colorScheme.secondaryLabel,
+                modifier = Modifier.padding(horizontal = appleMetrics.cardHorizontalInset)
             )
         }
     }
@@ -253,16 +260,25 @@ private fun StyledToggleContent(
             }
         }
     } else {
+        val appleMetrics = LocalAppleDesignMetrics.current
         val isPressed = remember { mutableStateOf(false) }
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        shape = RoundedCornerShape(28.dp),
+                        shape = RoundedCornerShape(appleMetrics.cardCornerRadius),
                         color = if (isPressed.value) Color(0xFFE0E0E0) else Color.Transparent
                     )
-                    .padding(16.dp)
+                    .heightIn(min = appleMetrics.listRowMinHeight)
+                    .padding(horizontal = appleMetrics.cardHorizontalInset)
+                    .padding(
+                        vertical = if (description != null) {
+                            appleMetrics.stackedRowVerticalPadding
+                        } else {
+                            0.dp
+                        }
+                    )
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onPress = {
@@ -300,11 +316,12 @@ private fun StyledToggleContent(
                     )
 
                     if (description != null) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        // No spacer: the two styles' line leading already puts ~6dp
+                        // between the ink, which is what iOS shows.
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodySmall,
-                            color = textColor.copy(0.8f)
+                            color = MaterialTheme.colorScheme.secondaryLabel
                         )
                     }
                 }

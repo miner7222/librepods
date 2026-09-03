@@ -87,6 +87,7 @@ val AppleTypography = Typography().run {
             fontSize = 14.sp,
             lineHeight = 18.sp
         ),
+        bodySmallEmphasized = bodySmallEmphasized.merge(AppleDesignMetrics.sectionFooterStyle),
 
         labelLarge = labelLarge.copy(fontFamily = pretendardFamily),
 
@@ -99,11 +100,7 @@ val AppleTypography = Typography().run {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         ),
-        labelSmallEmphasized = labelSmallEmphasized.copy(
-            fontFamily = pretendardFamily,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
-        )
+        labelSmallEmphasized = labelSmallEmphasized.merge(AppleDesignMetrics.sectionHeaderStyle)
     )
 }
 

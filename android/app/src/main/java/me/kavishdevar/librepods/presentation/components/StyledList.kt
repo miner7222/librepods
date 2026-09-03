@@ -22,8 +22,10 @@ import androidx.compose.ui.tooling.preview.Wallpapers.GREEN_DOMINATED_EXAMPLE
 import androidx.compose.ui.unit.dp
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 
 @Composable
 fun StyledList(
@@ -36,27 +38,30 @@ fun StyledList(
     scope.content()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
+    val appleMetrics = LocalAppleDesignMetrics.current
 
-    Column (modifier = modifier) {
+    Column(
+        modifier = modifier.padding(bottom = if (m3eEnabled) 0.dp else appleMetrics.cardGap)
+    ) {
         title?.let {
             Box(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
                     .padding(top = 4.dp, bottom = if (m3eEnabled) 12.dp else 4.dp)
             ) {
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = MaterialTheme.typography.labelSmallEmphasized
+                    style = if (m3eEnabled) MaterialTheme.typography.labelSmallEmphasized else appleMetrics.sectionHeaderStyle
                 )
             }
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface, RoundedCornerShape(if (m3eEnabled) 24.dp else 28.dp))
-                .clip(RoundedCornerShape(if (m3eEnabled) 24.dp else 28.dp))
+                .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface, RoundedCornerShape(if (m3eEnabled) 24.dp else appleMetrics.cardCornerRadius))
+                .clip(RoundedCornerShape(if (m3eEnabled) 24.dp else appleMetrics.cardCornerRadius))
         ) {
             if (m3eEnabled && description != null) {
                 Text(
@@ -72,15 +77,15 @@ fun StyledList(
             }
             Spacer(modifier = Modifier.height(if(m3eEnabled) 4.dp else 0.dp))
         }
-    }
-    if (!m3eEnabled && description != null) {
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmallEmphasized,
-            color = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        if (!m3eEnabled && description != null) {
+            Spacer(modifier = Modifier.height(appleMetrics.cardFooterGap))
+            Text(
+                text = description,
+                style = appleMetrics.sectionFooterStyle,
+                color = MaterialTheme.colorScheme.secondaryLabel,
+                modifier = Modifier.padding(horizontal = appleMetrics.cardHorizontalInset)
+            )
+        }
     }
 }
 

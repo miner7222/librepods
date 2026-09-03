@@ -75,6 +75,7 @@ import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.Shadow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import kotlin.math.abs
 
 @Composable
@@ -85,6 +86,7 @@ fun StyledSwitch(
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val haptics = LocalHapticFeedback.current
+    val appleMetrics = LocalAppleDesignMetrics.current
 
     // iOS system green, and the switch's own off-track grey, which is a good
     // deal lighter than the separator grey this used to borrow.
@@ -99,17 +101,10 @@ fun StyledSwitch(
         if (isDarkTheme) Color(0x8039393D) else Color(0x80E9E9EA)
     }
 
-    // Measured off an iOS 26 capture: the track runs about 64x27 pt, longer and
-    // a little flatter than the 51x31 of the older UISwitch, around a round
-    // thumb still inset by 2 pt on each side.
-    val trackWidth = 64.dp
-    val trackHeight = 27.dp
-    // The thumb is a stadium, wider than it is tall. Its height has to be the
-    // track height minus twice the 2dp inset, otherwise the inset is 2dp on the
-    // sides but 3dp top and bottom and the corner curves stop being concentric
-    // with the track's.
-    val thumbHeight = 23.dp
-    val thumbWidth = 38.dp
+    val trackWidth = appleMetrics.switchTrackWidth
+    val trackHeight = appleMetrics.switchTrackHeight
+    val thumbHeight = appleMetrics.switchThumbHeight
+    val thumbWidth = appleMetrics.switchThumbWidth
 
     val backdrop = rememberLayerBackdrop()
     val switchBackdrop = rememberLayerBackdrop()

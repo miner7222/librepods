@@ -100,6 +100,7 @@ import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
@@ -372,6 +373,7 @@ fun StyledSlider(
         }
 
         DesignSystem.Apple -> {
+            val appleMetrics = LocalAppleDesignMetrics.current
             val backgroundColor =
                 if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
             val isDarkTheme = isSystemInDarkTheme()
@@ -645,7 +647,7 @@ fun StyledSlider(
                                         .then(momentumAnimation.modifier)
                                         .drawBackdrop(
                                             rememberCombinedBackdrop(backdrop, sliderBackdrop),
-                                            { RoundedCornerShape(28.dp) },
+                                            { RoundedCornerShape(appleMetrics.sliderThumbCornerRadius) },
                                             highlight = {
                                                 val progress = momentumAnimation.progress
                                                 Highlight.Ambient.copy(alpha = progress)
@@ -692,10 +694,10 @@ fun StyledSlider(
                                             }
                                         )
                                 } else {
-                                    Modifier.background(trackColor, RoundedCornerShape(28.dp))
+                                    Modifier.background(trackColor, RoundedCornerShape(appleMetrics.sliderThumbCornerRadius))
                                 }
                             )
-                            .size(40f.dp, 24f.dp)
+                            .size(appleMetrics.sliderThumbWidth, appleMetrics.sliderThumbHeight)
                     )
                 }
             }
@@ -709,11 +711,8 @@ fun StyledSlider(
                     if (label != null) {
                         Text(
                             text = label,
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = labelTextColor.copy(alpha = 0.6f),
-                                fontFamily = FontFamily(Font(R.font.pretendard))
+                            style = appleMetrics.sectionHeaderStyle.copy(
+                                color = labelTextColor.copy(alpha = 0.6f)
                             ),
                             modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
                         )
@@ -722,9 +721,9 @@ fun StyledSlider(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(backgroundColor, RoundedCornerShape(28.dp))
+                            .background(backgroundColor, RoundedCornerShape(appleMetrics.cardCornerRadius))
                             .padding(horizontal = 8.dp, vertical = 0.dp)
-                            .heightIn(min = 58.dp),
+                            .heightIn(min = appleMetrics.listRowMinHeight),
                         contentAlignment = Alignment.Center
                     ) {
                         content()

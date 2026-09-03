@@ -23,7 +23,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,16 +67,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
+import me.kavishdevar.librepods.presentation.theme.tertiaryLabel
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
-
-/**
- * iOS secondaryLabel, measured off clean captures: about 0.46 of the label on
- * a light card and about 0.6 on a dark one. A single figure made the light
- * theme's descriptions read almost as dark as their titles.
- */
-private const val SECONDARY_LABEL_ALPHA_LIGHT = 0.46f
-private const val SECONDARY_LABEL_ALPHA_DARK = 0.6f
 
 @Composable
 fun StyledListItem(
@@ -88,37 +82,40 @@ fun StyledListItem(
     description: String? = null,
     annotatedDescription: AnnotatedString? = null,
     inlineContent: Map<String, InlineTextContent> = emptyMap(),
-    height: Dp = 58.dp,
+    height: Dp = LocalAppleDesignMetrics.current.listRowMinHeight,
     enabled: Boolean = true,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
     leadingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    Column {
+    val appleMetrics = LocalAppleDesignMetrics.current
+    Column(
+        modifier = Modifier.padding(bottom = if (m3eEnabled) 0.dp else appleMetrics.cardGap)
+    ) {
         title?.let {
             Box(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
                     .padding(top = 4.dp, bottom = if (m3eEnabled) 8.dp else 4.dp)
             ) {
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = MaterialTheme.typography.labelSmallEmphasized
+                    style = if (m3eEnabled) MaterialTheme.typography.labelSmallEmphasized else appleMetrics.sectionHeaderStyle
                 )
             }
         }
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .heightIn(min = 48.dp)
+                .heightIn(min = if (m3eEnabled) 48.dp else appleMetrics.listRowMinHeight)
                 .background(
                     if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(if (m3eEnabled) 16.dp else 28.dp)
+                    RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius)
                 )
-                .clip(RoundedCornerShape(if (m3eEnabled) 16.dp else 28.dp))
+                .clip(RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius))
         ) {
             StyledListItemContent(
                 name = name,
@@ -185,7 +182,7 @@ private fun StyledListItemContent(
     description: String? = null,
     annotatedDescription: AnnotatedString? = null,
     inlineContent: Map<String, InlineTextContent> = emptyMap(),
-    height: Dp = 58.dp,
+    height: Dp = LocalAppleDesignMetrics.current.listRowMinHeight,
     enabled: Boolean = true,
     index: Int,
     count: Int,
@@ -194,8 +191,8 @@ private fun StyledListItemContent(
     leadingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
+    val appleMetrics = LocalAppleDesignMetrics.current
     val descriptionText = annotatedDescription ?: description?.let { AnnotatedString(it) }
-    val isDarkTheme = isSystemInDarkTheme()
     val surfaceColor = MaterialTheme.colorScheme.surface
     val surfaceDimColor = MaterialTheme.colorScheme.surfaceDim
     var backgroundColor by remember { mutableStateOf(surfaceColor) }
@@ -224,7 +221,7 @@ private fun StyledListItemContent(
                             Icon(
                                 painter = painterResource(R.drawable.sf_chevron_forward),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+                                tint = MaterialTheme.colorScheme.tertiaryLabel,
                                 modifier = Modifier
                                     .padding(start = if (descriptionText != null) 6.dp else 0.dp)
                                     .size(19.dp)
@@ -241,13 +238,13 @@ private fun StyledListItemContent(
                         animatedBackgroundColor,
                         when {
                             (index == 0 && count == 1) -> {
-                                RoundedCornerShape(28.dp)
+                                RoundedCornerShape(appleMetrics.cardCornerRadius)
                             }
 
                             (index == 0) -> {
                                 RoundedCornerShape(
-                                    topStart = 28.dp,
-                                    topEnd = 28.dp,
+                                    topStart = appleMetrics.cardCornerRadius,
+                                    topEnd = appleMetrics.cardCornerRadius,
                                     bottomStart = 0.dp,
                                     bottomEnd = 0.dp
                                 )
@@ -257,8 +254,8 @@ private fun StyledListItemContent(
                                 RoundedCornerShape(
                                     topStart = 0.dp,
                                     topEnd = 0.dp,
-                                    bottomStart = 28.dp,
-                                    bottomEnd = 28.dp
+                                    bottomStart = appleMetrics.cardCornerRadius,
+                                    bottomEnd = appleMetrics.cardCornerRadius
                                 )
                             }
 
@@ -289,12 +286,18 @@ private fun StyledListItemContent(
                         )
                     }
                     .heightIn(min = height)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = appleMetrics.cardHorizontalInset)
             ) {
                 Row(
                     modifier = Modifier
                         .heightIn(min = height)
-                        .padding(vertical = if (orientation == ListItemOrientation.Vertical) 12.dp else 0.dp),
+                        .padding(
+                            vertical = if (orientation == ListItemOrientation.Vertical) {
+                                appleMetrics.stackedRowVerticalPadding
+                            } else {
+                                0.dp
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (leadingContent != null) {
@@ -308,11 +311,12 @@ private fun StyledListItemContent(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         if (descriptionText != null && orientation == ListItemOrientation.Vertical) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                            // No spacer: the two styles' line leading already puts ~6dp
+                            // between the ink, which is what iOS shows.
                             Text(
                                 text = descriptionText,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT),
+                                color = MaterialTheme.colorScheme.secondaryLabel,
                                 inlineContent = inlineContent,
                             )
                         }
@@ -324,7 +328,7 @@ private fun StyledListItemContent(
                         Text(
                             text = descriptionText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(if (isDarkTheme) SECONDARY_LABEL_ALPHA_DARK else SECONDARY_LABEL_ALPHA_LIGHT),
+                            color = MaterialTheme.colorScheme.secondaryLabel,
                             inlineContent = inlineContent,
                         )
                     }

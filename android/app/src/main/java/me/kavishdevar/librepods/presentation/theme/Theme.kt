@@ -29,10 +29,29 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 
+// iOS does not use a neutral grey for secondary text: it applies one tinted colour
+// at a fixed alpha over whatever the text sits on. Measured off the iOS 27 captures,
+// these two reproduce Apple's rendered values to within a unit per channel — on a
+// white card #8A8A8D, on the grouped background #85858A, on a dark card #98989F.
+private val AppleLabelLight = Color(0xFF3C3C43)
+private val AppleLabelDark = Color(0xFFEBEBF5)
+
+private val ColorScheme.appleLabel: Color
+    get() = if (onBackground.luminance() > 0.5f) AppleLabelDark else AppleLabelLight
+
+/** Descriptions, footers and section headers. */
+val ColorScheme.secondaryLabel: Color
+    get() = appleLabel.copy(alpha = 0.6f)
+
+/** Chevrons and other furniture that must not compete with the label beside it. */
+val ColorScheme.tertiaryLabel: Color
+    get() = appleLabel.copy(alpha = 0.3f)
+
 val ColorScheme.sectionHeader: Color
-    get() = onBackground.copy(alpha = 0.6f)
+    get() = secondaryLabel
 
 private val AppleDarkColorScheme = darkColorScheme(
     surfaceContainer = Color(0xFF000000), // for some reason background is not used as the background in gmail and settings app, but surfacecontainer, so using that
@@ -76,7 +95,8 @@ fun LibrePodsTheme(
     CompositionLocalProvider(
         LocalDesignSystem provides
             if (m3eEnabled) DesignSystem.Material
-            else DesignSystem.Apple
+            else DesignSystem.Apple,
+        LocalAppleDesignMetrics provides AppleDesignMetrics
     ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,

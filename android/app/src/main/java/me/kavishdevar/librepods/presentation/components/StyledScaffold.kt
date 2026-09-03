@@ -64,14 +64,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -83,6 +78,7 @@ import com.kyant.backdrop.highlight.Highlight
 import kotlinx.coroutines.flow.collect
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 
 @Composable
@@ -187,6 +183,7 @@ fun StyledScaffold(
             }
         }
         DesignSystem.Apple -> {
+            val appleMetrics = LocalAppleDesignMetrics.current
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -237,7 +234,7 @@ fun StyledScaffold(
                         ),
                         modifier = Modifier
                             .zIndex(2f)
-                            .height(64.dp + topPadding)
+                            .height(appleMetrics.navigationBarHeight + topPadding)
                             .fillMaxWidth()
                     ){
                         Box(
@@ -279,12 +276,8 @@ fun StyledScaffold(
                                 Crossfade(targetState = title) {
                                     Text(
                                         text = it,
-                                        style = TextStyle(
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = if (isDarkTheme) Color.White else Color.Black,
-                                            fontFamily = FontFamily(Font(R.font.pretendard))
-                                        ),
+                                        style = appleMetrics.navigationBarTitleStyle,
+                                        color = if (isDarkTheme) Color.White else Color.Black,
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center
                                     )
