@@ -7,6 +7,8 @@
     <string name="tone_volume">Tone Volume</string>
     <string name="tone_volume_description">Adjust the tone volume of sound effects played by AirPods.</string>
     <string name="audio">Audio</string>
+    <string name="audio_and_routing">Audio &amp; Routing</string>
+    <string name="controls_and_gestures">Controls &amp; Gestures</string>
     <string name="adaptive_audio">Adaptive Audio</string>
     <string name="customize_adaptive_audio">Customize Adaptive Audio</string>
     <string name="adaptive_audio_description">Adaptive audio dynamically responds to your environment and cancels or allows external noise. You can customize Adaptive Audio to allow more or less noise.</string>
