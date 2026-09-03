@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -75,7 +76,23 @@ fun BatterySettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
+        Text(
+            text = stringResource(R.string.battery_intro),
+            style = appleMetrics.sectionFooterStyle,
+            color = MaterialTheme.colorScheme.onBackground.copy(0.6f)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        StyledToggle(
+            label = stringResource(R.string.charge_notifications),
+            description = stringResource(R.string.charge_notifications_description),
+            checked = state.chargeNotifications,
+            onCheckedChange = viewModel::setChargeNotifications
+        )
+
         if (state.capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
+            Spacer(modifier = Modifier.height(16.dp))
             StyledToggle(
                 label = stringResource(R.string.optimized_charging),
                 description = stringResource(R.string.optimized_charging_description),

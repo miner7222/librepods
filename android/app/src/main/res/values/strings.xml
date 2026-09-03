@@ -303,6 +303,13 @@
     <string name="describe_your_issue">Describe your issue</string>
     <string name="optimized_charging">Optimized Charge Limit</string>
     <string name="optimized_charging_description">AirPods can learn from your daily usage and determine when to charge to an optimized limit and when to allow for full charge. This limit adapts to your daily usage and preserves your battery lifespan over time.\nThis setting may not affect unsupported AirPods, or AirPods on an older firmware version.</string>
+    <string name="charge_notifications">Charging Notifications</string>
+    <string name="charge_notifications_description">Receive notifications reminding you to charge your AirPods when the battery is low and when your AirPods have fully charged.</string>
+    <string name="battery_low_title">AirPods Battery Low</string>
+    <string name="battery_low_text">\"%1$s\" need charging.</string>
+    <string name="battery_charged_title">AirPods Charged</string>
+    <string name="battery_charged_text">\"%1$s\" is fully charged.</string>
+    <string name="battery_intro">AirPods batteries, like all rechargeable batteries, are consumable components that become less effective as they age.</string>
     <string name="enable_app_in_xposed_or_update_device">Update your device or enable LibrePods in Xposed and reopen the app to proceed.</string>
     <string name="play_foss_premium_banner">Due to an error in billing, premium access will expire in %1$d days. If you already upgraded the app, please click on this message to email billing@kavish.xyz to restore or verify access. Apologies for the inconvenience.</string>
     <string name="custom">Custom</string>
