@@ -21,3 +21,11 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class me.kavishdevar.librepods.utils.KotlinModule { *; }
+
+# NativeBridge is bound by name from l2c_fcr_hook.cpp
+# (Java_me_kavishdevar_librepods_utils_NativeBridge_setSdpHook), and it is a
+# separate top-level object, so the KotlinModule rule above does not cover it.
+-keep class me.kavishdevar.librepods.utils.NativeBridge { *; }
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
