@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
@@ -74,12 +75,14 @@ fun BatterySettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        StyledToggle(
-            label = stringResource(R.string.optimized_charging),
-            description = stringResource(R.string.optimized_charging_description),
-            checked = state.dynamicEndOfCharge,
-            onCheckedChange = viewModel::setDynamicEndOfCharge
-        )
+        if (state.capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
+            StyledToggle(
+                label = stringResource(R.string.optimized_charging),
+                description = stringResource(R.string.optimized_charging_description),
+                checked = state.dynamicEndOfCharge,
+                onCheckedChange = viewModel::setDynamicEndOfCharge
+            )
+        }
 
         Spacer(modifier = Modifier.height(bottomPadding))
     }
