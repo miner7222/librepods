@@ -1,6 +1,7 @@
 package me.kavishdevar.librepods.presentation.theme
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,23 @@ object AppleDesignMetrics {
     val cardGap = 35.dp
     val cardCornerRadius = 28.dp
     val cardHorizontalInset = 16.dp
+
+    val settingsHubIconTileSize = 28.dp
+    val settingsHubIconTileCornerRadius = 6.dp
+    // The glyph inside the tile is sized by WIDTH, not by the drawable's own 24dp
+    // height. Measured off the iOS 27 tiles, all four glyphs are ~19.6pt wide while
+    // their heights range 9-19pt; since these drawables' glyphs fill 93-95% of their
+    // viewport width, a fixed 21dp width reproduces every reference height to within
+    // half a point. Sizing by height instead makes the battery glyph overflow the tile.
+    val settingsHubIconGlyphWidth = 21.dp
+    // StyledListItem supplies 12.dp after leadingContent; the tile supplies
+    // the remaining 3.dp of the measured 15.dp icon-to-label gap.
+    val settingsHubIconLabelGapAdjustment = 3.dp
+    val settingsHubIconTint = Color.White
+    val audioAndRoutingIconTileColor = Color(0xFFFF2D55)
+    val controlsAndGesturesIconTileColor = Color(0xFF9F9FA4)
+    val accessibilityIconTileColor = Color(0xFF0092FF)
+    val batteryIconTileColor = Color(0xFF41D565)
 
     val navigationBarHeight = 44.dp
     val cardColumnTopInset = 17.5.dp

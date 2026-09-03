@@ -57,6 +57,9 @@ fun NavigationRoot(
     val title = when (currentScreen) {
         Screen.Onboarding -> ""
         Screen.AirPodsSettings -> if (state.isLocallyConnected) state.deviceName else stringResource(R.string.app_name)
+        Screen.AudioAndRouting -> stringResource(R.string.audio_and_routing)
+        Screen.ControlsAndGestures -> stringResource(R.string.controls_and_gestures)
+        Screen.Battery -> stringResource(R.string.battery)
         Screen.Accessibility -> stringResource(R.string.accessibility)
         Screen.AdaptiveStrength -> stringResource(R.string.customize_adaptive_audio)
         Screen.AppSettings -> stringResource(R.string.settings)

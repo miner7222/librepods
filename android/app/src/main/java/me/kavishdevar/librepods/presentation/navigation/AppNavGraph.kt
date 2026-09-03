@@ -20,7 +20,10 @@ import me.kavishdevar.librepods.presentation.screens.AccessibilitySettingsScreen
 import me.kavishdevar.librepods.presentation.screens.AdaptiveStrengthScreen
 import me.kavishdevar.librepods.presentation.screens.AirPodsSettingsRoute
 import me.kavishdevar.librepods.presentation.screens.AppSettingsScreen
+import me.kavishdevar.librepods.presentation.screens.AudioAndRoutingScreen
+import me.kavishdevar.librepods.presentation.screens.BatterySettingsScreen
 import me.kavishdevar.librepods.presentation.screens.CallControlScreen
+import me.kavishdevar.librepods.presentation.screens.ControlsAndGesturesScreen
 import me.kavishdevar.librepods.presentation.screens.EqualizerRoute
 import me.kavishdevar.librepods.presentation.screens.HeadTrackingScreen
 import me.kavishdevar.librepods.presentation.screens.HearingAidAdjustmentsScreen
@@ -62,6 +65,14 @@ fun AppNavGraph(
         navigate(Screen.Purchase)
     }
 
+    fun navigateToLeftLongPress() {
+        navigate(Screen.LongPress("Left"))
+    }
+
+    fun navigateToRightLongPress() {
+        navigate(Screen.LongPress("Right"))
+    }
+
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 
     SharedTransitionLayout {
@@ -91,26 +102,55 @@ fun AppNavGraph(
                                 navigateToRename = { navigate(Screen.Rename) },
                                 navigateToHearingProtection = { navigate(Screen.HearingProtection) },
                                 navigateToHearingAid = { navigate(Screen.HearingAid) },
-                                navigateToLeftLongPress = {
-                                    navigate(
-                                        Screen.LongPress("Left")
-                                    )
-                                },
-                                navigateToRightLongPress = {
-                                    navigate(
-                                        Screen.LongPress("Right")
-                                    )
-                                },
+                                navigateToLeftLongPress = ::navigateToLeftLongPress,
+                                navigateToRightLongPress = ::navigateToRightLongPress,
                                 navigateToPurchase = { navigate(Screen.Purchase) },
                                 navigateToAdaptiveStrength = { navigate(Screen.AdaptiveStrength) },
                                 navigateToEqualizer = { navigate(Screen.Equalizer) },
                                 navigateToHeadTracking = { navigate(Screen.HeadTracking) },
+                                navigateToAudioAndRouting = { navigate(Screen.AudioAndRouting) },
+                                navigateToControlsAndGestures = { navigate(Screen.ControlsAndGestures) },
                                 navigateToAccessibility = { navigate(Screen.Accessibility) },
+                                navigateToBattery = { navigate(Screen.Battery) },
                                 navigateToVersion = { navigate(Screen.VersionInfo) },
                                 navigateToTroubleshooting = { navigate(Screen.Troubleshooting) },
                                 navigateToCallControlScreen = { navigate(Screen.CallControl(it)) },
                                 navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) },
+                            )
+                        }
+
+                    Screen.AudioAndRouting ->
+                        NavEntry(screen) {
+                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            AudioAndRoutingScreen(
+                                viewModel = airPodsViewModel,
+                                navigateToAdaptiveStrength = { navigate(Screen.AdaptiveStrength) },
+                                navigateToEqualizer = { navigate(Screen.Equalizer) },
+                                navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
+                        }
+
+                    Screen.ControlsAndGestures ->
+                        NavEntry(screen) {
+                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            ControlsAndGesturesScreen(
+                                viewModel = airPodsViewModel,
+                                navigateToLeftLongPress = ::navigateToLeftLongPress,
+                                navigateToRightLongPress = ::navigateToRightLongPress,
+                                navigateToCallControlScreen = { navigate(Screen.CallControl(it)) },
+                                navigateToHeadTracking = { navigate(Screen.HeadTracking) },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
+                        }
+
+                    Screen.Battery ->
+                        NavEntry(screen) {
+                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            BatterySettingsScreen(
+                                viewModel = airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )
                         }
 
