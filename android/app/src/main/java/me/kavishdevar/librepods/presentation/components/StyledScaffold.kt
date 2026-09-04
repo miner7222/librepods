@@ -55,6 +55,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -81,15 +85,51 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 
+/**
+ * How far content may scroll before it reaches the bar at all. The Apple screens
+ * start their content one cardColumnTopInset below the bar's bottom edge, so
+ * until that much has gone by nothing is behind the bar and the divider would be
+ * marking an overlap that has not happened. Material lays its own bar directly on
+ * the content, so it has no such slack.
+ */
+@Composable
+private fun topBarOverlapThresholdPx(): Int {
+    val appleMetrics = LocalAppleDesignMetrics.current
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
+    return with(LocalDensity.current) {
+        if (m3eEnabled) 0 else appleMetrics.cardColumnTopInset.roundToPx()
+    }
+}
+
+/**
+ * The bar's divider follows a scroll container, but a container can leave the
+ * composition while its screen stays — the AirPods settings swap in a
+ * non-scrolling "not connected" state without changing screen — and the last
+ * value reported would otherwise stick, drawing a divider over content that
+ * cannot scroll. Reset on the way out.
+ */
+@Composable
+private fun ResetScrollReportOnDispose(onScrollStateChanged: (Boolean) -> Unit) {
+    // Keyed on Unit deliberately: the callers build this lambda inline, so keying
+    // on it would re-run the effect on recomposition and report a spurious reset
+    // mid-scroll.
+    val currentCallback by rememberUpdatedState(onScrollStateChanged)
+    DisposableEffect(Unit) {
+        onDispose { currentCallback(false) }
+    }
+}
+
 @Composable
 internal fun ReportStyledScaffoldScrollState(
     scrollState: ScrollState,
     onScrollStateChanged: (Boolean) -> Unit
 ) {
-    LaunchedEffect(scrollState, onScrollStateChanged) {
-        snapshotFlow { scrollState.value > 0 }
+    val threshold = topBarOverlapThresholdPx()
+    LaunchedEffect(scrollState, onScrollStateChanged, threshold) {
+        snapshotFlow { scrollState.value > threshold }
             .collect { onScrollStateChanged(it) }
     }
+    ResetScrollReportOnDispose(onScrollStateChanged)
 }
 
 @Composable
@@ -97,11 +137,14 @@ internal fun ReportStyledScaffoldScrollState(
     listState: LazyListState,
     onScrollStateChanged: (Boolean) -> Unit
 ) {
-    LaunchedEffect(listState, onScrollStateChanged) {
+    val threshold = topBarOverlapThresholdPx()
+    LaunchedEffect(listState, onScrollStateChanged, threshold) {
         snapshotFlow {
-            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+            listState.firstVisibleItemIndex > 0 ||
+                listState.firstVisibleItemScrollOffset > threshold
         }.collect { onScrollStateChanged(it) }
     }
+    ResetScrollReportOnDispose(onScrollStateChanged)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
