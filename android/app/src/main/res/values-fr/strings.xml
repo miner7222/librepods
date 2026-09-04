@@ -12,6 +12,7 @@
     <string name="case_alt">Boîtier</string>
     <string name="name">Nom</string>
     <string name="listening_mode">Mode d\'écoute</string>
+    <string name="volume">Volume</string>
     <string name="off">Désactivé</string>
     <string name="transparency">Transparence</string>
     <string name="adaptive">Adaptatif</string>

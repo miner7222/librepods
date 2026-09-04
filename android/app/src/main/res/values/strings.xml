@@ -16,6 +16,7 @@
     <string name="case_alt">Case</string>
     <string name="name">Name</string>
     <string name="listening_mode">Listening Mode</string>
+    <string name="volume">Volume</string>
     <string name="noise_control_section">Noise Control</string>
     <string name="off">Off</string>
     <string name="transparency">Transparency</string>

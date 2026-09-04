@@ -12,6 +12,7 @@
     <string name="case_alt">Kılıf</string>
     <string name="name">İsim</string>
     <string name="listening_mode">Dinleme Modu</string>
+    <string name="volume">Ses</string>
     <string name="off">Kapalı</string>
     <string name="transparency">Şeffaflık</string>
     <string name="adaptive">Uyarlanabilir</string>

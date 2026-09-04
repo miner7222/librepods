@@ -19,6 +19,8 @@ object AppleDesignMetrics {
     val cardFooterGap = 8.dp
     // iOS's measured gap between adjacent cards.
     val cardGap = 35.dp
+    // Compose's line leading supplies the rest of the measured 9.5pt gap.
+    val sectionHeaderBottomGap = 7.dp
     val cardCornerRadius = 28.dp
     val cardHorizontalInset = 16.dp
 

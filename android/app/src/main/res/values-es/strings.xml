@@ -12,6 +12,7 @@
     <string name="case_alt">Estuche</string>
     <string name="name">Nombre</string>
     <string name="listening_mode">Modo de Escucha</string>
+    <string name="volume">Volumen</string>
     <string name="off">Desactivado</string>
     <string name="transparency">Transparencia</string>
     <string name="adaptive">Adaptativo</string>

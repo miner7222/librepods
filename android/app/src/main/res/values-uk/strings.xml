@@ -12,6 +12,7 @@
     <string name="case_alt">Кейс</string>
     <string name="name">Назва</string>
     <string name="listening_mode">Режим Прослуховування</string>
+    <string name="volume">Гучність</string>
     <string name="off">Вимкнено</string>
     <string name="transparency">Проникність</string>
     <string name="adaptive">Адаптування</string>

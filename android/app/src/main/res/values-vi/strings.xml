@@ -12,6 +12,7 @@
     <string name="case_alt">Hộp sạc</string>
     <string name="name">Tên</string>
     <string name="listening_mode">Chế độ nghe</string>
+    <string name="volume">Âm lượng</string>
     <string name="off">Tắt</string>
     <string name="transparency">Xuyên âm</string>
     <string name="adaptive">Thích ứng</string>

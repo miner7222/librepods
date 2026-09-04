@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="volume">Lautstärke</string>
     <string name="app_description">Befreie deine AirPods aus Apples Ökosystem.</string>
     <string name="app_widget_description">Sieh den Akkustand deiner AirPods direkt vom Homescreen!</string>
     <string name="accessibility">Bedienungshilfen</string>

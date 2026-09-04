@@ -13,6 +13,7 @@
         <string name="case_alt">Custodia</string>
         <string name="name">Nome</string>
         <string name="listening_mode">Modalità di Ascolto</string>
+        <string name="volume">Volume</string>
         <string name="off">Spento</string>
         <string name="transparency">Trasparenza</string>
         <string name="adaptive">Adattivo</string>
