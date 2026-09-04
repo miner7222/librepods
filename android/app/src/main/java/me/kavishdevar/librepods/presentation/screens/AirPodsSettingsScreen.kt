@@ -22,9 +22,14 @@ package me.kavishdevar.librepods.presentation.screens
 
 // import me.kavishdevar.librepods.utils.RadareOffsetFinder
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.media.AudioManager
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -66,6 +71,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -120,17 +126,20 @@ import me.kavishdevar.librepods.presentation.components.PressAndHoldSettings
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
+import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.AppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsUiState
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import me.kavishdevar.librepods.presentation.viewmodel.demoState
 import java.util.concurrent.TimeUnit
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -210,7 +219,95 @@ fun AirPodsSettingsRoute(
     }
 }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
+@Composable
+private fun MediaVolumeSettings() {
+    val context = LocalContext.current
+    val audioManager = remember(context) {
+        context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+    val maxVolume = remember(audioManager) {
+        audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+    }
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
+    // The slider position is a float so the fill follows the finger; the stream has
+    // only ~16 steps, and feeding those back made the handle stick between them.
+    // appliedVolume is what we last wrote, so the drag neither re-reads the stream
+    // every frame nor mistakes the echo of its own write for someone else's change.
+    var appliedVolume by remember(audioManager) {
+        mutableIntStateOf(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+    }
+    var volumePosition by remember(audioManager) {
+        mutableFloatStateOf(appliedVolume.toFloat())
+    }
+
+    DisposableEffect(context, audioManager) {
+        val volumeReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == "android.media.VOLUME_CHANGED_ACTION") {
+                    val systemVolume =
+                        audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    if (systemVolume != appliedVolume) {
+                        appliedVolume = systemVolume
+                        volumePosition = systemVolume.toFloat()
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter("android.media.VOLUME_CHANGED_ACTION")
+        context.registerReceiver(volumeReceiver, filter)
+        onDispose {
+            context.unregisterReceiver(volumeReceiver)
+        }
+    }
+
+    val appleMetrics = LocalAppleDesignMetrics.current
+    val volumeLabel = stringResource(R.string.volume)
+
+    Column(
+        modifier = Modifier.padding(
+            bottom = if (m3eEnabled) 0.dp else appleMetrics.cardGap
+        )
+    ) {
+        if (!m3eEnabled) {
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .padding(horizontal = appleMetrics.cardHorizontalInset)
+                    .padding(top = 4.dp, bottom = appleMetrics.sectionHeaderBottomGap)
+            ) {
+                Text(
+                    text = volumeLabel,
+                    color = MaterialTheme.colorScheme.sectionHeader,
+                    style = appleMetrics.sectionHeaderStyle
+                )
+            }
+        }
+
+        StyledSlider(
+            label = if (m3eEnabled) volumeLabel else null,
+            value = volumePosition,
+            onValueChange = { value ->
+                volumePosition = value
+                val target = value.roundToInt().coerceIn(0, maxVolume)
+                if (target != appliedVolume) {
+                    appliedVolume = target
+                    try {
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0)
+                    } catch (e: Exception) {
+                        Log.e("AirPodsSettings", "Failed to set volume", e)
+                    }
+                }
+            },
+            valueRange = 0f..maxVolume.toFloat(),
+            startIcon = R.drawable.sf_speaker_wave_3_fill,
+            independent = true,
+            prominent = true
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MissingPermission", "UnspecifiedRegisterReceiverFlag")
 @Composable
 fun AirPodsSettingsScreen(
@@ -394,6 +491,10 @@ fun AirPodsSettingsScreen(
                         },
                     )
                 }
+            }
+
+            item(key = "media_volume") {
+                MediaVolumeSettings()
             }
 
             if (!m3eEnabled) {

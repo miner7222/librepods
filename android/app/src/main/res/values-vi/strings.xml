@@ -14,6 +14,7 @@
     <string name="test">Kiểm tra</string>
     <string name="name">Tên</string>
     <string name="noise_control">Chế độ nghe</string>
+    <string name="volume">Âm lượng</string>
     <string name="off">Tắt</string>
     <string name="transparency">Xuyên âm</string>
     <string name="adaptive">Thích ứng</string>

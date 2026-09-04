@@ -14,6 +14,7 @@
     <string name="test">Тест</string>
     <string name="name">Назва</string>
     <string name="noise_control">Режим Прослуховування</string>
+    <string name="volume">Гучність</string>
     <string name="off">Вимкнено</string>
     <string name="transparency">Проникність</string>
     <string name="adaptive">Адаптування</string>

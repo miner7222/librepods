@@ -14,6 +14,7 @@
     <string name="test">Teste</string>
     <string name="name">Nome</string>
     <string name="noise_control">Modo de Escuta</string>
+    <string name="volume">Volume</string>
     <string name="off">Desligado</string>
     <string name="transparency">Transparência</string>
     <string name="adaptive">Adaptativo</string>

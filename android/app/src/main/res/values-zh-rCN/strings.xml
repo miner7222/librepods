@@ -13,6 +13,7 @@
     <string name="test">测试</string>
     <string name="name">名称</string>
     <string name="noise_control">听音模式</string>
+    <string name="volume">音量</string>
     <string name="off">关闭</string>
     <string name="transparency">通透模式</string>
     <string name="adaptive">自适应</string>
