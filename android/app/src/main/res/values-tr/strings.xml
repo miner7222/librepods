@@ -14,6 +14,7 @@
     <string name="test">Test</string>
     <string name="name">İsim</string>
     <string name="noise_control">Dinleme Modu</string>
+    <string name="volume">Ses</string>
     <string name="off">Kapalı</string>
     <string name="transparency">Şeffaflık</string>
     <string name="adaptive">Uyarlanabilir</string>
