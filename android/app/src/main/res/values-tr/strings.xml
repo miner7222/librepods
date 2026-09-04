@@ -19,7 +19,6 @@
     <string name="transparency">Şeffaflık</string>
     <string name="adaptive">Uyarlanabilir</string>
     <string name="noise_cancellation">Gürültü Engelleme</string>
-    <string name="press_and_hold_airpods">AirPods\'a Basılı Tutun</string>
     <string name="press_and_hold_noise_control_description">Seçili dinleme modları arasında geçiş yapmak için sapı basılı tutun.</string>
     <string name="head_gestures">Kafa Hareketleri</string>
     <string name="left">Sol</string>
@@ -114,9 +113,6 @@
     <string name="volume_swipe_speed">Ses Kaydırma Hızı</string>
     <string name="volume_swipe_speed_description">İstenmeyen ses ayarlamalarını önlemek için, kaydırmalar arasındaki tercih edilen bekleme süresini seçin.</string>
     <string name="equalizer">Ekolayzer</string>
-    <string name="apply_eq_to">EQ\'yu uygula</string>
-    <string name="phone">Telefon</string>
-    <string name="media">Medya</string>
     <string name="band_label">Bant %d</string>
     <string name="default_option">Varsayılan</string>
     <string name="slower">Daha Yavaş</string>
@@ -173,10 +169,6 @@
     <string name="found_offset_restart_bluetooth">Ofset bulundu, lütfen Bluetooth sürecini yeniden başlatın</string>
     <string name="digital_assistant">Dijital Asistan</string>
     <string name="on">Açık</string>
-    <string name="camera_remote">Kamera Uzaktan Kumandası</string>
-    <string name="camera_control">Kamera Kontrolü</string>
-    <string name="camera_control_description">Bir Kez Bas veya Basılı Tut kullanarak fotoğraf çekin, kaydı başlatın veya durdurun ve daha fazlasını yapın. Kamera işlemleri için AirPods kullanırken, Bir Kez Bas\'ı seçerseniz, medya kontrol hareketleri kullanılamaz ve Basılı Tut\'u seçerseniz, dinleme modu ve Dijital Asistan hareketleri kullanılamaz.</string>
-    <string name="camera_control_app_description">Kamera algılama için özel uygulama paketi ayarlayın</string>
     <string name="set_custom_camera_package">Özel Kamera uygulama kimliğini ayarla</string>
     <string name="enter_custom_camera_package">Kamera uygulamasının uygulama kimliğini girin:</string>
     <string name="custom_camera_package">Özel Kamera uygulama kimliği</string>

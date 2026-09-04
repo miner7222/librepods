@@ -188,8 +188,6 @@ fun AirPodsSettingsRoute(
             setControlCommandInt = viewModel::setControlCommandInt,
             setControlCommandBoolean = viewModel::setControlCommandBoolean,
 //        setControlCommandValue = viewModel::setControlCommandValue,
-            setControlCommandByte = viewModel::setControlCommandByte,
-
             setATTCharacteristicValue = viewModel::setATTCharacteristicValue,
 
             onAutomaticEarDetectionChanged = viewModel::setAutomaticEarDetectionEnabled,
@@ -323,7 +321,6 @@ fun AirPodsSettingsScreen(
         setControlCommandInt: (AACPManager.Companion.ControlCommandIdentifiers, Int) -> Unit,
         setControlCommandBoolean: (AACPManager.Companion.ControlCommandIdentifiers, Boolean) -> Unit,
 //        setControlCommandValue: (AACPManager.Companion.ControlCommandIdentifiers, ByteArray) -> Unit,
-        setControlCommandByte: (AACPManager.Companion.ControlCommandIdentifiers, Byte) -> Unit,
         setATTCharacteristicValue: (ATTHandles, ByteArray) -> Unit,
 
         onAutomaticEarDetectionChanged: (Boolean) -> Unit,
@@ -1123,7 +1120,6 @@ fun AirPodsSettingsScreenPreviewApple() {
 
                 setControlCommandInt = { _, _ -> },
                 setControlCommandBoolean = { _, _ -> },
-                setControlCommandByte = { _, _ -> },
                 setATTCharacteristicValue = { _, _ -> },
 
                 onAutomaticEarDetectionChanged = {},
@@ -1173,7 +1169,6 @@ fun AirPodsSettingsScreenPreviewMaterial() {
 
                 setControlCommandInt = { _, _ -> },
                 setControlCommandBoolean = { _, _ -> },
-                setControlCommandByte = { _, _ -> },
                 setATTCharacteristicValue = { _, _ -> },
 
                 onAutomaticEarDetectionChanged = {},
