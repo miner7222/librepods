@@ -48,6 +48,13 @@ object AppleDesignMetrics {
     val batteryIconTileColor = Color(0xFF41D565)
 
     val navigationBarHeight = 44.dp
+
+    /**
+     * How far the scrolled bar's tint reaches past the bar itself. Apple leaves
+     * about 14dp under the back button before the hairline; the bar on its own
+     * leaves 4, which is what made the line look stuck to the button.
+     */
+    val navigationBarScrolledExtra = 11.dp
     // Measured from the navigation bar's bottom, taken as the back button's centre
     // plus half its 44pt height: iOS opens its content 27.5pt below the bar. This
     // also sets how far content may scroll before the bar draws its divider, since

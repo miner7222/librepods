@@ -54,11 +54,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -81,15 +87,51 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
+/**
+ * How far content may scroll before it reaches the bar at all. The Apple screens
+ * start their content one cardColumnTopInset below the bar's bottom edge, so
+ * until that much has gone by nothing is behind the bar and the divider would be
+ * marking an overlap that has not happened. Material lays its own bar directly on
+ * the content, so it has no such slack.
+ */
+@Composable
+private fun topBarOverlapThresholdPx(): Int {
+    val appleMetrics = LocalAppleDesignMetrics.current
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
+    return with(LocalDensity.current) {
+        if (m3eEnabled) 0 else appleMetrics.cardColumnTopInset.roundToPx()
+    }
+}
+
+/**
+ * The bar's divider follows a scroll container, but a container can leave the
+ * composition while its screen stays — the AirPods settings swap in a
+ * non-scrolling "not connected" state without changing screen — and the last
+ * value reported would otherwise stick, drawing a divider over content that
+ * cannot scroll. Reset on the way out.
+ */
+@Composable
+private fun ResetScrollReportOnDispose(onScrollStateChanged: (Boolean) -> Unit) {
+    // Keyed on Unit deliberately: the callers build this lambda inline, so keying
+    // on it would re-run the effect on recomposition and report a spurious reset
+    // mid-scroll.
+    val currentCallback by rememberUpdatedState(onScrollStateChanged)
+    DisposableEffect(Unit) {
+        onDispose { currentCallback(false) }
+    }
+}
+
 @Composable
 internal fun ReportStyledScaffoldScrollState(
     scrollState: ScrollState,
     onScrollStateChanged: (Boolean) -> Unit
 ) {
-    LaunchedEffect(scrollState, onScrollStateChanged) {
-        snapshotFlow { scrollState.value > 0 }
+    val threshold = topBarOverlapThresholdPx()
+    LaunchedEffect(scrollState, onScrollStateChanged, threshold) {
+        snapshotFlow { scrollState.value > threshold }
             .collect { onScrollStateChanged(it) }
     }
+    ResetScrollReportOnDispose(onScrollStateChanged)
 }
 
 @Composable
@@ -97,11 +139,14 @@ internal fun ReportStyledScaffoldScrollState(
     listState: LazyListState,
     onScrollStateChanged: (Boolean) -> Unit
 ) {
-    LaunchedEffect(listState, onScrollStateChanged) {
+    val threshold = topBarOverlapThresholdPx()
+    LaunchedEffect(listState, onScrollStateChanged, threshold) {
         snapshotFlow {
-            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+            listState.firstVisibleItemIndex > 0 ||
+                listState.firstVisibleItemScrollOffset > threshold
         }.collect { onScrollStateChanged(it) }
     }
+    ResetScrollReportOnDispose(onScrollStateChanged)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -234,7 +279,10 @@ fun StyledScaffold(
                         ),
                         modifier = Modifier
                             .zIndex(2f)
-                            .height(appleMetrics.navigationBarHeight + topPadding)
+                            .height(
+                                appleMetrics.navigationBarHeight + topPadding +
+                                    appleMetrics.navigationBarScrolledExtra
+                            )
                             .fillMaxWidth()
                     ){
                         Box(
@@ -254,6 +302,7 @@ fun StyledScaffold(
                                             exportedBackdrop = backdrop,
                                             shape = { RectangleShape },
                                             highlight = { Highlight.Ambient.copy(alpha = 0f) },
+                                            shadow = { null },
                                             effects = {
                                                 vibrancy()
                                                 blur(6f.dp.toPx())
@@ -261,10 +310,23 @@ fun StyledScaffold(
                                             onDrawSurface = {
                                                 // Only ever drawn once content is
                                                 // under the bar, so this cannot
-                                                // band against an empty page.
+                                                // band against an empty page. The
+                                                // tint sits a shade above the page
+                                                // rather than level with it, which
+                                                // is what lifts the bar off the
+                                                // content passing under it.
                                                 drawRect(
                                                     if (isDarkTheme) Color.Black.copy(0.55f)
-                                                    else Color(0xFFF2F2F7).copy(alpha = 0.85f)
+                                                    else Color(0xFFF9F9FE).copy(alpha = 0.85f)
+                                                )
+                                                // Apple closes the bar with a
+                                                // hairline, not a shadow.
+                                                val hairline = 0.5.dp.toPx()
+                                                drawRect(
+                                                    color = if (isDarkTheme) Color.White.copy(0.15f)
+                                                    else Color.Black.copy(0.12f),
+                                                    topLeft = Offset(0f, size.height - hairline),
+                                                    size = Size(size.width, hairline)
                                                 )
                                             }
                                         )
