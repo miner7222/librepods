@@ -16,7 +16,6 @@
     <string name="transparency">주변음 허용</string>
     <string name="adaptive">적응형</string>
     <string name="noise_cancellation">노이즈 캔슬링</string>
-    <string name="press_and_hold_airpods">AirPods 길게 누르기</string>
     <string name="press_and_hold_listening_mode_description">AirPods의 기둥 부분을 길게 누르면 선택한 소음 제어 모드가 차례로 전환됩니다.</string>
     <string name="head_gestures">고개 제스처</string>
     <string name="left">왼쪽</string>
@@ -111,9 +110,6 @@
     <string name="volume_swipe_speed">음량 조절 동작 간격</string>
     <string name="volume_swipe_speed_description">쓸어서 음량을 조절한 뒤 다음 쓸기 동작이 인식될 때까지의 대기 시간을 설정합니다. 간격을 늘리면 실수로 음량이 바뀌는 것을 줄일 수 있습니다.</string>
     <string name="equalizer">이퀄라이저</string>
-    <string name="apply_eq_to">EQ 적용 대상</string>
-    <string name="phone">통화</string>
-    <string name="media">미디어</string>
     <string name="band_label">밴드 %d</string>
     <string name="default_option">기본값</string>
     <string name="slower">느리게</string>
@@ -175,10 +171,6 @@
     <string name="found_offset_restart_bluetooth">Bluetooth 프로세스를 다시 시작하세요</string>
     <string name="digital_assistant">디지털 어시스턴트</string>
     <string name="on">켬</string>
-    <string name="camera_remote">카메라 리모컨</string>
-    <string name="camera_control">카메라 제어</string>
-    <string name="camera_control_description">AirPods를 한 번 누르거나 길게 눌러 사진을 찍고 녹화를 시작하거나 중지할 수 있습니다. ‘한 번 누르기’를 카메라 제어에 사용하면 미디어 제어를, ‘길게 누르기’를 사용하면 소음 제어 모드 전환과 디지털 어시스턴트 실행을 해당 동작으로 사용할 수 없습니다.</string>
-    <string name="camera_control_app_description">카메라로 인식할 앱의 패키지 이름을 직접 입력합니다.</string>
     <string name="set_custom_camera_package">카메라 앱 직접 지정</string>
     <string name="enter_custom_camera_package">카메라 앱의 애플리케이션 ID를 입력하세요:</string>
     <string name="custom_camera_package">사용자 지정 카메라 앱 ID</string>

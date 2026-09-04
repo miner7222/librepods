@@ -17,7 +17,6 @@
     <string name="transparency">Transparenz</string>
     <string name="adaptive">Adaptiv</string>
     <string name="noise_cancellation">Geräuschunterdrückung</string>
-    <string name="press_and_hold_airpods">AirPods drücken und halten</string>
     <string name="press_and_hold_listening_mode_description">Drücke und halte den Stiel, um zwischen den ausgewählten Hörmodi zu wechseln.</string>
     <string name="head_gestures">Kopfgesten</string>
     <string name="left">Links</string>
@@ -112,9 +111,6 @@
     <string name="volume_swipe_speed">Wischgeschwindigkeit für Lautstärke</string>
     <string name="volume_swipe_speed_description">Wähle eine bevorzugte Wartezeit zwischen Wischbewegungen, um unbeabsichtigte Lautstärkeänderungen zu vermeiden.</string>
     <string name="equalizer">Equalizer</string>
-    <string name="apply_eq_to">EQ anwenden auf</string>
-    <string name="phone">Telefonate</string>
-    <string name="media">Medien</string>
     <string name="band_label">Band %d</string>
     <string name="default_option">Standard</string>
     <string name="slower">Langsamer</string>
@@ -171,10 +167,6 @@
     <string name="found_offset_restart_bluetooth">Bitte den Bluetooth-Prozess neu starten</string>
     <string name="digital_assistant">Sprachassistent</string>
     <string name="on">An</string>
-    <string name="camera_remote">Kamera-Auslöser</string>
-    <string name="camera_control">Kamerasteuerung</string>
-    <string name="camera_control_description">Mache ein Foto, starte oder stoppe eine Aufnahme und mehr per „Einmal drücken“ oder „Drücken und halten“. Wenn du AirPods für Kameraaktionen nutzt: Bei „Einmal drücken“ sind Mediensteuerungs-Gesten nicht verfügbar, bei „Drücken und halten“ sind Hörmodus- und Sprachassistent-Gesten nicht verfügbar.</string>
-    <string name="camera_control_app_description">Eigenes App-Paket für die Kamera-Erkennung festlegen</string>
     <string name="set_custom_camera_package">Eigene Kamera-App-ID festlegen</string>
     <string name="enter_custom_camera_package">Gib die App-ID der Kamera-App ein:</string>
     <string name="custom_camera_package">Eigene Kamera-App-ID</string>

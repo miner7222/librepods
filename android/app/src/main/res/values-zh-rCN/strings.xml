@@ -17,7 +17,6 @@
     <string name="transparency">通透模式</string>
     <string name="adaptive">自适应</string>
     <string name="noise_cancellation">降噪</string>
-    <string name="press_and_hold_airpods">按住 AirPods</string>
     <string name="press_and_hold_listening_mode_description">按住耳机柄在所选聆听模式之间切换。</string>
     <string name="head_gestures">头部动作</string>
     <string name="left">左</string>
@@ -112,9 +111,6 @@
     <string name="volume_swipe_speed">音量轻扫速度</string>
     <string name="volume_swipe_speed_description">为避免意外调整音量，请选择轻扫间的首选等候时间。</string>
     <string name="equalizer">均衡器</string>
-    <string name="apply_eq_to">将均衡器应用于</string>
-    <string name="phone">电话</string>
-    <string name="media">媒体</string>
     <string name="band_label">频段 %d</string>
     <string name="default_option">默认</string>
     <string name="slower">较慢</string>
@@ -178,10 +174,6 @@
     <string name="found_offset_restart_bluetooth">找到偏移量，请重启蓝牙进程</string>
     <string name="digital_assistant">数字助理</string>
     <string name="on">打开</string>
-    <string name="camera_remote">相机遥控器</string>
-    <string name="camera_control">相机控制</string>
-    <string name="camera_control_description">“按一下”或“按住”可用于拍照、开始或停止录像等。使用 AirPods 进行相机操作时，若选择“按一下”，媒体控制手势将不可用；若选择“按住”，聆听模式和数字助理手势将不可用。</string>
-    <string name="camera_control_app_description">为相机检测设置自定义应用包名</string>
     <string name="set_custom_camera_package">设置自定义相机应用 ID</string>
     <string name="enter_custom_camera_package">输入相机应用的应用程序 ID：</string>
     <string name="custom_camera_package">自定义相机应用 ID</string>

@@ -17,7 +17,6 @@
     <string name="transparency">外部音取り込み</string>
     <string name="adaptive">適応型</string>
     <string name="noise_cancellation">ノイズキャンセリング</string>
-    <string name="press_and_hold_airpods">AirPodsを長押し</string>
     <string name="press_and_hold_listening_mode_description">ステム（軸部分）を長押しして、選択したリスニングモードを切り替えます。</string>
     <string name="head_gestures">頭のジェスチャ</string>
     <string name="left">左</string>
@@ -112,9 +111,6 @@
     <string name="volume_swipe_speed">音量スワイプの速度</string>
     <string name="volume_swipe_speed_description">意図しない音量調整を防ぐため、スワイプ間の待機時間を選択します。</string>
     <string name="equalizer">イコライザ</string>
-    <string name="apply_eq_to">イコライザの適用対象</string>
-    <string name="phone">通話</string>
-    <string name="media">メディア</string>
     <string name="band_label">バンド %d</string>
     <string name="default_option">デフォルト</string>
     <string name="slower">遅く</string>
@@ -176,10 +172,6 @@
     <string name="found_offset_restart_bluetooth">Bluetoothプロセスを再起動してください</string>
     <string name="digital_assistant">デジタルアシスタント</string>
     <string name="on">オン</string>
-    <string name="camera_remote">カメラリモート</string>
-    <string name="camera_control">カメラコントロール</string>
-    <string name="camera_control_description">「1回押す」または「長押し」を使用して、写真の撮影やビデオ撮影の開始・停止などを行えます。AirPodsをカメラ操作に使用する場合、「1回押す」を選択するとメディア操作のジェスチャが利用できなくなり、「長押し」を選択するとリスニングモードとデジタルアシスタントのジェスチャが利用できなくなります。</string>
-    <string name="camera_control_app_description">カメラ検出用のカスタムアプリのパッケージ名を設定します</string>
     <string name="set_custom_camera_package">カスタムカメラのパッケージ名を設定</string>
     <string name="enter_custom_camera_package">カメラアプリのパッケージ名（Application ID）を入力してください:</string>
     <string name="custom_camera_package">カスタムカメラのパッケージ名</string>
