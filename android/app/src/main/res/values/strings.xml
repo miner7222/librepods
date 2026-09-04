@@ -23,7 +23,6 @@
     <string name="transparency">Transparency</string>
     <string name="adaptive">Adaptive</string>
     <string name="noise_cancellation">Noise Cancellation</string>
-    <string name="press_and_hold_airpods">Press and Hold AirPods</string>
     <string name="press_and_hold_airpod">Press and Hold AirPod</string>
     <string name="press_and_hold_noise_control_description">Press and hold the stem to cycle between the selected listening modes.</string>
     <string name="head_gestures">Head Gestures</string>
@@ -131,9 +130,6 @@
     <string name="volume_swipe_speed_description">To prevent unintended volume adjustments, select preferred wait time between swipes.</string>
     <string name="equalizer">Equalizer</string>
     <string name="equalizer_description">AirPods reproduce music, TV shows, movies, and call audio faithfully, based on Apple\'s design and engineering. If you prefer a different sound profile, you can customize how AirPods reproduce audio using Custom.</string>
-    <string name="apply_eq_to">Apply EQ to</string>
-    <string name="phone">Phone</string>
-    <string name="media">Media</string>
     <string name="band_label">Band %d</string>
     <string name="equalizer_low">Low</string>
     <string name="equalizer_mid">Mid</string>
@@ -200,10 +196,6 @@
     <string name="found_offset_restart_bluetooth">Please restart the Bluetooth process</string>
     <string name="digital_assistant">Digital Assistant</string>
     <string name="on">On</string>
-    <string name="camera_remote">Camera Remote</string>
-    <string name="camera_control">Camera Control</string>
-    <string name="camera_control_description">Capture a photo, start or stop recording, and more using either Press Once or Press and Hold. When using AirPods for camera actions, if you select Press Once, media control gestures will be unavailable, and if you select Press and Hold, listening mode and Digital Assistant gestures will be unavailable.</string>
-    <string name="camera_control_app_description">Set a custom app package for camera detection</string>
     <string name="set_custom_camera_package">Set Custom Camera appid</string>
     <string name="enter_custom_camera_package">Enter the application id of the camera app:</string>
     <string name="custom_camera_package">Custom Camera appid</string>

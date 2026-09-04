@@ -19,7 +19,6 @@
     <string name="transparency">Transparence</string>
     <string name="adaptive">Adaptatif</string>
     <string name="noise_cancellation">Réduction de bruit</string>
-    <string name="press_and_hold_airpods">Appuyer et maintenir les AirPods</string>
     <string name="press_and_hold_noise_control_description">Maintenez la tige pour passer entre les modes d\'écoute sélectionnés.</string>
     <string name="head_gestures">Gestes de la tête</string>
     <string name="left">Gauche</string>
@@ -114,9 +113,6 @@
     <string name="volume_swipe_speed">Vitesse du balayage du volume</string>
     <string name="volume_swipe_speed_description">Pour éviter les changements de volume involontaires, sélectionnez le délai préféré entre les balayages.</string>
     <string name="equalizer">Égaliseur</string>
-    <string name="apply_eq_to">Appliquer l\'EQ à</string>
-    <string name="phone">Téléphone</string>
-    <string name="media">Média</string>
     <string name="band_label">Bande %d</string>
     <string name="default_option">Par défaut</string>
     <string name="slower">Plus lent</string>
@@ -173,10 +169,6 @@
     <string name="found_offset_restart_bluetooth">Offset trouvé. Veuillez redémarrer le processus Bluetooth.</string>
     <string name="digital_assistant">Assistant numérique</string>
     <string name="on">Activé</string>
-    <string name="camera_remote">Télécommande de l\'appareil photo</string>
-    <string name="camera_control">Contrôle de la caméra</string>
-    <string name="camera_control_description">Prenez une photo, lancez/arrêtez un enregistrement, etc., avec un appui simple ou un appui long. Si vous utilisez un appui simple, les gestes de contrôle multimédia seront indisponibles ; si vous utilisez un appui long, les gestes de mode d\'écoute et d\'assistant numérique seront indisponibles.</string>
-    <string name="camera_control_app_description">Définir un paquet d\'application de caméra personnalisé</string>
     <string name="set_custom_camera_package">Définir un appid de caméra personnalisé</string>
     <string name="enter_custom_camera_package">Entrez l\'identifiant de l\'application caméra :</string>
     <string name="custom_camera_package">Appid caméra personnalisé</string>
