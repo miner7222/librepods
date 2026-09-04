@@ -394,13 +394,17 @@ half4 main(float2 coord) {
                             }
                         }
                     }
-                    .size(with(density) { 48.sp.toDp() }),
+                    // iOS draws this button at 44 and its chevron 19 tall. Ours was
+                    // 48 around a 24 box, and since these drawables' ink fills about
+                    // 71% of their box that came out at 17 - a bigger button holding
+                    // a smaller glyph, which is what made the icon look shrunken.
+                    .size(with(density) { 44.sp.toDp() }),
             ) {
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = contentDescription,
                     tint = if (iconTint.isSpecified) iconTint else if (darkMode) Color.White else Color.Black,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(27.dp)
                 )
             }
         }
