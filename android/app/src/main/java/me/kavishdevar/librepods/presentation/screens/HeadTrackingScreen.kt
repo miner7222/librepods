@@ -80,11 +80,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
+import me.kavishdevar.librepods.presentation.components.HeadGestureFace
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
@@ -96,10 +97,13 @@ import me.kavishdevar.librepods.utils.HeadTracking
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
 
-@ExperimentalHazeMaterialsApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun HeadTrackingScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -> Unit) {
+fun HeadTrackingScreen(
+    viewModel: AirPodsViewModel,
+    navigateToPurchase: () -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
     DisposableEffect(Unit) {
         viewModel.startHeadTracking()
@@ -125,6 +129,7 @@ fun HeadTrackingScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -> Un
     var shouldExplode by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
 
     Column(
         modifier = Modifier
@@ -160,13 +165,45 @@ fun HeadTrackingScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -> Un
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
+            if (!m3eEnabled) {
+                Spacer(modifier = Modifier.height(8.dp))
+                HeadGestureFace(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    // Measured off the references, and the two themes do not use
+                    // the same strength: #5C5B60 on black is 0.39 of #EBEBF5, while
+                    // #BDBCBF on the light grouped background is 0.29 of #3C3C43.
+                    color = if (isDarkTheme) {
+                        Color(0xFFEBEBF5).copy(alpha = 0.39f)
+                    } else {
+                        Color(0xFF3C3C43).copy(alpha = 0.29f)
+                    }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.head_gestures_details),
+                    style = MaterialTheme.typography.bodyMedium,
+                    // iOS sets this paragraph in the primary label colour, not the
+                    // secondary one it uses for footers.
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+
             StyledToggle(
                 label = stringResource(R.string.head_gestures),
                 checked = state.headGesturesEnabled,
                 onCheckedChange = { viewModel.setHeadGesturesEnabled(it) },
                 enabled = state.isPremium || state.headGesturesEnabled,
-                description = stringResource(R.string.head_gestures_details),
-                header = true
+                description = if (m3eEnabled) {
+                    stringResource(R.string.head_gestures_details)
+                } else {
+                    null
+                },
+                header = m3eEnabled
             )
 
             Spacer(modifier = Modifier.height(16.dp))
