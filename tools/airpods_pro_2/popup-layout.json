@@ -1,0 +1,45 @@
+{
+  "popup_card_x": [
+    12,
+    738
+  ],
+  "case_bounds_px": [
+    399,
+    738,
+    644,
+    951
+  ],
+  "pair_bounds_px": [
+    77,
+    781,
+    271,
+    926
+  ],
+  "fit_ortho_m": 0.15498277753096462,
+  "fit_elevation_degrees": 0,
+  "fit_phase_degrees": -38.599334663678555,
+  "fit_half_unit_spacing_m": 0.013044254859784997,
+  "case_center_fraction": 0.7017906336088154,
+  "pair_center_fraction": 0.2231404958677686,
+  "fit_bounds_normalized": [
+    0.3374655646208252,
+    0.29221962937427387,
+    0.26721763073566485,
+    0.2014202081402544
+  ],
+  "target_bounds_normalized": [
+    0.33746556473829203,
+    0.29338842975206614,
+    0.26721763085399447,
+    0.19972451790633608
+  ],
+  "note": "Single animation-phase screenshot; bounded orthographic silhouette fit. Lighting and motion timing not recoverable from one frame.",
+  "case_x_m": 0.03128680913599866,
+  "case_z_m": -0.0,
+  "pair_x_m": -0.04258269153546179,
+  "pair_z_m": -0.001921273635962241,
+  "source_url": "https://cdn.alza.cz/Foto/or/articles/37626/img/airpods-pro-2022-recenze-kapacity-baterie.jpg",
+  "measurement_tolerance_px": 2,
+  "phase_sign_evidence": "Negative yaw matches the visible silicone tips and lanyard side. Near-zero elevation follows horizontal case seam in the screenshot, not silhouette dimensions alone.",
+  "reference_sha256": "ae636b4972d0ba9ed62239f669dfdd46ef8d1da978aa4aed66165e9d421d1238"
+}

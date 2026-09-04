@@ -1,0 +1,24 @@
+{
+  "meshes": 64,
+  "parts": {
+    "Left": 15,
+    "Right": 15,
+    "Body": 27,
+    "Lid": 7
+  },
+  "closed_case_dimensions_mm": [
+    50.2144,
+    21.2323,
+    46.0595
+  ],
+  "independent_units": true,
+  "hinge_fixed_axis": true,
+  "closed_pose_round_trip": true,
+  "packed_textures": true,
+  "refined_outer_shells": [
+    "Left_bDIyXAdIMtgSBEi",
+    "Right_HIDXaaSAHZrqLDD",
+    "Body_vuvYJBgdWMHhiIk",
+    "Lid_YIDVULmyvQhyjbw"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "product": "AirPods Pro 1 (2019 A2190 charging case)",
+  "acquired": "2026-09-05",
+  "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+  "geometry": {
+    "filename": "apple_airpods_pro_1.usdz",
+    "url": "https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/quicklook/airpods_pro_ios13.usdz",
+    "sha256": "08b689a4c912563c0758937fb21ecb43d390f9b2397f951629334f90a491d919"
+  },
+  "reference_images": [
+    {
+      "filename": "connected-popup.jpg",
+      "url": "https://cdn.mos.cms.futurecdn.net/WzHHdNMiYo6SFUYS5xhYnC.jpeg",
+      "sha256": "a15b7a72a2585a05c180ce401b1c53a1536ca9034ef2e47b63143cc198d72753"
+    },
+    {
+      "filename": "rear-real.jpg",
+      "url": "https://i.ebayimg.com/images/g/k5YAAOSw~YNjYoIi/s-l960.jpg",
+      "sha256": "7c1a0e70c31039cd02fb8a37cc1e6bf67532c8d99057bd639b4a18a02936ce13"
+    },
+    {
+      "filename": "popup-connect.jpg",
+      "url": "https://media.idownloadblog.com/wp-content/uploads/2021/07/AirPopupConnect.jpg",
+      "sha256": "667bb16237af8c87ba857ab1923cd7a4ddc0849bdbc23eb3148a42d513d3a620"
+    }
+  ],
+  "production_presentation": "tools/apple_artwork/presentation.json",
+  "production_material_references": "tools/apple_artwork/material-references.json"
+}

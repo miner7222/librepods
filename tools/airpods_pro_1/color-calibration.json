@@ -1,0 +1,65 @@
+{
+  "percentiles": [
+    5,
+    10,
+    50,
+    90,
+    98
+  ],
+  "raw_case_rgb": [
+    [
+      181.0,
+      181.0,
+      181.0
+    ],
+    [
+      198.0,
+      198.0,
+      198.0
+    ],
+    [
+      235.0,
+      235.0,
+      235.0
+    ],
+    [
+      248.0,
+      248.0,
+      248.0
+    ],
+    [
+      252.0,
+      252.0,
+      252.0
+    ]
+  ],
+  "popup_case_rgb": [
+    [
+      222.0,
+      223.0,
+      228.0
+    ],
+    [
+      228.0,
+      229.0,
+      234.0
+    ],
+    [
+      234.0,
+      235.0,
+      239.0
+    ],
+    [
+      240.0,
+      241.0,
+      246.0
+    ],
+    [
+      249.0,
+      250.0,
+      253.0
+    ]
+  ],
+  "reference": "https://cdn.mos.cms.futurecdn.net/WzHHdNMiYo6SFUYS5xhYnC.jpeg",
+  "method": "Inset superellipse mask in case bounding box; low anchors preserve dark sensors; RGB curve does not replace physical gloss lighting."
+}
