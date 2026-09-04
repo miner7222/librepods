@@ -130,7 +130,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_background"
+                    android:tint="@color/popup_background"
                     android:visibility="gone" />
 
                 <ImageView
@@ -141,7 +141,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_text"
+                    android:tint="@color/popup_text"
                     android:visibility="gone" />
 
                 <ImageView
@@ -152,7 +152,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/airpods"
-                    app:tint="@color/popup_text" />
+                    android:tint="@color/popup_text" />
             </FrameLayout>
 
             <TextView
@@ -199,7 +199,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_background"
+                    android:tint="@color/popup_background"
                     android:visibility="gone" />
 
                 <ImageView
@@ -210,7 +210,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_text"
+                    android:tint="@color/popup_text"
                     android:visibility="gone" />
 
                 <ImageView
@@ -220,7 +220,7 @@
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_left_notification"
-                    app:tint="@color/popup_text" />
+                    android:tint="@color/popup_text" />
             </FrameLayout>
 
             <LinearLayout
@@ -238,7 +238,8 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_l_circle_fill"
-                    app:tint="@color/popup_text" />
+                    android:alpha="0.6"
+                    android:tint="@color/popup_secondary_text" />
 
                 <TextView
                     android:id="@+id/left_battery"
@@ -284,7 +285,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_background"
+                    android:tint="@color/popup_background"
                     android:visibility="gone" />
 
                 <ImageView
@@ -295,7 +296,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_text"
+                    android:tint="@color/popup_text"
                     android:visibility="gone" />
 
                 <ImageView
@@ -305,7 +306,7 @@
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_right_notification"
-                    app:tint="@color/popup_text" />
+                    android:tint="@color/popup_text" />
             </FrameLayout>
 
             <LinearLayout
@@ -323,7 +324,8 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_r_circle_fill"
-                    app:tint="@color/popup_text" />
+                    android:alpha="0.6"
+                    android:tint="@color/popup_secondary_text" />
 
                 <TextView
                     android:id="@+id/right_battery"
@@ -369,7 +371,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_background"
+                    android:tint="@color/popup_background"
                     android:visibility="gone" />
 
                 <ImageView
@@ -380,7 +382,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_bolt_fill"
-                    app:tint="@color/popup_text"
+                    android:tint="@color/popup_text"
                     android:visibility="gone" />
 
                 <ImageView
@@ -390,7 +392,7 @@
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/airpods_pro_case_notification"
-                    app:tint="@color/popup_text" />
+                    android:tint="@color/popup_text" />
             </FrameLayout>
 
             <LinearLayout
@@ -408,7 +410,7 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_chargingcase_wireless_fill"
-                    app:tint="@color/popup_text" />
+                    android:tint="@color/popup_text" />
 
                 <TextView
                     android:id="@+id/case_battery"

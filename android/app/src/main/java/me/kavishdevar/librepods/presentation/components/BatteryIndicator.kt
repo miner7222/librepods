@@ -70,6 +70,7 @@ import kotlin.math.sqrt
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 
 @Composable
 fun BatteryIndicator(
@@ -102,7 +103,14 @@ fun BatteryIndicator(
                 Icon(
                     painter = painterResource(prefix),
                     contentDescription = prefixContentDescription,
-                    tint = batteryTextColor,
+                    // iOS draws the two bud badges at the secondary label's opacity
+                    // and the case badge at full strength; measured on both themes.
+                    tint = when (prefix) {
+                        R.drawable.sf_l_circle_fill, R.drawable.sf_r_circle_fill ->
+                            MaterialTheme.colorScheme.secondaryLabel
+
+                        else -> batteryTextColor
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
