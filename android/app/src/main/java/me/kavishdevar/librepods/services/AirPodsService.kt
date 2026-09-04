@@ -808,6 +808,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 } else if (intent?.action == AirPodsNotifications.AIRPODS_DISCONNECTED) {
                     device = null
 //                    isConnectedLocally = false
+                    dismissPopup()
                     popupShown = false
                     updateNotificationContent(false)
                     aacpManager.disconnected()
@@ -1898,6 +1899,17 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         bleManager.getMostRecentStatus()?.model
     )
 
+    var popupWindow: PopupWindow? = null
+
+    /**
+     * iOS retracts the connect sheet the moment the AirPods drop off, rather than
+     * leaving it up until its own timeout. close() animates out and is a no-op once
+     * it has already started, so calling this twice is harmless.
+     */
+    fun dismissPopup() {
+        popupWindow?.close()
+    }
+
     fun showPopup(service: Service, name: String) {
         if (!sharedPreferences.getBoolean("show_bottom_sheet_popup", true)) {
             return
@@ -1909,15 +1921,19 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         if (popupShown) {
             return
         }
-        val popupWindow = PopupWindow(service.applicationContext)
+        val window = PopupWindow(service.applicationContext) {
+            popupShown = false
+            popupWindow = null
+        }
+        popupWindow = window
         val overlayModel = overlayModel()
-        popupWindow.open(
+        popupShown = true
+        window.open(
             name,
             batteryNotification,
             overlayModel?.connectedVideoRes ?: FallbackArtwork.Pro.connected,
             overlayModel?.ringLayout ?: OverlayRingLayout()
         )
-        popupShown = true
     }
 
     var islandOpen = false
@@ -2947,6 +2963,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         context?.sendBroadcast(intent)
                     } else {
                         bluetoothDevice.fetchUuidsWithSdp()
+                    }
+                } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED == action) {
+                    if (bluetoothDevice.address == device?.address ||
+                        bluetoothDevice.address == macAddress
+                    ) {
+                        dismissPopup()
+                        popupShown = false
                     }
                 } else if ("android.bluetooth.device.action.UUID" == action) {
                     val savedMac = context?.getSharedPreferences("settings", MODE_PRIVATE)

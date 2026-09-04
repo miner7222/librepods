@@ -205,7 +205,9 @@ class PopupWindow(
                 try {
                     mWindowManager.addView(mView, mParams)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("PopupWindow", "Error adding popup view: ${e.message}")
+                    onCloseCallback()
+                    return
                 }
 
                 val displayMetrics = mView.context.resources.displayMetrics
