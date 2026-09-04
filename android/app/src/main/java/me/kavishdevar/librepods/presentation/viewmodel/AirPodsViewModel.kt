@@ -400,17 +400,31 @@ class AirPodsViewModel(
 
     fun observeControl(identifier: ControlCommandIdentifiers) {
         val listener = controlRepo.observe(identifier) { value ->
+            if (identifier == ControlCommandIdentifiers.ALLOW_OFF_OPTION) {
+                // Apple keeps this switch on the AirPods themselves, so what the buds
+                // report is the truth. The preference is only what to fall back on
+                // before they have said anything, and the service, the widgets and the
+                // tile read it directly, so it has to follow them.
+                sharedPreferences.edit {
+                    putBoolean("off_listening_mode", value.getOrNull(0) == 0x01.toByte())
+                }
+            }
             _uiState.update { state ->
                 val current = state.controlStates[identifier]
                 if (current?.contentEquals(value) == true) return@update state
 
-                if (identifier == ControlCommandIdentifiers.DYNAMIC_END_OF_CHARGE) {
-                    state.copy(
+                when (identifier) {
+                    ControlCommandIdentifiers.DYNAMIC_END_OF_CHARGE -> state.copy(
                         dynamicEndOfCharge = value[0] == 0x01.toByte(),
                         controlStates = state.controlStates + (identifier to value)
                     )
-                } else {
-                    state.copy(
+
+                    ControlCommandIdentifiers.ALLOW_OFF_OPTION -> state.copy(
+                        offListeningMode = value.getOrNull(0) == 0x01.toByte(),
+                        controlStates = state.controlStates + (identifier to value)
+                    )
+
+                    else -> state.copy(
                         controlStates = state.controlStates + (identifier to value)
                     )
                 }

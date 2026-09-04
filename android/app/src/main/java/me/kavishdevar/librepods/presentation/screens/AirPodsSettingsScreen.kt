@@ -397,14 +397,13 @@ fun AirPodsSettingsScreen(
             }
 
             if (!m3eEnabled) {
-                if (capabilities.contains(Capability.LOUD_SOUND_REDUCTION)) {
+                if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
                     item(key = "spacer_off_listening") { Spacer(modifier = Modifier.height(16.dp)) }
                     item(key = "off_listening") {
-                        val id = AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION
                         StyledToggle(
                             label = stringResource(R.string.off_listening_mode),
                             description = stringResource(R.string.off_listening_mode_description),
-                            checked = state.controlStates[id]?.getOrNull(0) == 0x01.toByte(),
+                            checked = state.offListeningMode,
                             onCheckedChange = setOffListeningMode
                         )
                     }
@@ -665,14 +664,13 @@ fun AirPodsSettingsScreen(
             }
 
             if (m3eEnabled) {
-                if (capabilities.contains(Capability.LOUD_SOUND_REDUCTION)) {
+                if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
                     item(key = "spacer_off_listening") { Spacer(modifier = Modifier.height(16.dp)) }
                     item(key = "off_listening") {
-                        val id = AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION
                         StyledToggle(
                             label = stringResource(R.string.off_listening_mode),
                             description = stringResource(R.string.off_listening_mode_description),
-                            checked = state.controlStates[id]?.getOrNull(0) == 0x01.toByte(),
+                            checked = state.offListeningMode,
                             onCheckedChange = setOffListeningMode
                         )
                     }
