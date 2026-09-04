@@ -1,0 +1,281 @@
+{
+  "reviewed": "2026-09-06",
+  "purpose": "Shape, finish, diffuse brightness and reflection width from multiple angles. Dramatic product-page lighting is not an OS brightness target. OS capture provenance remains in per-model files.",
+  "references": [
+    {
+      "model": "airpods-pro2",
+      "file": "airpods-pro2/Apple-AirPods-Pro-2nd-gen-hero-220907_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-gen-hero-220907_big.jpg",
+      "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "a3d174994cbf52b41edee678eb11c53facf7c6aeaf63026625a3d925ce415103"
+    },
+    {
+      "model": "airpods-pro2",
+      "file": "airpods-pro2/Apple-AirPods-Pro-2nd-gen-l-and-r-220907_inline.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-gen-l-and-r-220907_inline.jpg",
+      "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "bce8f778095aeedcb8387699bf9d6da1ace2f7853343280152844b633025e395"
+    },
+    {
+      "model": "airpods-pro2",
+      "file": "airpods-pro2/Apple-AirPods-Pro-2nd-gen-silicon-ear-tips-220907_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-gen-silicon-ear-tips-220907_big.jpg",
+      "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "9f3e56ab5b42efd600e3a41ecc82fd7bdd9023784838fc9eab9b558b211cc030"
+    },
+    {
+      "model": "airpods-pro2",
+      "file": "airpods-pro2/Apple-AirPods-Pro-2nd-gen-iPhone-14-Pro-2up-Spatial-Audio-220907_inline.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-gen-iPhone-14-Pro-2up-Spatial-Audio-220907_inline.jpg",
+      "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "5940a75a2fae77b7c14d898a3928c8f6aff5df19f831778e616db0068feb635f"
+    },
+    {
+      "model": "airpods-pro2",
+      "file": "airpods-pro2/Apple-AirPods-Pro-2nd-lanyard-loop-lifestyle-220907_inline.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-lanyard-loop-lifestyle-220907_inline.jpg",
+      "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "45536e8790cdd10f340b097279bcaa24512d1775e21ae10cce1543e28c1d1a41"
+    },
+    {
+      "model": "airpods-pro2",
+      "file": "airpods-pro2/Apple-AirPods-Pro-2nd-gen-Memoji-engraving-220907_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-gen-Memoji-engraving-220907_big.jpg",
+      "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "581930d138b5c74b063bab0fb33357a71e717fe7219b5ff485ef2906319df754"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/hero__b0eal3mn03ua_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/welcome/hero__b0eal3mn03ua_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "12e26544feec8b08393e259d1497edc82f5d2b74c1613e3d18d652ddde3ce723"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/hero_endframe__vzawkxxoc72u_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/welcome/hero_endframe__vzawkxxoc72u_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "cdf040cbeadd9bd7de5d0e8c75db868640875486a2fef0421b4ccf9a830caba1"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/hero_startframe__bfinf01b59si_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/welcome/hero_startframe__bfinf01b59si_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "4123d6fd28187d8f626b915560ff2b9b7e9690f8df7de0363a30b369e47587b2"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_noise_cancellation__cxd50c0etw4m_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_noise_cancellation__cxd50c0etw4m_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "dc125d60fd358e1b01e17d2f8e684310524c323e50821bdf05722560f7d68023"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_heart_rate__emqj469iyfsm_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_heart_rate__emqj469iyfsm_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "2ab6bfd952f80a664a72badc30745e316e2bdb536c19e73b422716330bed454e"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_acoustic__fiq4ppflft6q_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_acoustic__fiq4ppflft6q_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "569a42c2440e8f2530ada58ef7a6ab9dc1c898f722e2945b4619cf6651fe9380"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_live_translation__ga7nep85dr6m_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_live_translation__ga7nep85dr6m_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "fbe9163bc450d3bf48685bbb01c8fa18f289aea87266f4504f5730d466a843a9"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_hearing_aid__dh5og4rjwcq6_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_hearing_aid__dh5og4rjwcq6_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "ecaece8f572ec04bab259d320f57577e9d29cc848ea660d154ea9c2efd1845d7"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_hearing_endframe__ehzacudia2ie_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_hearing_endframe__ehzacudia2ie_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "65019b97a8687c5b96fd66544a5d72db5f9c70b2eda88682c2d6c82083230d05"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_hearing_startframe__eoiwt7oiirsm_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_hearing_startframe__eoiwt7oiirsm_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "8febe4411e0eeac7c327385497845c8aafb995900b798a2ae743ceb684639369"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_noise_cancellation_hearing_aid__eni46zr12ogi_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_noise_cancellation_hearing_aid__eni46zr12ogi_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "835bf1d7e36a55cb12f00b50f6cf7320f8e1ffc3fe1ab1aeb26939b784ae28bc"
+    },
+    {
+      "model": "airpods-pro3",
+      "file": "airpods-pro3/highlights_battery_endframe__f5ljqvliqpym_large_2x.jpg",
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/highlights/highlights_battery_endframe__f5ljqvliqpym_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-pro/",
+      "type": "official Apple product render",
+      "sha256": "e43d981bfc3ad8b5c76b5e032b52e6cf6de101015020ad8539a5691815089d11"
+    },
+    {
+      "model": "airpods-pro1",
+      "file": "airpods-pro1/Apple_AirPods-Pro_New-Design_102819_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-Pro_New-Design_102819_big.jpg",
+      "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+      "type": "official Apple product render",
+      "sha256": "91e36a39fcecd93bf384e8252fbc1f852f18715a3b1aa6a110f141fa7781c67a"
+    },
+    {
+      "model": "airpods-pro1",
+      "file": "airpods-pro1/Apple_AirPods-Pro_Lifestyle_102819_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-Pro_Lifestyle_102819_big.jpg",
+      "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+      "type": "official Apple product render",
+      "sha256": "2721035769415220ce6c0a9630f864ec81a9cc9d574ab7dfe404d58705b9a937"
+    },
+    {
+      "model": "airpods-pro1",
+      "file": "airpods-pro1/Apple_AirPods-Pro_New-Design-Case-And-AirPods-Pro_102819_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-Pro_New-Design-Case-And-AirPods-Pro_102819_big.jpg",
+      "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+      "type": "official Apple product render",
+      "sha256": "f0df0b22c9805c176118a34d27f533bae0345b587cdd6ab5e7c487b2a0d93cb5"
+    },
+    {
+      "model": "airpods-pro1",
+      "file": "airpods-pro1/Apple_AirPods-Pro_Expanded_102819_big.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-Pro_Expanded_102819_big.jpg",
+      "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+      "type": "official Apple product render",
+      "sha256": "2737b6c2f0e884ad6552e5a38be073287e3b1539a26fef2b8feac7faa4f8d839"
+    },
+    {
+      "model": "airpods-pro1",
+      "file": "airpods-pro1/Apple_AirPods-Pro_iPhone11-Pro_102819_inline.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-Pro_iPhone11-Pro_102819_inline.jpg",
+      "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+      "type": "official Apple product render",
+      "sha256": "0fa6dc5e6cf1de9665688b3e5c2858615925a066fb29a8e86beb7264de8d95c2"
+    },
+    {
+      "model": "airpods-pro1",
+      "file": "airpods-pro1/Apple_AirPods-Pro_SiP-Design_102819_inline.jpg",
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-Pro_SiP-Design_102819_inline.jpg",
+      "page": "https://www.apple.com/newsroom/2019/10/apple-reveals-new-airpods-pro-available-october-30/",
+      "type": "official Apple product render",
+      "sha256": "2f63ea31e443d777ac2e40eaca6610bbd386fed75f5711ed3e764bb78adcbc74"
+    },
+    {
+      "model": "airpods3",
+      "file": "airpods3/apple-newsroom-hero-inline.jpg",
+      "page": "https://www.apple.com/newsroom/2021/10/introducing-the-next-generation-of-airpods/",
+      "sha256": "150d9da660cc458d69144e2a8821179b265dd8b6343d1ab8e649a1c428d6716e",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods3",
+      "file": "airpods3/apple-newsroom-pairing-inline.jpg",
+      "page": "https://www.apple.com/newsroom/2021/10/introducing-the-next-generation-of-airpods/",
+      "sha256": "67963e57752adb9b00e3263add18c5c233f80318e6a45318431eac7177ff04c1",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods3",
+      "file": "airpods3/apple-newsroom-magsafe-inline.jpg",
+      "page": "https://www.apple.com/newsroom/2021/10/introducing-the-next-generation-of-airpods/",
+      "sha256": "c9169253ece119575a25eea7646774a2094612f93e3b2de75729421c3303810d",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods4",
+      "file": "airpods4/bento_side__edtf67wfg10m_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-4/",
+      "sha256": "d8f4788a1f3f587d84058bc8e602c7bb7097f546aa7e7ec51f5e6068d576924f",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods4",
+      "file": "airpods4/bento_case_close__f0fhueeeoy2q_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-4/",
+      "sha256": "c3f478aa1739c64cae993487e77c3ef8de68686e70283daf36ed31779c04167f",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods4",
+      "file": "airpods4/bento_case_open__63kccmu775u6_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-4/",
+      "sha256": "241bd4e9957d87fd2335de55e06592678fee0b5b7fe1aa0e6ce4e15d9020068b",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods4",
+      "file": "airpods4/bento_stem__cfztc9z01vpy_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-4/",
+      "sha256": "7d395304ca1830a85cee23773925fabad8f4a2528c317986a03e5358d0086894",
+      "type": "official Apple product render"
+    },
+    {
+      "model": "airpods4",
+      "file": "airpods4/bento_angle__b2i7xnzp5h7m_large_2x.jpg",
+      "page": "https://www.apple.com/airpods-4/",
+      "sha256": "c77243aa8fdf7260ea07047f25a745d7be3e041ab9782ddc4b5d14e01d295afb",
+      "type": "official Apple product render"
+    }
+  ],
+  "airpods4_diffuse_patch_check": {
+    "reference": "ios27/orig/IMG_0052.PNG",
+    "reference_xyxy": [
+      485,
+      895,
+      570,
+      945
+    ],
+    "reference_median_rgb": [
+      238,
+      239,
+      242
+    ],
+    "render": "airpods_4/case/0000.png",
+    "render_xyxy": [
+      690,
+      175,
+      805,
+      245
+    ],
+    "render_median_rgb": [
+      238,
+      239,
+      241
+    ],
+    "note": "Diffuse center only; a small patch does not establish whole-image or multi-angle equivalence."
+  }
+}

@@ -3027,7 +3027,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 ) && SystemApisUtils.setMetadata(
                     device,
                     device.METADATA_UNTETHERED_CASE_ICON,
-                    resToUri(instance.model.caseRes).toString().toByteArray()
+                    resToUri(instance.model.caseIconRes).toString().toByteArray()
                 ) && SystemApisUtils.setMetadata(
                     device,
                     device.METADATA_UNTETHERED_RIGHT_ICON,

@@ -23,20 +23,17 @@ package me.kavishdevar.librepods.presentation.components
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,121 +46,78 @@ import androidx.compose.ui.unit.dp
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
+import me.kavishdevar.librepods.data.OverlayRingLayout
 import me.kavishdevar.librepods.data.BatteryStatus
 import kotlin.io.encoding.ExperimentalEncodingApi
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
-/**
- * The artwork sits on a square canvas with a lot of transparent margin - the buds
- * fill about 72% of it vertically and the case about 89% - so letting the image
- * take the full column width made it roughly three times the height iOS gives it.
- */
-private val ARTWORK_MAX_HEIGHT = 100.dp
-
-/**
- * iOS keeps the products in a tight group: measured on a real AirPods settings
- * capture, the right bud sits 0.85 bud widths from the case. Two equal-weight
- * columns spread across the full width put them almost three bud widths apart.
- */
-private val ARTWORK_ROW_MAX_WIDTH = 246.dp
-
+/** Stills are two transparent layers on the shared 1050 × 354 artwork canvas. */
 @Composable
 fun BatteryView(
     batteryList: List<Battery>,
     budsRes: Int,
-    caseRes: Int
+    caseRes: Int,
+    ringLayout: OverlayRingLayout = OverlayRingLayout()
 ) {
     val left = batteryList.find { it.component == BatteryComponent.LEFT }
     val right = batteryList.find { it.component == BatteryComponent.RIGHT }
     val case = batteryList.find { it.component == BatteryComponent.CASE }
-
     val leftLevel = left?.level ?: 0
     val rightLevel = right?.level ?: 0
     val caseLevel = case?.level ?: 0
+    val combined = left?.status == right?.status && (leftLevel - rightLevel) in -3..3
 
-    val singleDisplayed = remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier.widthIn(max = ARTWORK_ROW_MAX_WIDTH),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Column(Modifier.widthIn(max = 353.dp).fillMaxWidth()) {
+            Box(Modifier.fillMaxWidth().aspectRatio(1050f / 354f)) {
                 Image(
                     bitmap = ImageBitmap.imageResource(budsRes),
                     contentDescription = stringResource(R.string.buds),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = ARTWORK_MAX_HEIGHT)
-                        .padding(vertical = 8.dp)
+                    modifier = Modifier.matchParentSize()
                 )
-
-                if (
-                    left?.status == right?.status &&
-                    (leftLevel - rightLevel) in -3..3
-                ) {
-                    BatteryIndicator(
-                        leftLevel.coerceAtMost(rightLevel),
-                        left?.status ?: BatteryStatus.NOT_CHARGING
-                    )
-                    singleDisplayed.value = true
-                } else {
-                    singleDisplayed.value = false
-
-                    Row(
-                        modifier = Modifier.wrapContentWidth(unbounded = true),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        if (leftLevel > 0 || left?.status != BatteryStatus.DISCONNECTED) {
-                            BatteryIndicator(
-                                leftLevel,
-                                left?.status ?: BatteryStatus.NOT_CHARGING,
-                                R.drawable.sf_l_circle_fill
-                            )
-                        }
-
-                        if (leftLevel > 0 && rightLevel > 0) {
-                            Spacer(modifier = Modifier.width(16.dp))
-                        }
-
-                        if (rightLevel > 0 || right?.status != BatteryStatus.DISCONNECTED) {
-                            BatteryIndicator(
-                                rightLevel,
-                                right?.status ?: BatteryStatus.NOT_CHARGING,
-                                R.drawable.sf_r_circle_fill
-                            )
-                        }
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
                 Image(
                     bitmap = ImageBitmap.imageResource(caseRes),
                     contentDescription = stringResource(R.string.case_alt),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = ARTWORK_MAX_HEIGHT)
-                        .padding(vertical = 8.dp)
+                    modifier = Modifier.matchParentSize()
                 )
-
+            }
+            BoxWithConstraints(
+                Modifier.fillMaxWidth().padding(top = 8.dp),
+                contentAlignment = AbsoluteAlignment.TopLeft
+            ) {
+                // Positions are physical image coordinates; keep them in LTR
+                // even when surrounding labels use a right-to-left language.
+                val canvasWidth = maxWidth
+                @Composable
+                fun At(center: Float, content: @Composable () -> Unit) {
+                    Box(
+                        Modifier.absoluteOffset(x = canvasWidth * center - 36.dp).width(72.dp),
+                        contentAlignment = Alignment.TopCenter
+                    ) { content() }
+                }
+                if (combined) {
+                    At(ringLayout.budPair) {
+                        BatteryIndicator(leftLevel.coerceAtMost(rightLevel), left?.status ?: BatteryStatus.NOT_CHARGING)
+                    }
+                } else {
+                    if (leftLevel > 0 || left?.status != BatteryStatus.DISCONNECTED) {
+                        At(ringLayout.leftBud) {
+                            BatteryIndicator(leftLevel, left?.status ?: BatteryStatus.NOT_CHARGING, R.drawable.sf_l_circle_fill)
+                        }
+                    }
+                    if (rightLevel > 0 || right?.status != BatteryStatus.DISCONNECTED) {
+                        At(ringLayout.rightBud) {
+                            BatteryIndicator(rightLevel, right?.status ?: BatteryStatus.NOT_CHARGING, R.drawable.sf_r_circle_fill)
+                        }
+                    }
+                }
                 if (caseLevel > 0 || case?.status != BatteryStatus.DISCONNECTED) {
-                    BatteryIndicator(
-                        caseLevel,
-                        case?.status ?: BatteryStatus.NOT_CHARGING,
-                        prefix = if (!singleDisplayed.value) R.drawable.sf_chargingcase_wireless_fill else 0
-                    )
+                    At(ringLayout.chargingCase) {
+                        BatteryIndicator(caseLevel, case?.status ?: BatteryStatus.NOT_CHARGING,
+                            prefix = if (!combined) R.drawable.sf_chargingcase_wireless_fill else 0)
+                    }
                 }
             }
         }

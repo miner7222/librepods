@@ -1,0 +1,50 @@
+{
+  "fit_ortho_m": 0.1549600985915493,
+  "fit_elevation_degrees": 0,
+  "case_x_m": 0.033297211267605625,
+  "case_z_m": 0,
+  "pair_x_m": -0.03713919718309859,
+  "pair_z_m": -0.001494105633802817,
+  "fit_half_unit_spacing_m": 0.011758977565392357,
+  "fit_phase_degrees": 0,
+  "popup_card_x": [
+    12,
+    738
+  ],
+  "case_bounds_px": [
+    389,
+    778,
+    673,
+    993
+  ],
+  "pair_bounds_px": [
+    91,
+    819,
+    311,
+    966
+  ],
+  "source_url": "https://cdn.mos.cms.futurecdn.net/WzHHdNMiYo6SFUYS5xhYnC.jpeg",
+  "reference_sha256": "a15b7a72a2585a05c180ce401b1c53a1536ca9034ef2e47b63143cc198d72753",
+  "note": "2021-09-01 Laptop Mag original Pro1 connected popup. Reference phase0. Dark iDownloadBlog capture is a secondary pose cross-check.",
+  "unit_local_yaw_degrees": {
+    "left": -35,
+    "right": 35
+  },
+  "target_bounds_normalized": [
+    0.39118457300275483,
+    0.29614325068870523,
+    0.30303030303030304,
+    0.2024793388429752
+  ],
+  "unit_pose_roll_y_degrees": {
+    "left": -6,
+    "right": 6
+  },
+  "overlay_ring_layout": {
+    "left": 0.161,
+    "right": 0.3586,
+    "combined": 0.2796,
+    "case": 0.7149,
+    "basis": "Individual rings use final front-frame stem centers; combined/case centers follow reference battery indicators."
+  }
+}

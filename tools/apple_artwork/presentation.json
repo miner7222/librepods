@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "reference_phone_width_px": 750,
+  "popup_card_x_px": [
+    12,
+    738
+  ],
+  "reference_directory": "/Users/jsp/Git/librepods-ref/ios27/orig",
+  "references": {
+    "settings_static": "7D7CCAE7-7694-4A4E-A362-ADFB5C09CEE8.png",
+    "compact_pair": "C125D2F4-D5C8-483E-B439-29323B205A0B.png",
+    "wide_pair": "IMG_0052.PNG"
+  },
+  "interpretation": "User confirmed: wide pair for all settings/popup stills; compact pair for connected/island motion. Captures alone do not establish motion; explicit user correction determines the mapping.",
+  "canvas_px": [
+    1050,
+    354
+  ],
+  "ortho_width_m": 0.1522,
+  "camera_elevation_degrees": 0,
+  "case_center_m": [
+    0.029,
+    0,
+    0
+  ],
+  "pair_center_m": [
+    -0.0368,
+    0,
+    -0.0024
+  ],
+  "compact_half_spacing_m": 0.0099,
+  "wide_half_spacing_m": 0.0155,
+  "island_ortho_width_m": 0.07,
+  "note": "Each state has shared metric camera and assembly centers across generations. Wide still layers retain their full canvas; compact moving composition uses its separately measured centers.",
+  "spacing_rule": "Center distance = canonical unit width + measured edge clearance (1.5 mm moving; 12.7 mm still). This preserves metric clearance for differently sized units.",
+  "still_pair_center_m": [
+    -0.0293,
+    0,
+    -0.0024
+  ],
+  "still_case_center_m": [
+    0.0325,
+    0,
+    0
+  ],
+  "measurements": {
+    "compact_popup": {
+      "case_bounds_px": [
+        393,
+        783,
+        630,
+        1004
+      ],
+      "pair_bounds_px": [
+        108,
+        832,
+        290,
+        978
+      ]
+    },
+    "wide_popup": {
+      "case_bounds_px": [
+        410,
+        783,
+        650,
+        1006
+      ],
+      "pair_bounds_px": [
+        119,
+        822,
+        352,
+        967
+      ]
+    },
+    "settings_static": {
+      "case_bounds_px": [
+        393,
+        211,
+        634,
+        399
+      ],
+      "pair_bounds_px": [
+        124,
+        243,
+        344,
+        367
+      ]
+    },
+    "method": "Use popup width 726 px to recover metric orthographic scale from the 50.1 mm case width. Keep settings/popup the same full-canvas composition. The settings capture has different unit scale relative to case; use wide popup product scale and shared centers as requested. Bounds are manual silhouette estimates (about 2 px uncertainty)."
+  },
+  "rings": {
+    "method": "Static individual ring centers follow each unit silhouette horizontal midpoint; combined and case follow the metric assembly centers. Moving combined/case use moving centers.",
+    "per_model": {
+      "airpods_3": [
+        0.2048,
+        0.409,
+        0.3075,
+        0.7135
+      ],
+      "airpods_4": [
+        0.2052,
+        0.409,
+        0.3075,
+        0.7135
+      ],
+      "airpods_pro_1": [
+        0.1743,
+        0.3786,
+        0.2762,
+        0.7114
+      ],
+      "airpods_pro_2": [
+        0.1714,
+        0.379,
+        0.2752,
+        0.7143
+      ],
+      "airpods_pro_3": [
+        0.1748,
+        0.3614,
+        0.2681,
+        0.6952
+      ]
+    }
+  },
+  "pro_still_overrides": {
+    "airpods_pro_1": {
+      "unit_gap_m": 0.0088,
+      "case_gap_m": 0.0093,
+      "reference": "airpods_pro_1.png",
+      "case_bounds_px": [
+        327,
+        48,
+        561,
+        222
+      ],
+      "unit_bounds_x_px": [
+        [
+          80,
+          169
+        ],
+        [
+          203,
+          291
+        ]
+      ],
+      "reference_role": "User supplied old iOS front crop: spacing only, preserve current unit orientation.",
+      "sha256": "9e2b700fd0330be7713869776f52f47e57d4613750690645e1fa08fbb8ed9e03"
+    },
+    "airpods_pro_2": {
+      "unit_gap_m": 0.0097,
+      "case_gap_m": 0.0097,
+      "reference": "airpods_pro_2.png",
+      "case_bounds_px": [
+        331,
+        878,
+        574,
+        1058
+      ],
+      "unit_bounds_x_px": [
+        [
+          76,
+          165
+        ],
+        [
+          203,
+          292
+        ]
+      ],
+      "reference_role": "User supplied old iOS dark popup: spacing only, preserve current unit orientation.",
+      "sha256": "6388d7a18bb499c29a4dc910b09a13863751b2b1812f4b1bede183fb94a25c28"
+    },
+    "airpods_pro_3": {
+      "unit_gap_m": 0.0095,
+      "case_gap_m": 0.0103,
+      "reference": "airpods_pro_3.png",
+      "case_bounds_px": [
+        536,
+        1388,
+        923,
+        1680
+      ],
+      "unit_bounds_x_px": [
+        [
+          168,
+          291
+        ],
+        [
+          350,
+          472
+        ]
+      ],
+      "reference_role": "User supplied wide still popup; case width is the metric ruler.",
+      "sha256": "16f7d47d24702b986a17c552dc75527671da299488f3e8aaef374345949f592f"
+    }
+  }
+}

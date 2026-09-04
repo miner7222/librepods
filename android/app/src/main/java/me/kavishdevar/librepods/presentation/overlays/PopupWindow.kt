@@ -82,6 +82,7 @@ class PopupWindow(
     private var batteryUpdateReceiver: BroadcastReceiver? = null
     private var dimAnimator: ValueAnimator? = null
     private var showingBudsInCase: Boolean? = null
+    private var artworkRingLayout = OverlayRingLayout()
     private var sheetWidthPx = 0
 
     @Suppress("DEPRECATION")
@@ -185,6 +186,7 @@ class PopupWindow(
             if (mView.windowToken == null && mView.parent == null && !isClosing) {
                 mView.findViewById<TextView>(R.id.name).text = name
 
+                artworkRingLayout = ringLayout
                 mView.findViewById<Guideline>(R.id.ring_guide_combined)
                     .setGuidelinePercent(ringLayout.budPair)
                 mView.findViewById<Guideline>(R.id.ring_guide_left)
@@ -375,6 +377,10 @@ class PopupWindow(
      * back showed a black frame until playback had drawn into the new one.
      */
     private fun showBudsInCase(inCase: Boolean) {
+        mView.findViewById<Guideline>(R.id.ring_guide_combined)
+            .setGuidelinePercent(if (inCase) artworkRingLayout.movingBudPair else artworkRingLayout.budPair)
+        mView.findViewById<Guideline>(R.id.ring_guide_case)
+            .setGuidelinePercent(if (inCase) artworkRingLayout.movingCase else artworkRingLayout.chargingCase)
         if (showingBudsInCase == inCase) return
         val settling = showingBudsInCase == null
         showingBudsInCase = inCase

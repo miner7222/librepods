@@ -436,7 +436,8 @@ fun AirPodsSettingsScreen(
                 BatteryView(
                     batteryList = state.battery,
                     budsRes = state.instance?.model?.budsRes ?: R.drawable.airpods_pro_2_buds,
-                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case
+                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case,
+                    ringLayout = state.instance?.model?.ringLayout ?: me.kavishdevar.librepods.data.OverlayRingLayout()
                 )
             }
             item(key = "spacer_battery") {

@@ -1,0 +1,65 @@
+{
+  "percentiles": [
+    5,
+    10,
+    50,
+    90,
+    98
+  ],
+  "raw_case_rgb": [
+    [
+      129.0,
+      129.0,
+      129.0
+    ],
+    [
+      180.0,
+      180.0,
+      180.0
+    ],
+    [
+      235.0,
+      235.0,
+      235.0
+    ],
+    [
+      248.0,
+      248.0,
+      248.0
+    ],
+    [
+      252.0,
+      252.0,
+      252.0
+    ]
+  ],
+  "popup_case_rgb": [
+    [
+      206.0,
+      209.0,
+      214.0
+    ],
+    [
+      231.0,
+      233.0,
+      235.0
+    ],
+    [
+      233.0,
+      235.0,
+      237.0
+    ],
+    [
+      244.0,
+      245.0,
+      247.0
+    ],
+    [
+      249.0,
+      250.0,
+      253.0
+    ]
+  ],
+  "reference": "https://b2c-contenthub.com/wp-content/uploads/2025/12/airpods_optimiertes_laden_1.jpg",
+  "method": "Inset superellipse mask in case bounding box; low anchors preserve dark sensors; RGB curve does not replace physical gloss lighting."
+}

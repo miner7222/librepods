@@ -1,0 +1,28 @@
+{
+  "meshes": 80,
+  "parts": {
+    "Left": 20,
+    "Right": 20,
+    "Body": 32,
+    "Lid": 8
+  },
+  "closed_case_dimensions_mm": [
+    60.8296,
+    21.8524,
+    45.289
+  ],
+  "independent_units": true,
+  "hinge_fixed_axis": true,
+  "closed_pose_round_trip": true,
+  "packed_textures": true,
+  "refined_outer_shells": [
+    "Left_duuMkGeyrtGLCOH",
+    "Right_anCscEdTfAqQIwv"
+  ],
+  "rear_hardware": {
+    "button_depth_mm": 0.03,
+    "aperture_rim_vertices": 53,
+    "uniform_hinge_material": true,
+    "ar_overlays_excluded": true
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "popup_card_x": [
+    12,
+    738
+  ],
+  "case_bounds_px": [
+    393,
+    783,
+    630,
+    1004
+  ],
+  "pair_bounds_px": [
+    108,
+    832,
+    290,
+    978
+  ],
+  "reference_filename": "connected-popup.png",
+  "phase_degrees": 0,
+  "elevation_degrees": 0,
+  "ortho_m": 0.1521683451248251,
+  "half_spacing_m": 0.009913027439052096,
+  "target_bounds_normalized": [
+    0.32644628099173556,
+    0.3044077134986226,
+    0.25068870523415976,
+    0.20110192837465565
+  ],
+  "fit_bounds_normalized": [
+    0.3300674925291447,
+    0.3027488242510452,
+    0.2506887052341987,
+    0.19759466030368003
+  ],
+  "measurement_tolerance_px": 3,
+  "note": "Orthographic fit to the product bounds at identified front/rear phase. Original mesh scale retained.",
+  "case_x_m": 0.028610164062725377,
+  "case_z_m": -0.0,
+  "pair_x_m": -0.036889296719158964,
+  "pair_z_m": -0.0024103801225006734,
+  "reference_sha256": "bcb9db69d14a8e042e0187d908130ec892831acd77a350a40c6bcc687771ae3d",
+  "source_url": "/Users/jsp/Git/librepods-ref/ios27/orig/C125D2F4-D5C8-483E-B439-29323B205A0B.png"
+}

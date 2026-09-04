@@ -1,0 +1,45 @@
+{
+  "popup_card_x": [
+    7,
+    451
+  ],
+  "case_bounds_px": [
+    255,
+    169,
+    376,
+    299
+  ],
+  "pair_bounds_px": [
+    82,
+    195,
+    181,
+    282
+  ],
+  "fit_ortho_m": 0.15745249836049807,
+  "fit_elevation_degrees": 1.0603899980310416e-09,
+  "fit_phase_degrees": 48.98666997835114,
+  "fit_half_unit_spacing_m": 0.011733365400928715,
+  "case_center_fraction": 0.6948198198198198,
+  "pair_center_fraction": 0.28040540540540543,
+  "fit_bounds_normalized": [
+    0.2725225475176619,
+    0.2926730662748498,
+    0.22297295271844444,
+    0.19612462060522912
+  ],
+  "target_bounds_normalized": [
+    0.2725225225225225,
+    0.2927927927927928,
+    0.22297297297297297,
+    0.19594594594594594
+  ],
+  "note": "Single animation-phase screenshot; bounded orthographic silhouette fit. Lighting and motion timing not recoverable from one frame.",
+  "case_x_m": 0.030590317784773325,
+  "case_z_m": -3.8519534784065e-14,
+  "pair_x_m": -0.034631447182567866,
+  "pair_z_m": -0.0015958014169339012,
+  "source_url": "https://images.gutefrage.net/media/fragen/bilder/airpods-verbinden-sich-nicht-mehr-3/0_big.jpg?v=1651315966113",
+  "measurement_tolerance_px": 2,
+  "phase_sign_evidence": "Positive yaw selected from visible speaker/vent orientation and case finger-recess displacement; bounding boxes alone cannot distinguish mirror phases.",
+  "reference_sha256": "4d3a875919fd29ec2702689a1c6e7f2195c3f53c73ed21a80ab011e4d3858c75"
+}
