@@ -83,6 +83,7 @@ class BLEManager(private val context: Context) {
     private val verifiedAddresses = mutableSetOf<String>()
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private var currentGlobalLidState: Boolean? = null
+    private var lastLidAdvertNanos: Long = Long.MIN_VALUE
     private var lastBroadcastTime: Long = 0
     private val processedAddresses = mutableSetOf<String>()
 
@@ -194,15 +195,23 @@ class BLEManager(private val context: Context) {
             mScanCallback = object : ScanCallback() {
                 override fun onScanResult(callbackType: Int, result: ScanResult) {
                     markScanSuccessful()
-                    processScanResult(result)
+                    processedAddresses.clear()
+                    publishNewestLidState(result, processScanResult(result))
                 }
 
                 override fun onBatchScanResults(results: List<ScanResult>) {
                     markScanSuccessful()
                     processedAddresses.clear()
+                    var newest: ScanResult? = null
+                    var newestStatus: AirPodsStatus? = null
                     for (result in results) {
-                        processScanResult(result)
+                        val status = processScanResult(result) ?: continue
+                        if (newest == null || result.timestampNanos > newest.timestampNanos) {
+                            newest = result
+                            newestStatus = status
+                        }
                     }
+                    publishNewestLidState(newest, newestStatus)
                 }
 
                 override fun onScanFailed(errorCode: Int) {
@@ -309,17 +318,17 @@ class BLEManager(private val context: Context) {
         return Pair(charging, level)
     }
 
-    private fun processScanResult(result: ScanResult) {
+    private fun processScanResult(result: ScanResult): AirPodsStatus? {
         try {
-            val scanRecord = result.scanRecord ?: return
+            val scanRecord = result.scanRecord ?: return null
             val address = result.device.address
 
             if (processedAddresses.contains(address)) {
-                return
+                return null
             }
 
-            val manufacturerData = scanRecord.getManufacturerSpecificData(76) ?: return
-            if (manufacturerData.size <= 20) return
+            val manufacturerData = scanRecord.getManufacturerSpecificData(76) ?: return null
+            if (manufacturerData.size <= 20) return null
 
             if (!verifiedAddresses.contains(address)) {
                 val irk = getIrkFromPreferences()
@@ -327,10 +336,10 @@ class BLEManager(private val context: Context) {
                     if (missingIrkLoggedForScan.compareAndSet(false, true)) {
                         Log.d(TAG, "Dropping BLE advertisements because no IRK is available")
                     }
-                    return
+                    return null
                 }
                 if (!BluetoothCryptography.verifyRPA(address, irk)) {
-                    return
+                    return null
                 }
                 verifiedAddresses.add(address)
                 Log.d(TAG, "RPA verified and added to trusted list: $address")
@@ -354,28 +363,12 @@ class BLEManager(private val context: Context) {
                 if (previousStatus == null) {
                     listener.onBroadcastFromNewAddress(parsedStatus)
                     Log.d(TAG, "New AirPods device detected: $address")
-
-                    if (currentGlobalLidState == null || currentGlobalLidState != parsedStatus.lidOpen) {
-                        currentGlobalLidState = parsedStatus.lidOpen
-                        listener.onLidStateChanged(parsedStatus.lidOpen)
-                        Log.d(TAG, "Lid state ${if (parsedStatus.lidOpen) "opened" else "closed"} (detected from new device)")
-                    }
                 } else {
                     // lastSeen moves with every advertisement, so comparing the whole
                     // status made "changed" mean "received" - and the listener writes
                     // a battery snapshot to disk each time it is called.
                     if (parsedStatus.copy(lastSeen = previousStatus.lastSeen) != previousStatus) {
                         listener.onDeviceStatusChanged(parsedStatus, previousStatus)
-                    }
-
-                    if (parsedStatus.lidOpen != previousStatus.lidOpen) {
-                        val previousGlobalState = currentGlobalLidState
-                        currentGlobalLidState = parsedStatus.lidOpen
-
-                        if (previousGlobalState != parsedStatus.lidOpen) {
-                            listener.onLidStateChanged(parsedStatus.lidOpen)
-                            Log.d(TAG, "Lid state changed from $previousGlobalState to ${parsedStatus.lidOpen}")
-                        }
                     }
 
                     if (parsedStatus.isLeftInEar != previousStatus.isLeftInEar ||
@@ -396,9 +389,26 @@ class BLEManager(private val context: Context) {
                     }
                 }
             }
+            return parsedStatus
         } catch (t: Throwable) {
             Log.e(TAG, "Error processing scan result", t)
+            return null
         }
+    }
+
+    /**
+     * A batch holds one advertisement per address, captured at different moments,
+     * and the case's two rotating addresses regularly disagree about the lid: the
+     * stale one still reads open after the fresh one has reported the close. Only
+     * the newest advertisement may move the lid state, or that disagreement shows
+     * up as a close immediately followed by an opening, and the popup fires while
+     * the user is putting the AirPods away.
+     */
+    private fun publishNewestLidState(newest: ScanResult?, status: AirPodsStatus?) {
+        if (newest == null || status == null) return
+        if (newest.timestampNanos < lastLidAdvertNanos) return
+        lastLidAdvertNanos = newest.timestampNanos
+        airPodsStatusListener?.let { publishLidState(status, it) }
     }
 
     private fun parseProximityMessageWithDecryption(address: String, data: ByteArray, decrypted: ByteArray): AirPodsStatus {
@@ -480,10 +490,18 @@ class BLEManager(private val context: Context) {
         }
     }
 
+    private fun publishLidState(status: AirPodsStatus, listener: AirPodsStatusListener) {
+        val previousState = currentGlobalLidState
+        if (previousState == status.lidOpen) return
+        currentGlobalLidState = status.lidOpen
+        listener.onLidStateChanged(status.lidOpen)
+        Log.d(TAG, "Lid state ${if (status.lidOpen) "opened" else "closed"} (was $previousState)")
+    }
+
     private fun checkLidStateTimeout() {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastBroadcastTime > LID_CLOSE_TIMEOUT_MS && currentGlobalLidState == true) {
-            Log.d(TAG, "No broadcasts for ${LID_CLOSE_TIMEOUT_MS}ms, forcing lid state to closed")
+            Log.d(TAG, "No broadcasts for ${LID_CLOSE_TIMEOUT_MS}ms, treating the lid state as stale")
             currentGlobalLidState = false
             airPodsStatusListener?.onLidStateChanged(false)
         }
@@ -567,7 +585,7 @@ class BLEManager(private val context: Context) {
         private const val TAG = "AirPodsBLE"
         private const val CLEANUP_INTERVAL_MS = 10000L
         private const val STALE_DEVICE_TIMEOUT_MS = 15000L
-        private const val LID_CLOSE_TIMEOUT_MS = 2500L
+        private const val LID_CLOSE_TIMEOUT_MS = 15000L
         private const val SCAN_RETRY_BACKOFF_MS = 5000L
         private const val MAX_SCAN_RETRY_BACKOFF_MS = 30000L
     }

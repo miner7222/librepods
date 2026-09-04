@@ -417,12 +417,14 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         ) {
             if (lidOpen) {
                 Log.d(TAG, "Lid opened")
-                showPopup(
-                    this@AirPodsService,
+                // The sheet announces a connection. Opening the case while the
+                // AirPods are already connected - worn, or simply out of it -
+                // announces nothing, and iOS shows nothing for it either.
+                if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
+                showPopupOnce(
                     getSharedPreferences("settings", MODE_PRIVATE).getString("name", "AirPods Pro")
                         ?: "AirPods"
                 )
-                if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
                 val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: 0
                 val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: 0
                 val caseLevel = bleManager.getMostRecentStatus()?.caseBattery ?: 0
@@ -443,6 +445,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 sendBatteryBroadcast()
             } else {
                 Log.d(TAG, "Lid closed")
+                releasePopupSession()
             }
         }
 
@@ -838,7 +841,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 } else if (intent?.action == AirPodsNotifications.AIRPODS_DISCONNECTED) {
                     device = null
 //                    isConnectedLocally = false
-                    popupShown = false
+                    releasePopupSession()
                     updateNotificationContent(false)
                     aacpManager.disconnected()
                     BluetoothConnectionManager.aacpSocket = null
@@ -1967,10 +1970,46 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
     var popupShown = false
 
+    /**
+     * The lid advertisement is not a dependable trigger on its own: it can arrive
+     * seconds late, or not at all, and a connection raises several ACL events. This
+     * latches the popup to one per session so either trigger can open it and
+     * neither repeats, and it clears whenever the AirPods go away.
+     */
+    private var popupShownForSession = false
+
+    fun showPopupOnce(name: String) {
+        if (popupShownForSession) return
+        popupShownForSession = true
+        showPopup(this, name)
+    }
+
+    /**
+     * Closing the lid is what retracts the sheet on iOS, and it has to take the
+     * popup down with it: releasing the latch alone would let the next connection
+     * add a second window on top of the one still on screen.
+     */
+    private fun releasePopupSession() {
+        dismissPopup()
+        popupShownForSession = false
+        popupShown = false
+    }
+
     private fun overlayModel() = airpodsInstance?.model ?: AirPodsModels.getModelForOverlays(
         config.airpodsModelNumber,
         bleManager.getMostRecentStatus()?.model
     )
+
+    var popupWindow: PopupWindow? = null
+
+    /**
+     * iOS retracts the connect sheet the moment the AirPods drop off, rather than
+     * leaving it up until its own timeout. close() animates out and is a no-op once
+     * it has already started, so calling this twice is harmless.
+     */
+    fun dismissPopup() {
+        popupWindow?.close()
+    }
 
     fun showPopup(service: Service, name: String) {
         if (!sharedPreferences.getBoolean("show_bottom_sheet_popup", true)) {
@@ -1983,15 +2022,19 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         if (popupShown) {
             return
         }
-        val popupWindow = PopupWindow(service.applicationContext)
+        val window = PopupWindow(service.applicationContext) {
+            popupShown = false
+            popupWindow = null
+        }
+        popupWindow = window
         val overlayModel = overlayModel()
-        popupWindow.open(
+        popupShown = true
+        window.open(
             name,
             batteryNotification,
             overlayModel?.connectedVideoRes ?: FallbackArtwork.Pro.connected,
             overlayModel?.ringLayout ?: OverlayRingLayout()
         )
-        popupShown = true
     }
 
     var islandOpen = false
@@ -3023,6 +3066,11 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 val uuid = ParcelUuid.fromString("74ec2172-0bad-4d01-8f77-997b2be0722a")
 
                 if (BluetoothDevice.ACTION_ACL_CONNECTED == action) {
+                    if (bluetoothDevice.address == macAddress ||
+                        bluetoothDevice.uuids?.contains(uuid) == true
+                    ) {
+                        showPopupOnce(name ?: config.deviceName)
+                    }
                     if (bluetoothDevice.uuids?.contains(uuid) == true) {
                         val intent = Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED)
                         intent.putExtra("name", name)
@@ -3030,6 +3078,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         context?.sendBroadcast(intent)
                     } else {
                         bluetoothDevice.fetchUuidsWithSdp()
+                    }
+                } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED == action) {
+                    if (bluetoothDevice.address == device?.address ||
+                        bluetoothDevice.address == macAddress
+                    ) {
+                        releasePopupSession()
                     }
                 } else if ("android.bluetooth.device.action.UUID" == action) {
                     val savedMac = context?.getSharedPreferences("settings", MODE_PRIVATE)
