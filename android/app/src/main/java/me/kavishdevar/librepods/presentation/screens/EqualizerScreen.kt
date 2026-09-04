@@ -219,7 +219,11 @@ fun EqualizerScreen(
                     // Not a card group, so the gap above it no longer arrives from
                     // the list before it.
                     .padding(top = LocalAppleDesignMetrics.current.cardGap)
-                    .visible(visible),
+                    .visible(visible)
+                    // The button's glass is a 16dp blur that reaches past its own
+                    // bounds, and this animated container ends flush with it, so the
+                    // blur came out cut off along a straight edge. Give it room.
+                    .padding(bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
