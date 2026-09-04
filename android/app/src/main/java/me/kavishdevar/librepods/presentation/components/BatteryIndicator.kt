@@ -71,6 +71,7 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
@@ -104,7 +105,12 @@ fun BatteryIndicator(
                 Icon(
                     painter = painterResource(prefix),
                     contentDescription = prefixContentDescription,
-                    tint = batteryTextColor,
+                    // iOS holds the badge at the secondary label's opacity while the
+                    // component is still filling and takes it to full strength once
+                    // it reads 100%. The case badge follows the buds rather than
+                    // sitting at full strength throughout.
+                    tint = if (batteryPercentage >= 100) batteryTextColor
+                    else MaterialTheme.colorScheme.secondaryLabel,
                     modifier = Modifier.fillMaxSize()
                 )
             }

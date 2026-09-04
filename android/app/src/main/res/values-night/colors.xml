@@ -3,6 +3,7 @@
     <color name="popup_background">#FF1C1C1E</color>
     <color name="popup_close_background">#FF39393D</color>
     <color name="popup_ring_track">#57808080</color>
+    <color name="popup_secondary_text">#EBEBF5</color>
     <color name="popup_text">#FFFFFF</color>
     <color name="widget_background">#1C1B1E</color>
     <color name="widget_text">@color/white</color>
