@@ -74,6 +74,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 
 @SuppressLint("DefaultLocale")
@@ -357,7 +358,7 @@ fun AccessibilitySettingsScreen(
 //                        )
 //                        .padding(vertical = 0.dp)
 //                ) {
-//                    val darkModeLocal = isSystemInDarkTheme()
+//                    val darkModeLocal = LocalIsDarkTheme.current
 //
 //                    val phoneShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 //                    var phoneBackgroundColor by remember {

@@ -67,6 +67,7 @@ import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.services.ServiceManager
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
+import me.kavishdevar.librepods.presentation.theme.withAppNightMode
 
 enum class IslandType {
     CONNECTED,
@@ -75,7 +76,9 @@ enum class IslandType {
     MOVED_TO_OTHER_DEVICE,
 }
 
-class IslandWindow(private val context: Context) {
+class IslandWindow(baseContext: Context) {
+    // Its own window, so the app's appearance has to be carried in by hand.
+    private val context: Context = baseContext.withAppNightMode()
     private val windowManager: WindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     @SuppressLint("InflateParams")
     private val islandView: View = LayoutInflater.from(context).inflate(R.layout.island_window, null)

@@ -332,9 +332,6 @@
     <string name="permissions_grant_all">Grant all</string>
     <string name="next">Next</string>
     <string name="widget_appearance">Widget Appearance</string>
-    <string name="widget_theme_system">Follow System</string>
-    <string name="widget_theme_light">Light</string>
-    <string name="widget_theme_dark">Dark</string>
     <string name="widget_background_opacity">Background Opacity: %1$d%%</string>
     <string name="widget_done">Done</string>
     <string name="compatibility_check_bypassed">Compatibility check bypassed. Are you sure your device is compatible?</string>
@@ -411,4 +408,7 @@
     <string name="welcome_to">Welcome to</string>
     <string name="enable_hearing_aid">Enable Hearing Aid</string>
     <string name="enable_hearing_aid_confirmation">Enabling Hearing Aid will disable Headphone Accommodation and Customized Transparency Mode.</string>
+    <string name="theme_system">Automatic</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>
