@@ -3322,38 +3322,45 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 aacpManager.sendNotificationRequest()
                 Log.d(TAG, "Requesting proximity keys")
                 aacpManager.sendRequestProximityKeys((AACPManager.Companion.ProximityKeyType.IRK.value + AACPManager.Companion.ProximityKeyType.ENC_KEY.value).toByte())
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(200)
+                val followUpHandler = Handler(Looper.getMainLooper())
+                val followUpRunnable = Runnable {
+                    if (BluetoothConnectionManager.aacpSocket !== socket || !socket.isConnected) {
+                        return@Runnable
+                    }
                     aacpManager.sendPacket(aacpManager.createHandshakePacket())
-                    delay(200)
                     aacpManager.sendSetFeatureFlagsPacket()
-                    delay(200)
                     aacpManager.sendNotificationRequest()
-                    delay(200)
-                    aacpManager.sendSomePacketIDontKnowWhatItIs()
-                    delay(200)
-                    aacpManager.sendRequestProximityKeys((AACPManager.Companion.ProximityKeyType.IRK.value + AACPManager.Companion.ProximityKeyType.ENC_KEY.value).toByte())
-                    if (!handleIncomingCallOnceConnected) startHeadTracking() else handleIncomingCall()
-                    Handler(Looper.getMainLooper()).postDelayed({
+                    aacpManager.sendRequestProximityKeys(AACPManager.Companion.ProximityKeyType.IRK.value)
+                    if (!handleIncomingCallOnceConnected) stopHeadTracking()
+                }
+                CoroutineScope(Dispatchers.IO).launch {
+                    val resendJob = launch {
+                        delay(200)
                         aacpManager.sendPacket(aacpManager.createHandshakePacket())
+                        delay(200)
                         aacpManager.sendSetFeatureFlagsPacket()
+                        delay(200)
                         aacpManager.sendNotificationRequest()
-                        aacpManager.sendRequestProximityKeys(AACPManager.Companion.ProximityKeyType.IRK.value)
-                        if (!handleIncomingCallOnceConnected) stopHeadTracking()
-                    }, 5000)
+                        delay(200)
+                        aacpManager.sendSomePacketIDontKnowWhatItIs()
+                        delay(200)
+                        aacpManager.sendRequestProximityKeys((AACPManager.Companion.ProximityKeyType.IRK.value + AACPManager.Companion.ProximityKeyType.ENC_KEY.value).toByte())
+                        if (!handleIncomingCallOnceConnected) startHeadTracking() else handleIncomingCall()
+                        followUpHandler.postDelayed(followUpRunnable, 5000)
 
-                    sendBroadcast(
-                        Intent(AirPodsNotifications.AIRPODS_CONNECTED).putExtra("device", device)
-                            .apply {
-                                setPackage(packageName)
-                            })
+                        sendBroadcast(
+                            Intent(AirPodsNotifications.AIRPODS_CONNECTED).putExtra("device", device)
+                                .apply {
+                                    setPackage(packageName)
+                                })
 
-                    setupStemActions()
+                        setupStemActions()
+                    }
 
-                    while (socket.isConnected) {
-                        try {
+                    try {
+                        while (socket.isConnected) {
                             val buffer = ByteArray(1024)
-                            val bytesRead = it.inputStream.read(buffer)
+                            val bytesRead = socket.inputStream.read(buffer)
                             var data: ByteArray
                             if (bytesRead > 0) {
                                 data = buffer.copyOfRange(0, bytesRead)
@@ -3379,35 +3386,37 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
                             } else if (bytesRead == -1) {
                                 Log.d("AirPodsService", "socket closed (bytesRead = -1)")
-                                sendBroadcast(Intent(AirPodsNotifications.AIRPODS_DISCONNECTED).apply {
-                                    setPackage(packageName)
-                                })
-                                aacpManager.disconnected()
-                                return@launch
+                                break
                             }
-                        } catch (e: Exception) {
+                        }
+                        Log.d("AirPods Service", "socket closed")
+                    } catch (e: Exception) {
+                        if (socket.isConnected) {
                             Log.w(TAG, "Error reading data, we have probably disconnected.")
                             e.printStackTrace()
+                        }
+                    } finally {
+                        resendJob.cancel()
+                        followUpHandler.removeCallbacks(followUpRunnable)
+                        try {
+                            socket.close()
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Error closing AACP socket after reader stopped", e)
+                        }
+//                        isConnectedLocally = false
+                        if (BluetoothConnectionManager.aacpSocket === socket) {
+                            aacpManager.disconnected()
+                            BluetoothConnectionManager.aacpSocket = null
+                            BluetoothConnectionManager.attSocket = null
+                            updateNotificationContent(false)
+                            // Same order as the broadcast handler: the widgets read the
+                            // socket, so it has to be gone before they are repainted.
+                            onBatteryDisconnected()
                             sendBroadcast(Intent(AirPodsNotifications.AIRPODS_DISCONNECTED).apply {
                                 setPackage(packageName)
                             })
-                            aacpManager.disconnected()
-                            return@launch
                         }
-
                     }
-                    Log.d("AirPods Service", "socket closed")
-//                        isConnectedLocally = false
-                    aacpManager.disconnected()
-                    BluetoothConnectionManager.aacpSocket = null
-                    BluetoothConnectionManager.attSocket = null
-                    updateNotificationContent(false)
-                    // Same order as the broadcast handler: the widgets read the
-                    // socket, so it has to be gone before they are repainted.
-                    onBatteryDisconnected()
-                    sendBroadcast(Intent(AirPodsNotifications.AIRPODS_DISCONNECTED).apply {
-                        setPackage(packageName)
-                    })
                 }
             }
         } catch (e: Exception) {
