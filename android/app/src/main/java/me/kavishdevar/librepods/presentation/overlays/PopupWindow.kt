@@ -288,9 +288,9 @@ class PopupWindow(
         val showCombinedBuds = combinedBuds != null
 
         val badgeVisibility = if (showCombinedBuds) View.GONE else View.VISIBLE
-        mView.findViewById<ImageView>(R.id.left_battery_badge).visibility = badgeVisibility
-        mView.findViewById<ImageView>(R.id.right_battery_badge).visibility = badgeVisibility
-        mView.findViewById<ImageView>(R.id.case_battery_badge).visibility = badgeVisibility
+        updateBatteryBadge(R.id.left_battery_badge, badgeVisibility, left?.level)
+        updateBatteryBadge(R.id.right_battery_badge, badgeVisibility, right?.level)
+        updateBatteryBadge(R.id.case_battery_badge, badgeVisibility, case?.level)
 
         updateBatteryCell(
             R.id.combined_buds_battery_cell,
@@ -332,6 +332,25 @@ class PopupWindow(
             case?.level,
             case?.status
         )
+    }
+
+    /**
+     * iOS holds the badge at the secondary label's opacity while the component is
+     * still filling and takes it to full strength once it reads 100%, the case
+     * included.
+     */
+    private fun updateBatteryBadge(badgeId: Int, visibility: Int, level: Int?) {
+        val badge = mView.findViewById<ImageView>(badgeId)
+        badge.visibility = visibility
+
+        val full = (level ?: 0) >= 100
+        badge.imageTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(
+                context,
+                if (full) R.color.popup_text else R.color.popup_secondary_text
+            )
+        )
+        badge.alpha = if (full) 1f else BADGE_FILLING_ALPHA
     }
 
     private fun updateBatteryCell(
@@ -468,6 +487,9 @@ class PopupWindow(
         /** Dismissal is quicker and never overshoots past the screen edge. */
         const val DISMISS_STIFFNESS = 900f
         const val DISMISS_DIM_DURATION_MS = 240L
+
+        /** What the badge sits at until its component reads 100%. */
+        const val BADGE_FILLING_ALPHA = 0.6f
 
         const val DIM_AMOUNT = 0.3f
         const val BLUR_BEHIND_RADIUS_DP = 48

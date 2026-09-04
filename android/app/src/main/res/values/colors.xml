@@ -5,6 +5,7 @@
     <color name="popup_background">#FFFFFFFF</color>
     <color name="popup_close_background">#FFEEEEEF</color>
     <color name="popup_ring_track">#21808080</color>
+    <color name="popup_secondary_text">#3C3C43</color>
     <color name="popup_text">@color/black</color>
     <color name="widget_background">#87FFFFFF</color>
     <color name="widget_text">@color/black</color>
