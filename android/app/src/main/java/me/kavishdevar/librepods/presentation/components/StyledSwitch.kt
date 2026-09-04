@@ -28,7 +28,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -77,6 +76,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import kotlin.math.abs
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun StyledSwitch(
@@ -84,7 +84,7 @@ fun StyledSwitch(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
     val haptics = LocalHapticFeedback.current
     val appleMetrics = LocalAppleDesignMetrics.current
 
@@ -300,7 +300,7 @@ fun StyledSwitch(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun StyledSwitchPreview() {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
     val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFF2F2F7)
     Box(
         modifier = Modifier

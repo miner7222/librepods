@@ -1,7 +1,6 @@
 package me.kavishdevar.librepods.presentation.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +31,7 @@ import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +44,7 @@ fun StyledBottomSheet(
 ) {
     if (!visible) return
 
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
     val isApple = LocalDesignSystem.current == DesignSystem.Apple
     val sheetState = rememberModalBottomSheetState(false) // move this to parent composable
 

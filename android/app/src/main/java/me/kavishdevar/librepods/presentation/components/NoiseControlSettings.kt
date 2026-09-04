@@ -29,7 +29,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -81,6 +80,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.roundToInt
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("UnspecifiedRegisterReceiverFlag", "UnusedBoxWithConstraintsScope")
@@ -188,7 +188,7 @@ fun NoiseControlSettings(
 
         DesignSystem.Apple -> {
             val appleMetrics = LocalAppleDesignMetrics.current
-            val isDarkTheme = isSystemInDarkTheme()
+            val isDarkTheme = LocalIsDarkTheme.current
             val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFE2E2E7)
             val textColor = if (isDarkTheme) Color.White else Color.Black
             val textColorSelected = if (isDarkTheme) Color.White else Color.Black

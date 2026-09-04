@@ -33,7 +33,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -96,6 +95,7 @@ import me.kavishdevar.librepods.services.ServiceManager
 import me.kavishdevar.librepods.utils.HeadTracking
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -111,7 +111,7 @@ fun HeadTrackingScreen(
             viewModel.stopHeadTracking()
         }
     }
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
     if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
     val textColor = if (isDarkTheme) Color.White else Color.Black
 
@@ -321,7 +321,7 @@ private fun Plot() {
     val verticalLabel = stringResource(R.string.vertical)
     val maxPoints = 100
     val points = remember { mutableStateListOf<Pair<Float, Float>>() }
-    val darkTheme = isSystemInDarkTheme()
+    val darkTheme = LocalIsDarkTheme.current
 
     var maxAbs by remember { mutableFloatStateOf(1000f) }
 

@@ -23,7 +23,6 @@ package me.kavishdevar.librepods.presentation.components
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +51,7 @@ import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
 import me.kavishdevar.librepods.data.BatteryStatus
 import kotlin.io.encoding.ExperimentalEncodingApi
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 /**
  * The artwork sits on a square canvas with a lot of transparent margin - the buds
@@ -179,7 +179,7 @@ fun BatteryViewPreview() {
         Battery(BatteryComponent.CASE, 60, BatteryStatus.NOT_CHARGING)
     )
 
-    val bg = if (isSystemInDarkTheme()) Color.Black else Color(0xFFF2F2F7)
+    val bg = if (LocalIsDarkTheme.current) Color.Black else Color(0xFFF2F2F7)
 
     Box(
         modifier = Modifier

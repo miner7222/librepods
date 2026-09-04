@@ -32,7 +32,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,6 +104,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun CustomIconButton(
@@ -152,13 +152,13 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val backgroundColor = if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
-    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    val backgroundColor = if (LocalIsDarkTheme.current) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+    val textColor = if (LocalIsDarkTheme.current) Color.White else Color.Black
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val accentColor = if (isSystemInDarkTheme()) Color(0xFF007AFF) else Color(0xFF3C6DF5)
-    val buttonBgColor = if (isSystemInDarkTheme()) Color(0xFF333333) else Color(0xFFDDDDDD)
+    val accentColor = if (LocalIsDarkTheme.current) Color(0xFF007AFF) else Color(0xFF3C6DF5)
+    val buttonBgColor = if (LocalIsDarkTheme.current) Color(0xFF333333) else Color(0xFFDDDDDD)
 
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {

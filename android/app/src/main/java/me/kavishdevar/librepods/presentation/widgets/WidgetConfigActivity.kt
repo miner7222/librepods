@@ -216,21 +216,21 @@ private fun WidgetConfigScreen(
             Spacer(modifier = Modifier.height(topPadding))
             StyledList(firstInColumn = true) {
                 StyledListItem(
-                    name = stringResource(R.string.widget_theme_system),
+                    name = stringResource(R.string.theme_system),
                     selected = theme == WidgetTheme.SYSTEM,
                     onClick = {
                         theme = WidgetTheme.SYSTEM
                     }
                 )
                 StyledListItem(
-                    name = stringResource(R.string.widget_theme_light),
+                    name = stringResource(R.string.theme_light),
                     selected = theme == WidgetTheme.LIGHT,
                     onClick = {
                         theme = WidgetTheme.LIGHT
                     }
                 )
                 StyledListItem(
-                    name = stringResource(R.string.widget_theme_dark),
+                    name = stringResource(R.string.theme_dark),
                     selected = theme == WidgetTheme.DARK,
                     onClick = {
                         theme = WidgetTheme.DARK

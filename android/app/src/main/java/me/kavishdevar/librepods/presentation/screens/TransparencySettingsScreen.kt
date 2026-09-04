@@ -22,7 +22,6 @@ package me.kavishdevar.librepods.presentation.screens
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,6 +77,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 private const val TAG = "TransparencySettings"
 
@@ -88,7 +88,7 @@ fun TransparencySettingsScreen(
     viewModel: AirPodsViewModel,
     onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
     val textColor = if (isDarkTheme) Color.White else Color.Black
     val verticalScrollState = rememberScrollState()
     ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)

@@ -29,7 +29,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -109,6 +108,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun rememberMomentumAnimation(
@@ -386,8 +386,8 @@ fun StyledSlider(
             if (prominent) {
                 val appleMetrics = LocalAppleDesignMetrics.current
                 val backgroundColor =
-                    if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
-                val isDarkTheme = isSystemInDarkTheme()
+                    if (LocalIsDarkTheme.current) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+                val isDarkTheme = LocalIsDarkTheme.current
                 val trackColor =
                     if (isDarkTheme) Color(0xFF1C1C1D) else Color(0xFFDEDEE2)
                 val fillColor = Color.White
@@ -551,7 +551,7 @@ fun StyledSlider(
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Light,
-                                    color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(
+                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
                                         alpha = 0.6f
                                     ),
                                     fontFamily = FontFamily(Font(R.font.pretendard))
@@ -576,8 +576,8 @@ fun StyledSlider(
             } else {
                 val appleMetrics = LocalAppleDesignMetrics.current
                 val backgroundColor =
-                    if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
-                val isDarkTheme = isSystemInDarkTheme()
+                    if (LocalIsDarkTheme.current) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+                val isDarkTheme = LocalIsDarkTheme.current
                 val trackColor =
                     if (isDarkTheme) Color(0xFF787880).copy(0.36f)
                     else Color(0xFF787878).copy(0.2f)
@@ -930,7 +930,7 @@ fun StyledSlider(
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Light,
-                                    color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(
+                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
                                         alpha = 0.6f
                                     ),
                                     fontFamily = FontFamily(Font(R.font.pretendard))

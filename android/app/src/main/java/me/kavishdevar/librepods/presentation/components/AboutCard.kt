@@ -20,7 +20,6 @@
 
 package me.kavishdevar.librepods.presentation.components
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -40,6 +39,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun AboutCard(
@@ -52,7 +52,7 @@ fun AboutCard(
     val left = stringResource(R.string.left)
     val right = stringResource(R.string.right)
     val inlineIconTint = MaterialTheme.colorScheme.onSurface.copy(
-        alpha = if (isSystemInDarkTheme()) 0.6f else 0.46f
+        alpha = if (LocalIsDarkTheme.current) 0.6f else 0.46f
     )
     val serialNumberEntries = when (LocalDesignSystem.current) {
         DesignSystem.Apple -> listOf(

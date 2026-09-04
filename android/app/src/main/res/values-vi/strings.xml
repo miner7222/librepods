@@ -203,4 +203,7 @@
     <string name="listening_mode_transparency_description">Cho phép âm thanh bên ngoài</string>
     <string name="listening_mode_adaptive_description">Điều chỉnh động tiếng ồn bên ngoài</string>
     <string name="listening_mode_noise_cancellation_description">Chặn âm thanh bên ngoài</string>
+    <string name="theme_system">Tự động</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_dark">Tối</string>
 </resources>

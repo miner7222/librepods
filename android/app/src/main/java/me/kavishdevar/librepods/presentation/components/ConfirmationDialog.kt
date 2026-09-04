@@ -25,7 +25,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,6 +66,7 @@ import com.kyant.backdrop.effects.vibrancy
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,7 +140,7 @@ fun ConfirmationDialog(
                             .clickable(enabled = false, onClick = {}),
                         contentAlignment = Alignment.Center
                     ) {
-                        val isDarkTheme = isSystemInDarkTheme()
+                        val isDarkTheme = LocalIsDarkTheme.current
                         Box(
                             modifier = Modifier
                                 .requiredWidthIn(min = 200.dp, max = 360.dp)

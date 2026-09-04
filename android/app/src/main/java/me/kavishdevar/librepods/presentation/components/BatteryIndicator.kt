@@ -25,7 +25,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -71,6 +70,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.secondaryLabel
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun BatteryIndicator(
@@ -79,7 +79,7 @@ fun BatteryIndicator(
     @DrawableRes prefix: Int = 0,
     previousCharging: Boolean = false,
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = LocalIsDarkTheme.current
     val batteryTextColor = if (isDarkTheme) Color.White else Color.Black
     val batteryFillColor =
         if (batteryPercentage > 25) if (isDarkTheme) Color(0xFF2ED158) else Color(0xFF35C759)

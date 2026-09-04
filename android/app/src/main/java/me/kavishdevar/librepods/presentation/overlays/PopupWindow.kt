@@ -61,6 +61,7 @@ import me.kavishdevar.librepods.data.FallbackArtwork
 import me.kavishdevar.librepods.data.OverlayRingLayout
 import me.kavishdevar.librepods.data.unifiedBudBattery
 import me.kavishdevar.librepods.presentation.widgets.BatteryRing
+import me.kavishdevar.librepods.presentation.theme.withAppNightMode
 
 // 93% of a turn leaves about 25 degrees open just before twelve o'clock,
 // which is where the charging bolt sits.
@@ -68,9 +69,11 @@ private const val POPUP_RING_DP = 37
 
 @SuppressLint("InflateParams", "ClickableViewAccessibility")
 class PopupWindow(
-    private val context: Context,
+    baseContext: Context,
     private val onCloseCallback: () -> Unit = {}
 ) {
+    // Its own window, so the app's appearance has to be carried in by hand.
+    private val context: Context = baseContext.withAppNightMode()
     private val mView: View
     private var isClosing = false
     private var autoCloseHandler = Handler(Looper.getMainLooper())

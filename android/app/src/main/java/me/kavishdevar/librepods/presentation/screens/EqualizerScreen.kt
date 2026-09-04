@@ -25,7 +25,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,6 +103,7 @@ import me.kavishdevar.librepods.presentation.viewmodel.demoState
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun EqualizerRoute(
@@ -273,7 +273,7 @@ fun EqualizerCard(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
     ) {
-        val dashColor = if (isSystemInDarkTheme()) Color(0x80AAAAAA) else Color(0x809D9D9D)
+        val dashColor = if (LocalIsDarkTheme.current) Color(0x80AAAAAA) else Color(0x809D9D9D)
 
         val backdrop = rememberLayerBackdrop()
         Column(
@@ -292,7 +292,7 @@ fun EqualizerCard(
             //                    Box(
             //                        modifier = Modifier
             //                            .size(64.dp)
-            //                            .background(if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray, RoundedCornerShape(12.dp))
+            //                            .background(if (LocalIsDarkTheme.current) Color.DarkGray else Color.LightGray, RoundedCornerShape(12.dp))
             //                    )
             //                    Column(
             //                        modifier = Modifier
@@ -305,7 +305,7 @@ fun EqualizerCard(
             //                                fontSize = 16.sp,
             //                                fontFamily = FontFamily(Font(R.font.pretendard)),
             //                                fontWeight = FontWeight.Bold,
-            //                                color = if (isSystemInDarkTheme()) Color.White else Color.Black
+            //                                color = if (LocalIsDarkTheme.current) Color.White else Color.Black
             //                            )
             //                        )
             //                        Spacer(modifier = Modifier.height(4.dp))
@@ -315,7 +315,7 @@ fun EqualizerCard(
             //                                fontSize = 14.sp,
             //                                fontFamily = FontFamily(Font(R.font.pretendard)),
             //                                fontWeight = FontWeight.Normal,
-            //                                color = if (isSystemInDarkTheme()) Color.White else Color.Black
+            //                                color = if (LocalIsDarkTheme.current) Color.White else Color.Black
             //                            )
             //                        )
             //                    }
@@ -570,7 +570,7 @@ fun EqualizerCard(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
                                     fontWeight = FontWeight.Bold,
-                                    color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(
+                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
                                         0.2f
                                     ),
                                     textAlign = TextAlign.Center
@@ -587,7 +587,7 @@ fun EqualizerCard(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
                                     fontWeight = FontWeight.Bold,
-                                    color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(
+                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
                                         0.2f
                                     ),
                                     textAlign = TextAlign.Center
@@ -604,7 +604,7 @@ fun EqualizerCard(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
                                     fontWeight = FontWeight.Bold,
-                                    color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(
+                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
                                         0.2f
                                     ),
                                     textAlign = TextAlign.Center

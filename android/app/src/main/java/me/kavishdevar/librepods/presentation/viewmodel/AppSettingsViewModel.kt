@@ -14,6 +14,7 @@ import me.kavishdevar.librepods.BuildConfig
 import me.kavishdevar.librepods.billing.BillingManager
 import me.kavishdevar.librepods.data.XposedRemotePrefProvider
 import kotlin.math.roundToInt
+import me.kavishdevar.librepods.presentation.theme.AppTheme
 
 data class AppSettingsUiState(
     val showPhoneBatteryInWidget: Boolean = false,
@@ -39,7 +40,8 @@ data class AppSettingsUiState(
     val showBottomSheetPopup: Boolean = true,
     val showIslandPopup: Boolean = true,
     val timeUntilFOSSPremiumExpiry: Long = 0L,
-    val m3eEnabled: Boolean = false
+    val m3eEnabled: Boolean = false,
+    val appTheme: AppTheme = AppTheme.System
 )
 
 class AppSettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -156,7 +158,10 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
                 connectionSuccessful = sharedPreferences.getBoolean("connection_successful", false),
                 showBottomSheetPopup = sharedPreferences.getBoolean("show_bottom_sheet_popup", true),
                 showIslandPopup = sharedPreferences.getBoolean("show_island_popup", true),
-                m3eEnabled = sharedPreferences.getBoolean("m3e_enabled", true)
+                m3eEnabled = sharedPreferences.getBoolean("m3e_enabled", true),
+                appTheme = AppTheme.from(
+                    sharedPreferences.getString(AppTheme.PREFERENCE_KEY, null)
+                )
             )
         }
     }
@@ -265,6 +270,11 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
     fun setShowIslandPopup(enabled: Boolean) {
         sharedPreferences.edit { putBoolean("show_island_popup", enabled) }
         _uiState.update { it.copy(showIslandPopup = enabled) }
+    }
+
+    fun setAppTheme(theme: AppTheme) {
+        sharedPreferences.edit { putString(AppTheme.PREFERENCE_KEY, theme.preferenceValue) }
+        _uiState.update { it.copy(appTheme = theme) }
     }
 
     fun setm3eEnabled(enabled: Boolean) {

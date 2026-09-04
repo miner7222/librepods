@@ -21,7 +21,6 @@ package me.kavishdevar.librepods.presentation.screens
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -71,6 +70,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 private const val TAG = "AccessibilitySettings"
 
@@ -158,7 +158,7 @@ fun HearingAidScreen(
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
-                color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(alpha = 0.6f),
+                color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(alpha = 0.6f),
                 fontFamily = FontFamily(Font(R.font.pretendard))
             ),
             modifier = Modifier.padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)

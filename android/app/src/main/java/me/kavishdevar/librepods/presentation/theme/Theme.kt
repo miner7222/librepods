@@ -18,7 +18,6 @@
 
 package me.kavishdevar.librepods.presentation.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
@@ -81,7 +80,9 @@ private val AppleLightColorScheme = lightColorScheme(
 
 @Composable
 fun LibrePodsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    // The app's own appearance, not the phone's: a caller that omits this must not
+    // silently fall back to the system theme.
+    darkTheme: Boolean = rememberAppDarkTheme(),
     m3eEnabled: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -98,7 +99,8 @@ fun LibrePodsTheme(
         LocalDesignSystem provides
             if (m3eEnabled) DesignSystem.Material
             else DesignSystem.Apple,
-        LocalAppleDesignMetrics provides AppleDesignMetrics
+        LocalAppleDesignMetrics provides AppleDesignMetrics,
+        LocalIsDarkTheme provides darkTheme
     ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,

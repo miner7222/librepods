@@ -25,7 +25,6 @@ import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,6 +91,7 @@ import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
+import me.kavishdevar.librepods.presentation.theme.AppTheme
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
@@ -99,6 +99,7 @@ import me.kavishdevar.librepods.presentation.theme.MaterialTypography
 import me.kavishdevar.librepods.presentation.viewmodel.AppSettingsViewModel
 import me.kavishdevar.librepods.utils.XposedState
 import java.util.concurrent.TimeUnit
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +142,7 @@ fun AppSettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        val isDarkTheme = isSystemInDarkTheme()
+        val isDarkTheme = LocalIsDarkTheme.current
 
         if (!state.isPremium && state.connectionSuccessful) {
             StyledButton(
@@ -201,6 +202,22 @@ fun AppSettingsScreen(
             enabled = state.isPremium,
             firstInColumn = !opensWithPremiumBanner
         )
+
+        StyledList {
+            AppTheme.entries.forEach { theme ->
+                StyledListItem(
+                    name = stringResource(
+                        when (theme) {
+                            AppTheme.System -> R.string.theme_system
+                            AppTheme.Light -> R.string.theme_light
+                            AppTheme.Dark -> R.string.theme_dark
+                        }
+                    ),
+                    selected = state.appTheme == theme,
+                    onClick = { viewModel.setAppTheme(theme) }
+                )
+            }
+        }
 
         if (state.connectionSuccessful) {
 
@@ -561,14 +578,14 @@ fun AppSettingsScreen(
                        fontFamily = FontFamily(Font(R.font.pretendard)),
                        fontWeight = FontWeight.Bold,
                        textAlign = TextAlign.Center,
-                       color = if (isSystemInDarkTheme()) Color.White else Color.Black
+                       color = if (LocalIsDarkTheme.current) Color.White else Color.Black
                    )
                )
                StyledIconButton(
                    icon = R.drawable.sf_paperplane,
                    contentDescription = stringResource(R.string.send),
                    backdrop = innerBackdrop,
-                   surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0091FF) else Color(0xFF0088FF),
+                   surfaceColor = if (LocalIsDarkTheme.current) Color(0xFF0091FF) else Color(0xFF0088FF),
                    iconTint = if (subjectState.text.isNotEmpty() && descriptionState.text.isNotEmpty()) Color.White else Color.Gray,
                    enabled = subjectState.text.isNotEmpty() && descriptionState.text.isNotEmpty(),
                    onClick = {

@@ -234,4 +234,7 @@
     <string name="bypass_compatiblity_check_confirmation">你確定你的裝置原生支援或已啟用 Xposed 模組嗎？</string>
     <string name="not_supported">不支援</string>
     <string name="check_the_repository_for_more_info">請查看儲存庫以獲取更多資訊。</string>
+    <string name="theme_system">自動</string>
+    <string name="theme_light">淺色</string>
+    <string name="theme_dark">深色</string>
 </resources>

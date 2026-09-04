@@ -28,7 +28,6 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -92,6 +91,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.tanh
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 fun StyledIconButton(
@@ -164,7 +164,7 @@ fun StyledIconButton(
         }
         DesignSystem.Apple -> {
             val haptics = LocalHapticFeedback.current
-            val darkMode = isSystemInDarkTheme()
+            val darkMode = LocalIsDarkTheme.current
             val scope = rememberCoroutineScope()
             val progressAnimationSpec = spring(0.5f, 300f, 0.001f)
             val offsetAnimationSpec = spring(1f, 300f, Offset.VisibilityThreshold)
@@ -196,7 +196,7 @@ half4 main(float2 coord) {
                     null
                 }
             }
-            val isDarkTheme = isSystemInDarkTheme()
+            val isDarkTheme = LocalIsDarkTheme.current
             TextButton(
                 onClick = {
                     if (enabled) {
@@ -419,7 +419,7 @@ fun StyledIconButtonPreview() {
         .height(120.dp)
         .width(200.dp)
         .background(
-            if (isSystemInDarkTheme()) Color(0xFF000000) else Color(0xFFF2F2F7),
+            if (LocalIsDarkTheme.current) Color(0xFF000000) else Color(0xFFF2F2F7),
             RoundedCornerShape(28.dp)
         ), contentAlignment = Alignment.Center) {
         StyledIconButton(
