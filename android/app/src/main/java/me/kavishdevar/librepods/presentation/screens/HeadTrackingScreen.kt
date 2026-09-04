@@ -310,7 +310,9 @@ private fun Plot() {
         shape = RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius)
     ) {
         val horizontalColor = MaterialTheme.colorScheme.primary
-        val verticalColor = MaterialTheme.colorScheme.onPrimary
+        // onPrimary is white in both schemes, so this trace disappeared into the
+        // light card. Apple's systemRed is the counterpart to the blue beside it.
+        val verticalColor = if (darkTheme) Color(0xFFFF453A) else Color(0xFFFF3B30)
 
         Box(
             modifier = Modifier
