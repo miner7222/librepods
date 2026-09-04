@@ -188,7 +188,7 @@ fun EqualizerScreen(
 
         val enabled = customEq.isEnabled()
 
-        StyledList {
+        StyledList(description = stringResource(R.string.equalizer_description)) {
             StyledListItem(
                 name = stringResource(R.string.recommended),
                 selected = !enabled,
@@ -353,7 +353,11 @@ fun EqualizerCard(
                     val stops = listOf(
                         0.0f to Color(0xFFFFA300),
                         0.25f to Color(0xFFFCE600),
-                        0.5f to Color(0xFF00FAAF),
+                        // The flat curve is the state iOS actually shows: measured off
+                        // its Equaliser at rest, the line and its dots are #65F6B5. The
+                        // four stops around it have no iOS counterpart in the captures -
+                        // iOS only exposes three bands, all centred.
+                        0.5f to Color(0xFF65F6B5),
                         0.75f to Color(0xFF00FAFF),
                         1.0f to Color(0xFF00B5FF)
                     )

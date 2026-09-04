@@ -129,6 +129,7 @@
     <string name="volume_swipe_speed">Volume Swipe Speed</string>
     <string name="volume_swipe_speed_description">To prevent unintended volume adjustments, select preferred wait time between swipes.</string>
     <string name="equalizer">Equalizer</string>
+    <string name="equalizer_description">AirPods reproduce music, TV shows, movies, and call audio faithfully, based on Apple\'s design and engineering. If you prefer a different sound profile, you can customize how AirPods reproduce audio using Custom.</string>
     <string name="apply_eq_to">Apply EQ to</string>
     <string name="phone">Phone</string>
     <string name="media">Media</string>
