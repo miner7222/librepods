@@ -35,6 +35,12 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 class AACPManager {
     private val TAG = "AACPManager[${System.identityHashCode(this)}]"
     companion object {
+        /** The handshake is answered under this header, not the usual 04000400. */
+        const val HANDSHAKE_RESPONSE_HEADER = "01000400"
+
+        /** Byte 4 of that answer: 0x00 accepts, 0x85 refuses. */
+        const val HANDSHAKE_ACCEPTED: Byte = 0x00
+
         @Suppress("unused")
         object Opcodes {
             const val SET_FEATURE_FLAGS: Byte = 0x4D
@@ -246,6 +252,12 @@ class AACPManager {
         fun onHeadphoneAccommodationReceived(eqData: FloatArray)
         fun onCustomEqReceived(customEq: CustomEq)
         fun onCapabilitiesReceived(capabilities: List<Capability>)
+
+        /**
+         * The AirPods' answer to a handshake. Accepted means this channel will carry
+         * notifications; refused means it never will, however long we wait on it.
+         */
+        fun onHandshakeResponse(accepted: Boolean)
     }
 
     fun parseStemPressResponse(data: ByteArray): Pair<StemPressType, StemPressBudType> {
@@ -399,6 +411,20 @@ class AACPManager {
 
     @OptIn(ExperimentalStdlibApi::class)
     fun receivePacket(packet: ByteArray) {
+        if (packet.toHexString().startsWith(HANDSHAKE_RESPONSE_HEADER) && packet.size > 4) {
+            // The handshake is answered on its own header rather than the one every
+            // other packet uses, so this was being dropped as malformed - and with it
+            // the only word we get on whether the channel is any good.
+            val accepted = packet[4] == HANDSHAKE_ACCEPTED
+            Log.d(
+                TAG,
+                "Handshake ${if (accepted) "accepted" else "refused"}: ${
+                    packet.joinToString(" ") { "%02X".format(it) }
+                }"
+            )
+            callback?.onHandshakeResponse(accepted)
+            return
+        }
         if (!packet.toHexString().startsWith("04000400")) {
             Log.w(
                 TAG, "Received packet does not start with expected header: ${
