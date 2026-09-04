@@ -46,8 +46,8 @@ open class AirPodsBase(
 /**
  * Artwork borrowed by a model that has none of its own.
  *
- * Only two sets exist: the AirPods 4 for the standard shape and the AirPods Pro 2 for the
- * Pro shape. Every other generation points at whichever matches its shape. Going through
+ * Two fallback sets are available: the AirPods 4 for the standard shape and the AirPods
+ * Pro 2 for the Pro shape. Generations without their own artwork use one of these. Going through
  * here rather than naming the resource directly is what marks the artwork as borrowed - a
  * model that owns its assets names them itself.
  */
@@ -266,14 +266,14 @@ class AirPodsPro3: AirPodsBase(
     modelNumber = listOf("A3063", "A3064", "A3065"),
     name = "AirPods Pro 3",
     displayName = "AirPods Pro",
-    // budCaseRes = R.drawable.airpods_pro_3
-    budCaseRes = FallbackArtwork.Pro.budCase,
-    budsRes = FallbackArtwork.Pro.buds,
-    leftBudsRes = FallbackArtwork.Pro.leftBuds,
-    rightBudsRes = FallbackArtwork.Pro.rightBuds,
-    caseRes = FallbackArtwork.Pro.chargingCase,
-    connectedVideoRes = FallbackArtwork.Pro.connected,
-    islandVideoRes = FallbackArtwork.Pro.island,
+    budCaseRes = R.drawable.airpods_pro_3,
+    budsRes = R.drawable.airpods_pro_3_buds,
+    leftBudsRes = R.drawable.airpods_pro_3_left,
+    rightBudsRes = R.drawable.airpods_pro_3_right,
+    caseRes = R.drawable.airpods_pro_3_case,
+    connectedVideoRes = R.raw.airpods_pro_3_connected,
+    islandVideoRes = R.raw.airpods_pro_3_island,
+    ringLayout = OverlayRingLayout(0.1988f, 0.3501f, 0.2997f, 0.6929f),
     capabilities = setOf(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,

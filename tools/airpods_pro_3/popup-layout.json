@@ -1,0 +1,43 @@
+{
+  "popup_card_x": [
+    663,
+    1337
+  ],
+  "case_bounds_px": [
+    998,
+    465,
+    1235,
+    645
+  ],
+  "pair_bounds_px": [
+    764,
+    503,
+    928,
+    620
+  ],
+  "reference_filename": "connected-popup.jpg",
+  "phase_degrees": 180,
+  "elevation_degrees": 0,
+  "ortho_m": 0.1768482394211161,
+  "half_spacing_m": 0.010997562914935758,
+  "target_bounds_normalized": [
+    0.3516320474777448,
+    0.26706231454005935,
+    0.2433234421364985,
+    0.17359050445103857
+  ],
+  "fit_bounds_normalized": [
+    0.3508487210603601,
+    0.2674497210498003,
+    0.24332344201327918,
+    0.1745713269134747
+  ],
+  "measurement_tolerance_px": 3,
+  "note": "Orthographic fit to the product bounds at identified front/rear phase. Original mesh scale retained.",
+  "case_x_m": 0.03056798017379406,
+  "case_z_m": -9.313225746154785e-10,
+  "pair_x_m": -0.04040745191949218,
+  "pair_z_m": -0.0017055097273549773,
+  "reference_sha256": "156d5529e86761ec9ae7f2dda20ec09fe3b7a3ab7043a2ffb2407abf787234dc",
+  "source_url": "https://b2c-contenthub.com/wp-content/uploads/2025/12/airpods_optimiertes_laden_1.jpg"
+}

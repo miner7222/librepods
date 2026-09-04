@@ -1,0 +1,144 @@
+{
+  "sequences": {
+    "connected": {
+      "frames": 360,
+      "minimum_margin_px": 36,
+      "loop_delta": 0.5928084740487533,
+      "maximum_adjacent_delta": 1.6049810286952193
+    },
+    "island": {
+      "frames": 360,
+      "minimum_margin_px": 50,
+      "loop_delta": 1.3145859920549952,
+      "maximum_adjacent_delta": 2.3676614157334677
+    }
+  },
+  "videos": {
+    "connected": {
+      "size": [
+        1050,
+        354
+      ],
+      "frames": 360,
+      "fps": 60,
+      "seconds": 6,
+      "decoded_background_rgb": [
+        255.0,
+        255.0,
+        255.0
+      ],
+      "sha256": "48675ef9d611cae04110fdc275f53b7abdc571189b6cac5be9e89f38a4aabb66"
+    },
+    "connected_night": {
+      "size": [
+        1050,
+        354
+      ],
+      "frames": 360,
+      "fps": 60,
+      "seconds": 6,
+      "decoded_background_rgb": [
+        28.0,
+        27.0,
+        30.0
+      ],
+      "sha256": "b9eb7992aea49b3e9f2cd45a6f2096b8f8b4fb5d0e81232c1d6f87df544dc2a6"
+    },
+    "island": {
+      "size": [
+        418,
+        418
+      ],
+      "frames": 360,
+      "fps": 60,
+      "seconds": 6,
+      "decoded_background_rgb": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sha256": "5d650989fba135b6bd627bd390f64ce5bf312da4d8ff0d14ccc66ab4e09bf026"
+    }
+  },
+  "stills": {
+    "airpods_pro_3.png": {
+      "size": [
+        900,
+        900
+      ],
+      "alpha_bounds": [
+        234,
+        131,
+        666,
+        779
+      ],
+      "sha256": "7898a64736ae836d52ec7ae80b83e5cd8ac7c86236c9fe44654def30ed08768f"
+    },
+    "airpods_pro_3_buds.png": {
+      "size": [
+        992,
+        693
+      ],
+      "alpha_bounds": [
+        109,
+        97,
+        883,
+        596
+      ],
+      "sha256": "dd7dce72559b35aea33c4c18770b7f83f5ccb0699a8be0608d755d3ebb0cd72e"
+    },
+    "airpods_pro_3_case.png": {
+      "size": [
+        805,
+        805
+      ],
+      "alpha_bounds": [
+        11,
+        106,
+        794,
+        699
+      ],
+      "sha256": "cbdfd38a0c7d719d8163d5f9c99a1ff8ccb1b0f391eeee6107a401565e35f000"
+    },
+    "airpods_pro_3_left.png": {
+      "size": [
+        556,
+        762
+      ],
+      "alpha_bounds": [
+        2,
+        2,
+        554,
+        760
+      ],
+      "sha256": "534c948eddf4c336853475a8aa45ba58b87a85fd80caf5b886838a8ed47f2555"
+    },
+    "airpods_pro_3_right.png": {
+      "size": [
+        556,
+        762
+      ],
+      "alpha_bounds": [
+        2,
+        2,
+        554,
+        760
+      ],
+      "sha256": "2584788ffa7ae545437b63cd3f8982fb4f725ac939114b6c3a901c5c127b8c6e"
+    }
+  },
+  "popup_measurement": {
+    "silhouette_centers": [
+      0.20904761904761904,
+      0.33285714285714285,
+      0.6723809523809524
+    ],
+    "dimension_residual_reference_px": [
+      -0.1371428571428499,
+      1.0171428571428534,
+      0.3276190476190532,
+      1.1104761904761984
+    ],
+    "reference": "connected-popup.jpg"
+  }
+}

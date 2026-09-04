@@ -1,0 +1,61 @@
+{
+  "product": "AirPods Pro 3",
+  "acquired": "2026-09-05",
+  "page": "https://www.apple.com/airpods-pro/",
+  "specifications": "https://www.apple.com/airpods-pro/specs/",
+  "geometry": {
+    "url": "https://www.apple.com/105/media/us/airpods-pro/2025/7acffb13-4adb-40b1-9393-8f1c99bc6c90/ar/airpods-pro.usdz",
+    "sha256": "e39e77471fb84c60c12d14f5449df4f0f4a0dffc281ba3f7ab1068db13164f2a",
+    "filename": "apple_airpods_pro_3.usdz"
+  },
+  "reference_images": [
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/audio-performance/audio_airpods_pro_pair__v28g95nj97mq_large_2x.png",
+      "filename": "audio_airpods_pro_pair__v28g95nj97mq_large_2x.png",
+      "sha256": "655a5ea74a10b60746c3040f1a33a06062de51e1fde826de826798714de445b3"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/audio-performance/design_endframe__gc2e2e5qz7ue_large_2x.png",
+      "filename": "design_endframe__gc2e2e5qz7ue_large_2x.png",
+      "sha256": "0f7434a4715f839695acf1e7c82f706c05fa65b978be6b84a091d7a80153c225"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/battery/case__b87ou7jna9de_large_2x.png",
+      "filename": "case__b87ou7jna9de_large_2x.png",
+      "sha256": "835a5247f1e5a4a868e23f8d8320593aa7f3a0a89563ff9fe4819f0739e68b4c"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/fitness/fitness_hero_endframe__cbbu1uukdjyq_large_2x.png",
+      "filename": "fitness_hero_endframe__cbbu1uukdjyq_large_2x.png",
+      "sha256": "71fa683c924b42d6a02ea331599a5c63f0fb3bfd6c5e391fc4dec516e5ba85fe"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/fitness/fitness_hero_startframe__bkez1lr95bde_large_2x.png",
+      "filename": "fitness_hero_startframe__bkez1lr95bde_large_2x.png",
+      "sha256": "fe37490c01202e9eb752e5e840d9f8a45b01ac8627fa99b2c0d9c28185ade960"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/welcome/hero__b0eal3mn03ua_large_2x.jpg",
+      "filename": "hero__b0eal3mn03ua_large_2x.jpg",
+      "sha256": "12e26544feec8b08393e259d1497edc82f5d2b74c1613e3d18d652ddde3ce723"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/welcome/hero_endframe__vzawkxxoc72u_large_2x.jpg",
+      "filename": "hero_endframe__vzawkxxoc72u_large_2x.jpg",
+      "sha256": "cdf040cbeadd9bd7de5d0e8c75db868640875486a2fef0421b4ccf9a830caba1"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-pro/s/images/overview/welcome/hero_startframe__bfinf01b59si_large_2x.jpg",
+      "filename": "hero_startframe__bfinf01b59si_large_2x.jpg",
+      "sha256": "4123d6fd28187d8f626b915560ff2b9b7e9690f8df7de0363a30b369e47587b2"
+    },
+    {
+      "url": "https://b2c-contenthub.com/wp-content/uploads/2025/12/airpods_optimiertes_laden_1.jpg",
+      "filename": "connected-popup.jpg",
+      "sha256": "156d5529e86761ec9ae7f2dda20ec09fe3b7a3ab7043a2ffb2407abf787234dc",
+      "page": "https://www.macwelt.de/article/3006255/airpods-optimiert-laden-sinnvoll.html",
+      "purpose": "Connected-popup calibration only; not shipped or used as a texture."
+    }
+  ],
+  "provenance": "Apple official AR geometry and textures, converted to Blender; custom LibrePods hierarchy, hinge control, lighting, camera, grade and animation. Not independently authored geometry. No CC BY or GPL grant claimed for Apple-derived artwork."
+}

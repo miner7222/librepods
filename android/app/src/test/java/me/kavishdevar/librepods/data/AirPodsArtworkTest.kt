@@ -47,8 +47,8 @@ class AirPodsArtworkTest {
 
     @Test
     fun everyProWithoutArtworkBorrowsTheAirPodsPro2() {
-        // AirPods Pro 1 and Pro 3
-        for (number in listOf("A2084", "A2083", "A3063", "A3064", "A3065")) {
+        // AirPods Pro 1
+        for (number in listOf("A2084", "A2083")) {
             val model = requireNotNull(AirPodsModels.getModelByModelNumber(number))
             assertEquals(FallbackArtwork.Pro.budCase, model.budCaseRes)
             assertEquals(FallbackArtwork.Pro.buds, model.budsRes)
@@ -61,11 +61,27 @@ class AirPodsArtworkTest {
     }
 
     @Test
-    fun theTwoFallbackSetsPointAtTheOnlyArtworkWeShip() {
+    fun theTwoFallbackSetsKeepTheirExistingArtwork() {
         assertEquals(R.raw.airpods_4_connected, FallbackArtwork.Standard.connected)
         assertEquals(R.raw.airpods_4_island, FallbackArtwork.Standard.island)
         assertEquals(R.raw.airpods_pro_2_connected, FallbackArtwork.Pro.connected)
         assertEquals(R.raw.airpods_pro_2_island, FallbackArtwork.Pro.island)
+    }
+
+    @Test
+    fun airPodsPro3UsesItsOwnArtworkForEveryModelNumberAndBroadcastName() {
+        val models = listOf("A3063", "A3064", "A3065").map {
+            requireNotNull(AirPodsModels.getModelByModelNumber(it))
+        } + requireNotNull(AirPodsModels.getModelForOverlays("", "AirPods Pro 3"))
+        for (model in models) {
+            assertEquals(R.drawable.airpods_pro_3, model.budCaseRes)
+            assertEquals(R.drawable.airpods_pro_3_buds, model.budsRes)
+            assertEquals(R.drawable.airpods_pro_3_left, model.leftBudsRes)
+            assertEquals(R.drawable.airpods_pro_3_right, model.rightBudsRes)
+            assertEquals(R.drawable.airpods_pro_3_case, model.caseRes)
+            assertEquals(R.raw.airpods_pro_3_connected, model.connectedVideoRes)
+            assertEquals(R.raw.airpods_pro_3_island, model.islandVideoRes)
+        }
     }
 
     @Test
