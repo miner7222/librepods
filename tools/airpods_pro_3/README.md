@@ -12,7 +12,8 @@ Source pages: [Apple product page](https://www.apple.com/airpods-pro/) and
 Exact asset URLs and SHA-256 hashes are in `provenance.json`.
 Apple-derived geometry, textures and rendered images are not claimed to be
 CC BY or GPL assets. They are kept in the app's existing `res-apple` source
-directory and are separate from its CC BY AirPods 4 artwork.
+directory. AirPods 4 has subsequently been replaced with Apple-derived artwork
+as well; its separate provenance is in `../airpods_4/README.md`.
 
 ## Blender files and controls
 

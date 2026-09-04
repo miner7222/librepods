@@ -1,0 +1,65 @@
+{
+  "percentiles": [
+    5,
+    10,
+    50,
+    90,
+    98
+  ],
+  "raw_case_rgb": [
+    [
+      198.0,
+      198.0,
+      198.0
+    ],
+    [
+      210.0,
+      210.0,
+      210.0
+    ],
+    [
+      231.0,
+      231.0,
+      231.0
+    ],
+    [
+      237.0,
+      238.0,
+      237.0
+    ],
+    [
+      240.0,
+      240.0,
+      240.0
+    ]
+  ],
+  "popup_case_rgb": [
+    [
+      223.0,
+      225.0,
+      227.0
+    ],
+    [
+      229.0,
+      232.0,
+      233.0
+    ],
+    [
+      233.0,
+      235.0,
+      237.0
+    ],
+    [
+      245.0,
+      248.0,
+      249.0
+    ],
+    [
+      255.0,
+      255.0,
+      255.0
+    ]
+  ],
+  "reference": "connected-popup.png",
+  "method": "Inset superellipse mask in case bounding box; low anchors preserve dark sensors; RGB curve does not replace physical gloss lighting."
+}

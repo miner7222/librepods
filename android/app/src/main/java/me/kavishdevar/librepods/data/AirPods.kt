@@ -151,6 +151,7 @@ class AirPods4: AirPodsBase(
     caseRes = R.drawable.airpods_4_case,
     connectedVideoRes = R.raw.airpods_4_connected,
     islandVideoRes = R.raw.airpods_4_island,
+    ringLayout = OverlayRingLayout(0.1860f, 0.3416f, 0.2631f, 0.6873f),
     capabilities = setOf(
         Capability.HEAD_GESTURES,
         Capability.SLEEP_DETECTION,
@@ -169,6 +170,7 @@ class AirPods4ANC: AirPodsBase(
     caseRes = R.drawable.airpods_4_case,
     connectedVideoRes = R.raw.airpods_4_connected,
     islandVideoRes = R.raw.airpods_4_island,
+    ringLayout = OverlayRingLayout(0.1860f, 0.3416f, 0.2631f, 0.6873f),
     capabilities = setOf(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,

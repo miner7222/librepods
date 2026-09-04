@@ -1,0 +1,50 @@
+{
+  "product": "AirPods 4",
+  "acquired": "2026-09-05",
+  "page": "https://www.apple.com/airpods-4/",
+  "specifications": "https://www.apple.com/airpods-4/specs/",
+  "geometry": {
+    "url": "https://www.apple.com/105/media/us/airpods-4/2024/62a51629-9227-413a-98ae-ba9e09984c00/ar/airpods-mid.usdz",
+    "filename": "apple_airpods_4.usdz",
+    "sha256": "ba3bbb92b50cf48d7d93c50f327be39e70270266884ea7ad7e83e09b89f48c01"
+  },
+  "reference_images": [
+    {
+      "url": "https://www.apple.com/v/airpods-4/g/images/overview/bento-gallery/bento_angle__b2i7xnzp5h7m_large_2x.jpg",
+      "filename": "bento_angle__b2i7xnzp5h7m_large_2x.jpg",
+      "sha256": "c77243aa8fdf7260ea07047f25a745d7be3e041ab9782ddc4b5d14e01d295afb"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-4/g/images/overview/bento-gallery/bento_case_close__f0fhueeeoy2q_large_2x.jpg",
+      "filename": "bento_case_close__f0fhueeeoy2q_large_2x.jpg",
+      "sha256": "c3f478aa1739c64cae993487e77c3ef8de68686e70283daf36ed31779c04167f"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-4/g/images/overview/bento-gallery/bento_case_open__63kccmu775u6_large_2x.jpg",
+      "filename": "bento_case_open__63kccmu775u6_large_2x.jpg",
+      "sha256": "241bd4e9957d87fd2335de55e06592678fee0b5b7fe1aa0e6ce4e15d9020068b"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-4/g/images/overview/bento-gallery/bento_closeup__nvqogkmqz4ae_large_2x.jpg",
+      "filename": "bento_closeup__nvqogkmqz4ae_large_2x.jpg",
+      "sha256": "ec6ec1cd7ae3aa9b62d386c0b896937e553729b8ae6db1f88845fd1c9cffc644"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-4/g/images/overview/bento-gallery/bento_side__edtf67wfg10m_large_2x.jpg",
+      "filename": "bento_side__edtf67wfg10m_large_2x.jpg",
+      "sha256": "d8f4788a1f3f587d84058bc8e602c7bb7097f546aa7e7ec51f5e6068d576924f"
+    },
+    {
+      "url": "https://www.apple.com/v/airpods-4/g/images/overview/bento-gallery/bento_stem__cfztc9z01vpy_large_2x.jpg",
+      "filename": "bento_stem__cfztc9z01vpy_large_2x.jpg",
+      "sha256": "7d395304ca1830a85cee23773925fabad8f4a2528c317986a03e5358d0086894"
+    }
+  ],
+  "provenance": "Apple official AR geometry and textures, converted to Blender; LibrePods rig, lighting and animation. No CC BY or GPL grant claimed for Apple-derived artwork.",
+  "modifications": [
+    "Independent rigid left and right unit controls; shared optional animation parent",
+    "Lid closes by 115 degree rotation around the original hinge pin; 0..115 degree driven open/close control",
+    "One non-destructive subdivision level on four outer shells, recalculated normals, outer material roughness 0.28 and coat weight 0.15",
+    "New orthographic studio renders, calibrated grade, existing connection/island framing and six-second paired rotation"
+  ]
+}
