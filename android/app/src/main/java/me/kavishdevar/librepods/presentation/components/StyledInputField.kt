@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +46,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 
 @Composable
@@ -77,7 +77,7 @@ fun StyledInputField(
     }
     else {
         val appleMetrics = LocalAppleDesignMetrics.current
-        val isDarkTheme = isSystemInDarkTheme()
+        val isDarkTheme = LocalIsDarkTheme.current
         val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
         val textColor = if (isDarkTheme) Color.White else Color.Black
         val minHeight = if (singleLine) appleMetrics.listRowMinHeight else 120.dp

@@ -20,7 +20,6 @@ package me.kavishdevar.librepods.presentation.components
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,6 +66,7 @@ import me.kavishdevar.librepods.data.AirPodsModels
 import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.widgets.batteryWidgetIcons
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 @Composable
 internal fun AppleDisconnectedContent(
@@ -88,7 +88,7 @@ internal fun AppleDisconnectedContent(
     }
     // A darker blue keeps white labels readable on the filled capsule.
     val buttonBlue = Color(0xFF0066DD)
-    val linkBlue = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else buttonBlue
+    val linkBlue = if (LocalIsDarkTheme.current) MaterialTheme.colorScheme.primary else buttonBlue
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

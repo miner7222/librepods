@@ -22,7 +22,6 @@ package me.kavishdevar.librepods.presentation.screens
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,8 +65,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.data.TransparencySettings
 import me.kavishdevar.librepods.data.parseTransparencySettingsResponse
 import me.kavishdevar.librepods.data.sendTransparencySettings
@@ -78,17 +77,21 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
+import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
 private const val TAG = "TransparencySettings"
 
 @SuppressLint("DefaultLocale")
-@ExperimentalHazeMaterialsApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalEncodingApi::class)
 @Composable
-fun TransparencySettingsScreen(viewModel: AirPodsViewModel) {
-    val isDarkTheme = isSystemInDarkTheme()
+fun TransparencySettingsScreen(
+    viewModel: AirPodsViewModel,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
+    val isDarkTheme = LocalIsDarkTheme.current
     val textColor = if (isDarkTheme) Color.White else Color.Black
     val verticalScrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)
 
     val trackColor = if (isDarkTheme) Color(0xFFB3B3B3) else Color(0xFF929491)
     val activeTrackColor = if (isDarkTheme) Color(0xFF007AFF) else Color(0xFF3C6DF5)
