@@ -151,6 +151,7 @@ import me.kavishdevar.librepods.utils.SystemApisUtils.METADATA_UNTETHERED_RIGHT_
 import me.kavishdevar.librepods.utils.SystemApisUtils.METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
@@ -327,6 +328,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private val inMemoryLogs = mutableSetOf<String>()
 
     private var handleIncomingCallOnceConnected = false
+    private val socketConnectionInProgress = AtomicBoolean(false)
 
     lateinit var bleManager: BLEManager
 
@@ -3195,7 +3197,24 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     fun connectToSocket(
         adapter: BluetoothAdapter, device: BluetoothDevice, manual: Boolean = false
     ) {
-        if (BluetoothConnectionManager.aacpSocket != null && BluetoothConnectionManager.aacpSocket?.isConnected == true) return
+        if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
+        if (!socketConnectionInProgress.compareAndSet(false, true)) {
+            Log.d(TAG, "Socket connection already in progress, skipping duplicate request")
+            return
+        }
+
+        try {
+            if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
+            connectToSocketGuarded(adapter, device, manual)
+        } finally {
+            socketConnectionInProgress.set(false)
+        }
+    }
+
+    @SuppressLint("MissingPermission", "UnspecifiedRegisterReceiverFlag")
+    private fun connectToSocketGuarded(
+        adapter: BluetoothAdapter, device: BluetoothDevice, manual: Boolean
+    ) {
         Log.d(TAG, "<LogCollector:Start> Connecting to socket")
         val uuid: ParcelUuid = ParcelUuid.fromString("74ec2172-0bad-4d01-8f77-997b2be0722a")
 //        if (!isConnectedLocally) {
