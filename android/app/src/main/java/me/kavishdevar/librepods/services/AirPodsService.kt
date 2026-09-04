@@ -2914,8 +2914,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
-    @Suppress("ClassName")
-    private object bluetoothReceiver : BroadcastReceiver() {
+    private val bluetoothReceiver = object : BroadcastReceiver() {
         @SuppressLint("MissingPermission")
         override fun onReceive(context: Context?, intent: Intent) {
             val bluetoothDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -2927,6 +2926,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
             val action = intent.action
             val context = context?.applicationContext
+            if (BluetoothAdapter.ACTION_STATE_CHANGED == action &&
+                intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR) ==
+                BluetoothAdapter.STATE_ON
+            ) {
+                Log.d(TAG, "Bluetooth enabled, restarting BLE scanner")
+                bleManager.startScanning()
+            }
             val name = context?.getSharedPreferences("settings", MODE_PRIVATE)
                 ?.getString("name", bluetoothDevice?.name)
             if (bluetoothDevice != null && !action.isNullOrEmpty()) {

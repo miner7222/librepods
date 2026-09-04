@@ -31,6 +31,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import me.kavishdevar.librepods.utils.BluetoothCryptography
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.iterator
@@ -111,6 +112,11 @@ class BLEManager(private val context: Context) {
     )
 
     private val cleanupHandler = Handler(Looper.getMainLooper())
+    private var scanRetryAttempts = 0
+    private val missingIrkLoggedForScan = AtomicBoolean(false)
+    private val scanRetryRunnable = Runnable {
+        startScanning(resetRetryAttempts = false)
+    }
     private val cleanupRunnable = object : Runnable {
         override fun run() {
             cleanupStaleDevices()
@@ -125,7 +131,17 @@ class BLEManager(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun startScanning() {
+        startScanning(resetRetryAttempts = true)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startScanning(resetRetryAttempts: Boolean) {
         try {
+            cancelPendingScanRetry()
+            if (resetRetryAttempts) {
+                scanRetryAttempts = 0
+                missingIrkLoggedForScan.set(false)
+            }
             Log.d(TAG, "Starting BLE scanner")
 
             val btManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -136,9 +152,10 @@ class BLEManager(private val context: Context) {
                 return
             }
 
-            if (mBluetoothLeScanner != null && mScanCallback != null) {
-                mBluetoothLeScanner?.stopScan(mScanCallback)
-                mScanCallback = null
+            val previousScanCallback = mScanCallback
+            mScanCallback = null
+            if (mBluetoothLeScanner != null && previousScanCallback != null) {
+                mBluetoothLeScanner?.stopScan(previousScanCallback)
             }
 
             if (!btAdapter.isEnabled) {
@@ -171,10 +188,12 @@ class BLEManager(private val context: Context) {
 
             mScanCallback = object : ScanCallback() {
                 override fun onScanResult(callbackType: Int, result: ScanResult) {
+                    markScanSuccessful()
                     processScanResult(result)
                 }
 
                 override fun onBatchScanResults(results: List<ScanResult>) {
+                    markScanSuccessful()
                     processedAddresses.clear()
                     for (result in results) {
                         processScanResult(result)
@@ -182,13 +201,16 @@ class BLEManager(private val context: Context) {
                 }
 
                 override fun onScanFailed(errorCode: Int) {
+                    if (mScanCallback !== this) return
                     Log.e(TAG, "BLE scan failed with error code: $errorCode")
+                    scheduleScanRetry()
                 }
             }
 
             mBluetoothLeScanner?.startScan(listOf(scanFilter), scanSettings, mScanCallback)
             Log.d(TAG, "BLE scanner started successfully")
 
+            cleanupHandler.removeCallbacks(cleanupRunnable)
             cleanupHandler.postDelayed(cleanupRunnable, CLEANUP_INTERVAL_MS)
         } catch (t: Throwable) {
             Log.e(TAG, "Error starting BLE scanner", t)
@@ -198,16 +220,41 @@ class BLEManager(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun stopScanning() {
         try {
-            if (mBluetoothLeScanner != null && mScanCallback != null) {
+            cancelPendingScanRetry()
+            scanRetryAttempts = 0
+            val scanCallback = mScanCallback
+            mScanCallback = null
+            if (mBluetoothLeScanner != null && scanCallback != null) {
                 Log.d(TAG, "Stopping BLE scanner")
-                mBluetoothLeScanner?.stopScan(mScanCallback)
-                mScanCallback = null
+                mBluetoothLeScanner?.stopScan(scanCallback)
             }
 
             cleanupHandler.removeCallbacks(cleanupRunnable)
         } catch (t: Throwable) {
             Log.e(TAG, "Error stopping BLE scanner", t)
         }
+    }
+
+    private fun markScanSuccessful() {
+        cancelPendingScanRetry()
+        scanRetryAttempts = 0
+    }
+
+    private fun scheduleScanRetry() {
+        if (scanRetryAttempts >= MAX_SCAN_RETRY_ATTEMPTS) {
+            Log.e(TAG, "BLE scan retry limit reached")
+            return
+        }
+
+        scanRetryAttempts++
+        val retryDelay = SCAN_RETRY_BACKOFF_MS * scanRetryAttempts
+        Log.d(TAG, "Retrying BLE scan in ${retryDelay}ms ($scanRetryAttempts/$MAX_SCAN_RETRY_ATTEMPTS)")
+        cleanupHandler.removeCallbacks(scanRetryRunnable)
+        cleanupHandler.postDelayed(scanRetryRunnable, retryDelay)
+    }
+
+    private fun cancelPendingScanRetry() {
+        cleanupHandler.removeCallbacks(scanRetryRunnable)
     }
 
     @OptIn(ExperimentalEncodingApi::class)
@@ -263,7 +310,13 @@ class BLEManager(private val context: Context) {
 
             if (!verifiedAddresses.contains(address)) {
                 val irk = getIrkFromPreferences()
-                if (irk == null || !BluetoothCryptography.verifyRPA(address, irk)) {
+                if (irk == null) {
+                    if (missingIrkLoggedForScan.compareAndSet(false, true)) {
+                        Log.d(TAG, "Dropping BLE advertisements because no IRK is available")
+                    }
+                    return
+                }
+                if (!BluetoothCryptography.verifyRPA(address, irk)) {
                     return
                 }
                 verifiedAddresses.add(address)
@@ -494,5 +547,7 @@ class BLEManager(private val context: Context) {
         private const val CLEANUP_INTERVAL_MS = 10000L
         private const val STALE_DEVICE_TIMEOUT_MS = 15000L
         private const val LID_CLOSE_TIMEOUT_MS = 2500L
+        private const val MAX_SCAN_RETRY_ATTEMPTS = 3
+        private const val SCAN_RETRY_BACKOFF_MS = 1000L
     }
 }
