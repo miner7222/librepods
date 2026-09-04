@@ -61,7 +61,9 @@ private val AppleDarkColorScheme = darkColorScheme(
     surfaceDim = Color(0x40888888),
     primary = Color(0xFF0091FF),
     secondaryContainer = Color(0xFF366AA8),
-    onSecondaryContainer = Color(0xFF0091FF),
+    // Buttons and links take a slightly deeper blue than the selection tint
+    // beside them; measured #0584FF-#0984FF on the dark captures.
+    onSecondaryContainer = Color(0xFF0A84FF),
     onPrimary = Color(0xFFFFFFFF)
 )
 
@@ -72,7 +74,7 @@ private val AppleLightColorScheme = lightColorScheme(
     onSurface = Color(0xFF000000),
     surfaceDim = Color(0x40D9D9D9),
     secondaryContainer = Color(0xFF6BC0FF),
-    onSecondaryContainer = Color(0xFF0088FF),
+    onSecondaryContainer = Color(0xFF007AFF),
     primary = Color(0xFF0088FF),
     onPrimary = Color(0xFFFFFFFF)
 )
