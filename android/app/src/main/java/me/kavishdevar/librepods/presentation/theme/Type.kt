@@ -78,14 +78,19 @@ val AppleTypography = Typography().run {
         titleSmall = titleSmall.copy(fontFamily = pretendardFamily),
 
         bodyLarge = bodyLarge.copy(fontFamily = pretendardFamily),
+        // Measured against the references on matching words: row titles, values,
+        // buttons and input fields sit at iOS's 17, and the description under a
+        // title at 13 - the same size as the footer below the card, which already
+        // matched. Ours were 16 and 14, so titles read about 5% small and
+        // descriptions about 8% large.
         bodyMedium = bodyMedium.copy(
             fontFamily = pretendardFamily,
-            fontSize = 16.sp
+            fontSize = 17.sp
         ),
         bodySmall = bodySmall.copy(
             fontFamily = pretendardFamily,
-            fontSize = 14.sp,
-            lineHeight = 18.sp
+            fontSize = 13.sp,
+            lineHeight = 17.sp
         ),
         bodySmallEmphasized = bodySmallEmphasized.merge(AppleDesignMetrics.sectionFooterStyle),
 
