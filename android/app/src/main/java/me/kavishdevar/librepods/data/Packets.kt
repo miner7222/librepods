@@ -184,6 +184,13 @@ class AirPodsNotifications {
         private var case: Battery = Battery(BatteryComponent.CASE, 0, BatteryStatus.DISCONNECTED)
 
         private fun batteryOrUnavailable(component: Int, level: Int, status: Int): Battery {
+            // The case reports through whichever bud is sitting in it, so with both
+            // buds out it has nothing to report and sends 0 instead of dropping out.
+            // That arrives as "0%, charging", which cannot be true, and a case that
+            // really were flat could not report itself either. Treat it as absent.
+            if (component == BatteryComponent.CASE && level == 0) {
+                return Battery(component, 0, BatteryStatus.DISCONNECTED)
+            }
             return if (level in 0..100) {
                 Battery(component, level, status)
             } else {

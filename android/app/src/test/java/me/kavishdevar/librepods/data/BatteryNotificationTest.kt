@@ -80,7 +80,7 @@ class BatteryNotificationTest {
             batteryPacket(
                 Battery(BatteryComponent.LEFT, 127, BatteryStatus.CHARGING),
                 Battery(BatteryComponent.RIGHT, 101, BatteryStatus.NOT_CHARGING),
-                Battery(BatteryComponent.CASE, 0, BatteryStatus.NOT_CHARGING)
+                Battery(BatteryComponent.CASE, 42, BatteryStatus.NOT_CHARGING)
             )
         )
 
@@ -88,7 +88,7 @@ class BatteryNotificationTest {
             listOf(
                 Battery(BatteryComponent.LEFT, 0, BatteryStatus.DISCONNECTED),
                 Battery(BatteryComponent.RIGHT, 0, BatteryStatus.DISCONNECTED),
-                Battery(BatteryComponent.CASE, 0, BatteryStatus.NOT_CHARGING)
+                Battery(BatteryComponent.CASE, 42, BatteryStatus.NOT_CHARGING)
             ),
             notification.getBattery()
         )
@@ -126,7 +126,7 @@ class BatteryNotificationTest {
             leftCharging = true,
             rightLevel = 101,
             rightCharging = false,
-            caseLevel = 0,
+            caseLevel = 42,
             caseCharging = false
         )
 
@@ -134,7 +134,7 @@ class BatteryNotificationTest {
             listOf(
                 Battery(BatteryComponent.LEFT, 0, BatteryStatus.DISCONNECTED),
                 Battery(BatteryComponent.RIGHT, 0, BatteryStatus.DISCONNECTED),
-                Battery(BatteryComponent.CASE, 0, BatteryStatus.NOT_CHARGING)
+                Battery(BatteryComponent.CASE, 42, BatteryStatus.NOT_CHARGING)
             ),
             notification.getBattery()
         )
@@ -233,5 +233,49 @@ class BatteryNotificationTest {
             this[19] = case.level.toByte()
             this[20] = case.status.toByte()
         }
+    }
+
+    @Test
+    fun caseWithoutAReadingIsMarkedUnavailable() {
+        val notification = AirPodsNotifications.BatteryNotification()
+
+        notification.setBattery(
+            batteryPacket(
+                Battery(BatteryComponent.LEFT, 100, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.RIGHT, 100, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.CASE, 0, BatteryStatus.CHARGING)
+            )
+        )
+
+        assertEquals(
+            listOf(
+                Battery(BatteryComponent.LEFT, 100, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.RIGHT, 100, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.CASE, 0, BatteryStatus.DISCONNECTED)
+            ),
+            notification.getBattery()
+        )
+    }
+
+    @Test
+    fun budsAtZeroAreStillARealReading() {
+        val notification = AirPodsNotifications.BatteryNotification()
+
+        notification.setBattery(
+            batteryPacket(
+                Battery(BatteryComponent.LEFT, 0, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.RIGHT, 0, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.CASE, 50, BatteryStatus.NOT_CHARGING)
+            )
+        )
+
+        assertEquals(
+            listOf(
+                Battery(BatteryComponent.LEFT, 0, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.RIGHT, 0, BatteryStatus.NOT_CHARGING),
+                Battery(BatteryComponent.CASE, 50, BatteryStatus.NOT_CHARGING)
+            ),
+            notification.getBattery()
+        )
     }
 }
