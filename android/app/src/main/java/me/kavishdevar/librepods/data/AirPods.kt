@@ -83,6 +83,9 @@ enum class Capability {
     STEM_CONFIG,
     HEAD_GESTURES,
     LOUD_SOUND_REDUCTION,
+    // Apple offers this on AirPods Pro 2 and 3 only. Loud Sound Reduction covers the
+    // same models today plus AirPods Max 2, so the two must not share a gate.
+    OFF_LISTENING_MODE,
     PPE,
     SLEEP_DETECTION,
     HEARING_AID,
@@ -216,6 +219,7 @@ class AirPodsPro2Lightning: AirPodsBase(
         Capability.CONVERSATION_AWARENESS,
         Capability.STEM_CONFIG,
         Capability.LOUD_SOUND_REDUCTION,
+        Capability.OFF_LISTENING_MODE,
         Capability.SLEEP_DETECTION,
         Capability.HEARING_AID,
         Capability.ADAPTIVE_AUDIO,
@@ -247,6 +251,7 @@ class AirPodsPro2USBC: AirPodsBase(
         Capability.CONVERSATION_AWARENESS,
         Capability.STEM_CONFIG,
         Capability.LOUD_SOUND_REDUCTION,
+        Capability.OFF_LISTENING_MODE,
         Capability.SLEEP_DETECTION,
         Capability.HEARING_AID,
         Capability.ADAPTIVE_AUDIO,
@@ -275,6 +280,7 @@ class AirPodsPro3: AirPodsBase(
         Capability.HEAD_GESTURES,
         Capability.STEM_CONFIG,
         Capability.LOUD_SOUND_REDUCTION,
+        Capability.OFF_LISTENING_MODE,
         Capability.PPE,
         Capability.SLEEP_DETECTION,
         Capability.HEARING_AID,
