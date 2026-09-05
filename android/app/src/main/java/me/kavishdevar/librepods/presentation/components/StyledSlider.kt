@@ -105,6 +105,8 @@ import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
+import me.kavishdevar.librepods.presentation.theme.SectionMetrics
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -270,7 +272,13 @@ fun StyledSlider(
                 else -> RoundedCornerShape(8.dp)
             }
 
-            Column {
+            Column(
+                modifier = Modifier.padding(
+                    top = sliderSectionTopGap(
+                        LocalSectionMetrics.current, label, firstInColumn
+                    )
+                )
+            ) {
                 label?.let {
                     Text(
                         text = it,
@@ -539,7 +547,7 @@ fun StyledSlider(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = appleSliderTopGap(appleMetrics, label, firstInColumn))
+                            .padding(top = sliderSectionTopGap(LocalSectionMetrics.current, label, firstInColumn))
                     ) {
                         if (label != null) {
                             AppleSliderLabel(label)
@@ -917,7 +925,7 @@ fun StyledSlider(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = appleSliderTopGap(appleMetrics, label, firstInColumn))
+                            .padding(top = sliderSectionTopGap(LocalSectionMetrics.current, label, firstInColumn))
                     ) {
                         if (label != null) {
                             AppleSliderLabel(label)
@@ -971,8 +979,8 @@ fun StyledSlider(
 // real section header - same gap above, same tinted grey, same card inset - or it
 // sits flush against whatever precedes it in a colour no other header uses. An
 // unlabelled slider carries no header of its own and is placed by its caller.
-private fun appleSliderTopGap(
-    metrics: AppleDesignMetrics,
+private fun sliderSectionTopGap(
+    metrics: SectionMetrics,
     label: String?,
     firstInColumn: Boolean
 ): Dp = when {

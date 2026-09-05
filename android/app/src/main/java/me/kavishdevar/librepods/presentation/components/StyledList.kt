@@ -24,6 +24,7 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 
@@ -40,15 +41,16 @@ fun StyledList(
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
-    val appleTopPadding = when {
-        title != null && firstInColumn -> appleMetrics.sectionHeaderColumnTopInset
-        title != null -> appleMetrics.sectionHeaderTopGap
-        firstInColumn -> appleMetrics.cardColumnTopInset
-        else -> appleMetrics.cardGap
+    val sectionMetrics = LocalSectionMetrics.current
+    val sectionTopGap = when {
+        title != null && firstInColumn -> sectionMetrics.sectionHeaderColumnTopInset
+        title != null -> sectionMetrics.sectionHeaderTopGap
+        firstInColumn -> sectionMetrics.cardColumnTopInset
+        else -> sectionMetrics.cardGap
     }
 
     Column(
-        modifier = modifier.padding(top = if (m3eEnabled) 0.dp else appleTopPadding)
+        modifier = modifier.padding(top = sectionTopGap)
     ) {
         title?.let {
             Box(
@@ -57,7 +59,7 @@ fun StyledList(
                     .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
                     .padding(
                         top = 4.dp,
-                        bottom = if (m3eEnabled) 12.dp else appleMetrics.sectionHeaderBottomGap
+                        bottom = sectionMetrics.sectionHeaderBottomGap
                     )
             ) {
                 Text(

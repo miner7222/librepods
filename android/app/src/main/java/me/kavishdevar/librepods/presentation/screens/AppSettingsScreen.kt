@@ -220,7 +220,6 @@ fun AppSettingsScreen(
         }
 
         if (state.connectionSuccessful) {
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             StyledList(title = stringResource(R.string.popup_animations)) {
                 StyledToggle(
@@ -238,7 +237,6 @@ fun AppSettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             StyledList (title = stringResource(R.string.conversational_awareness)) {
                 StyledToggle(
@@ -266,7 +264,6 @@ fun AppSettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             val conversationalAwarenessVolume = state.conversationalAwarenessVolume
             LaunchedEffect(conversationalAwarenessVolume) {
@@ -305,7 +302,6 @@ fun AppSettingsScreen(
 //                )
 //            }
 
-            Spacer(modifier = Modifier.height(16.dp))
             if (context.checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") == PackageManager.PERMISSION_GRANTED) {
                 StyledToggle(
                     title = stringResource(R.string.ear_detection),
@@ -349,7 +345,6 @@ fun AppSettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             StyledList(title = stringResource(R.string.takeover_phone_state)) {
                 StyledToggle(
@@ -376,7 +371,6 @@ fun AppSettingsScreen(
                 onCheckedChange = viewModel::setUseAlternateHeadTrackingPackets,
                 enabled = state.isPremium
             )
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         } else {
             Box(
                 modifier = Modifier
@@ -411,7 +405,6 @@ fun AppSettingsScreen(
         }
 
         if (!BuildConfig.PLAY_BUILD) {
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             StyledList {
                 StyledListItem(
                     name = stringResource(R.string.troubleshooting),
@@ -465,10 +458,8 @@ fun AppSettingsScreen(
 
         Spacer(modifier = Modifier.height(if (m3eEnabled) 20.dp else 0.dp))
         DeviceInfoCard()
-        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         AppInfoCard(navigateToReleaseNotesScreen)
 
-        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
         StyledListItem(
             name = stringResource(R.string.open_source_licenses),

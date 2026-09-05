@@ -95,7 +95,6 @@ fun ControlsAndGesturesScreen(
                 navigateToRightLongPress = navigateToRightLongPress,
                 firstInColumn = true
             )
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         }
 
         val bytes =
@@ -114,7 +113,6 @@ fun ControlsAndGesturesScreen(
         )
 
         if (capabilities.contains(Capability.HEAD_GESTURES)) {
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             StyledListItem(
                 name = stringResource(R.string.head_gestures),
                 description = if (sharedPreferences.getBoolean(

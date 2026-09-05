@@ -77,6 +77,7 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.roundToInt
@@ -128,11 +129,18 @@ fun NoiseControlSettings(
 
             val selectedMode = NoiseControlMode.entries[(noiseControlModeValue - 1).coerceIn(0, NoiseControlMode.entries.lastIndex)]
 
-            Column {
+            Column(
+                modifier = Modifier.padding(
+                    top = LocalSectionMetrics.current.sectionHeaderTopGap
+                )
+            ) {
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(top = 4.dp, bottom = 12.dp)
+                        .padding(
+                            top = 4.dp,
+                            bottom = LocalSectionMetrics.current.sectionHeaderBottomGap
+                        )
                 ) {
                     Text(
                         text = stringResource(R.string.noise_control),

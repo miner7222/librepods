@@ -66,6 +66,7 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -80,27 +81,21 @@ fun StyledToggle(
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
     header: Boolean = false,
-    firstInColumn: Boolean = false,
-    /**
-     * Material carries its own 12dp above and below so that toggles set down one
-     * after another are not touching. A screen that already spaces its sections
-     * would then give this one 28dp where its list rows get 16, so it can say so
-     * and take the spacing on itself.
-     */
-    spacedByCaller: Boolean = false
+    firstInColumn: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
-    val appleTopPadding = when {
-        title != null && firstInColumn -> appleMetrics.sectionHeaderColumnTopInset
-        title != null -> appleMetrics.sectionHeaderTopGap
-        firstInColumn -> appleMetrics.cardColumnTopInset
-        else -> appleMetrics.cardGap
+    val sectionMetrics = LocalSectionMetrics.current
+    val sectionTopGap = when {
+        title != null && firstInColumn -> sectionMetrics.sectionHeaderColumnTopInset
+        title != null -> sectionMetrics.sectionHeaderTopGap
+        firstInColumn -> sectionMetrics.cardColumnTopInset
+        else -> sectionMetrics.cardGap
     }
     Column(
         modifier = Modifier.padding(
-            top = if (!m3eEnabled) appleTopPadding else if (spacedByCaller) 0.dp else 12.dp,
-            bottom = if (m3eEnabled && !spacedByCaller) 12.dp else 0.dp
+            top = sectionTopGap,
+            bottom = 0.dp
         )
     ) {
         title?.let {
@@ -110,7 +105,7 @@ fun StyledToggle(
                     .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
                     .padding(
                         top = 4.dp,
-                        bottom = if (m3eEnabled) 12.dp else appleMetrics.sectionHeaderBottomGap
+                        bottom = sectionMetrics.sectionHeaderBottomGap
                     )
             ) {
                 Text(

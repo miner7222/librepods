@@ -95,7 +95,6 @@ fun BatterySettingsScreen(
         )
 
         if (state.capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             StyledToggle(
                 label = stringResource(R.string.optimized_charging),
                 description = stringResource(R.string.optimized_charging_description),

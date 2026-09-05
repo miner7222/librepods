@@ -474,9 +474,6 @@ fun AirPodsSettingsScreen(
             }
 
             if (capabilities.contains(Capability.LISTENING_MODE)) {
-                item(key = "spacer_noise") {
-                    Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
-                }
                 item(key = "noise_control") {
                     NoiseControlSettings(
                         showOffListeningMode = state.offListeningMode,
@@ -492,16 +489,12 @@ fun AirPodsSettingsScreen(
                 }
             }
 
-            item(key = "spacer_media_volume") {
-                Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
-            }
             item(key = "media_volume") {
                 MediaVolumeSettings()
             }
 
             if (!m3eEnabled) {
                 if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
-                    item(key = "spacer_off_listening") { Spacer(modifier = Modifier.height(0.dp)) }
                     item(key = "off_listening") {
                         StyledToggle(
                             label = stringResource(R.string.off_listening_mode),
@@ -515,9 +508,6 @@ fun AirPodsSettingsScreen(
 
             if (m3eEnabled) {
                 if (capabilities.contains(Capability.STEM_CONFIG)) {
-                    item(key = "spacer_press_hold") {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
                     item(key = "press_hold") {
                         PressAndHoldSettings(
                             leftAction = state.leftAction,
@@ -528,9 +518,6 @@ fun AirPodsSettingsScreen(
                     }
                 }
 
-                item(key = "spacer_call") {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
                 item(key = "call_control") {
                     val bytes =
                         state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.CALL_MANAGEMENT_CONFIG]?.take(
@@ -582,7 +569,6 @@ fun AirPodsSettingsScreen(
             }
 
             if (m3eEnabled) {
-                item(key = "spacer_audio") { Spacer(modifier = Modifier.height(16.dp)) }
                 item(key = "audio") {
                     val model = state.instance?.model ?: AirPodsPro3()
                     val adaptiveVolumeCapability =
@@ -637,7 +623,6 @@ fun AirPodsSettingsScreen(
                     )
                 }
 
-                item(key = "spacer_connection") { Spacer(modifier = Modifier.height(16.dp)) }
                 item(key = "connection") {
                     ConnectionSettings(
                         automaticEarDetectionEnabled = state.automaticEarDetectionEnabled,
@@ -647,7 +632,6 @@ fun AirPodsSettingsScreen(
                     )
                 }
 
-                item(key = "spacer_microphone") { Spacer(modifier = Modifier.height(16.dp)) }
                 item(key = "microphone") {
                     val id = AACPManager.Companion.ControlCommandIdentifiers.MIC_MODE
 
@@ -666,21 +650,18 @@ fun AirPodsSettingsScreen(
                 }
 
                 if (capabilities.contains(Capability.SLEEP_DETECTION)) {
-                    item(key = "spacer_sleep") { Spacer(modifier = Modifier.height(16.dp)) }
                     item(key = "sleep_detection") {
                         val id = AACPManager.Companion.ControlCommandIdentifiers.SLEEP_DETECTION_CONFIG
                         StyledToggle(
                             label = stringResource(R.string.sleep_detection),
                             checked = state.controlStates[id]?.getOrNull(0) == 0x01.toByte(),
                             onCheckedChange = { setControlCommandBoolean(id, it) },
-                            enabled = state.isPremium,
-                            spacedByCaller = true
+                            enabled = state.isPremium
                         )
                     }
                 }
 
                 if (capabilities.contains(Capability.HEAD_GESTURES)) {
-                    item(key = "spacer_head_tracking") { Spacer(modifier = Modifier.height(16.dp)) }
                     item(key = "head_tracking") {
                         StyledListItem(
                             name = stringResource(R.string.head_gestures),
@@ -694,26 +675,22 @@ fun AirPodsSettingsScreen(
                 }
 
                 if (capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
-                    item(key = "spacer_dynamic_end_of_charge") { Spacer(modifier = Modifier.height(16.dp)) }
                     item(key = "dynamic_end_of_charge") {
                         StyledToggle(
                             label = stringResource(R.string.optimized_charging),
                             description = stringResource(R.string.optimized_charging_description),
                             checked = state.dynamicEndOfCharge,
-                            onCheckedChange = setDynamicEndOfCharge,
-                            spacedByCaller = true
+                            onCheckedChange = setDynamicEndOfCharge
                         )
                     }
                 }
 
-                item(key = "spacer_accessibility") { Spacer(modifier = Modifier.height(16.dp)) }
                 item(key = "accessibility") {
                     StyledListItem(
                         name = stringResource(R.string.accessibility), onClick = navigateToAccessibility
                     )
                 }
             } else {
-                item(key = "spacer_settings_hub") { Spacer(modifier = Modifier.height(0.dp)) }
                 item(key = "settings_hub") {
                     StyledList {
                         StyledListItem(
@@ -749,7 +726,6 @@ fun AirPodsSettingsScreen(
                     }
                 }
 
-                item(key = "spacer_battery_settings") { Spacer(modifier = Modifier.height(0.dp)) }
                 item(key = "battery_settings") {
                     StyledList {
                         StyledListItem(
@@ -768,14 +744,12 @@ fun AirPodsSettingsScreen(
 
             if (m3eEnabled) {
                 if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
-                    item(key = "spacer_off_listening") { Spacer(modifier = Modifier.height(16.dp)) }
                     item(key = "off_listening") {
                         StyledToggle(
                             label = stringResource(R.string.off_listening_mode),
                             description = stringResource(R.string.off_listening_mode_description),
                             checked = state.offListeningMode,
-                            onCheckedChange = setOffListeningMode,
-                            spacedByCaller = true
+                            onCheckedChange = setOffListeningMode
                         )
                     }
                 }

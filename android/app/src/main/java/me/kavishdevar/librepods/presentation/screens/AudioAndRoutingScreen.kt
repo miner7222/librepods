@@ -140,7 +140,6 @@ fun AudioAndRoutingScreen(
             firstInColumn = true
         )
 
-        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         ConnectionSettings(
             automaticEarDetectionEnabled = state.automaticEarDetectionEnabled,
             onAutomaticEarDetectionChanged = viewModel::setAutomaticEarDetectionEnabled,
@@ -148,7 +147,6 @@ fun AudioAndRoutingScreen(
             navigateToConnectToThisDevice = navigateToConnectToThisDevice
         )
 
-        Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
         val microphoneModeId = AACPManager.Companion.ControlCommandIdentifiers.MIC_MODE
         val selectedModeText =
             when (state.controlStates[microphoneModeId]?.getOrNull(0) ?: 0x00.toByte()) {
@@ -164,7 +162,6 @@ fun AudioAndRoutingScreen(
         )
 
         if (capabilities.contains(Capability.SLEEP_DETECTION)) {
-            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
             val id = AACPManager.Companion.ControlCommandIdentifiers.SLEEP_DETECTION_CONFIG
             StyledToggle(
                 label = stringResource(R.string.sleep_detection),
