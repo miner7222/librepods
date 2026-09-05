@@ -18,7 +18,6 @@
 
 package me.kavishdevar.librepods.presentation.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -57,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -205,8 +205,17 @@ private fun StyledListItemContent(
     val descriptionText = annotatedDescription ?: description?.let { AnnotatedString(it) }
     val surfaceColor = MaterialTheme.colorScheme.surface
     val surfaceDimColor = MaterialTheme.colorScheme.surfaceDim
-    var backgroundColor by remember { mutableStateOf(surfaceColor) }
-    val animatedBackgroundColor by animateColorAsState(targetValue = backgroundColor, animationSpec = tween(durationMillis = 500))
+    // Animate the press, not the colour it resolves to: a remembered colour keeps
+    // the appearance the row was first drawn in, so the row stayed light after the
+    // user switched to dark until the app was restarted. Reading the scheme on every
+    // composition also lets the row follow a theme change instantly, while the press
+    // highlight still fades.
+    var pressed by remember { mutableStateOf(false) }
+    val pressFraction by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
+        animationSpec = tween(durationMillis = 500)
+    )
+    val animatedBackgroundColor = lerp(surfaceColor, surfaceDimColor, pressFraction)
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
@@ -278,9 +287,9 @@ private fun StyledListItemContent(
                         detectTapGestures(
                             onPress = {
                                 if (enabled) {
-                                    backgroundColor = surfaceDimColor
+                                    pressed = true
                                     tryAwaitRelease()
-                                    backgroundColor = surfaceColor
+                                    pressed = false
                                 }
                             },
                             onTap = {
