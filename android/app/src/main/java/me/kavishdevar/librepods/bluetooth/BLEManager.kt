@@ -212,7 +212,7 @@ class BLEManager(private val context: Context) {
                 override fun onScanFailed(errorCode: Int) {
                     if (mScanCallback !== this) return
                     Log.e(TAG, "BLE scan failed with error code: $errorCode")
-                    scheduleScanRetry()
+                    scheduleScanRetry(errorCode)
                 }
             }
 
@@ -249,15 +249,23 @@ class BLEManager(private val context: Context) {
         scanRetryAttempts = 0
     }
 
-    private fun scheduleScanRetry() {
-        if (scanRetryAttempts >= MAX_SCAN_RETRY_ATTEMPTS) {
-            Log.e(TAG, "BLE scan retry limit reached")
+    /**
+     * Giving up left the app with no scanner at all until Bluetooth was toggled or
+     * the service restarted, which costs the popup, the battery readings and ear
+     * detection for the rest of the session. Keep trying at a widening interval,
+     * spaced so the retries cannot themselves trip the platform's limit on how
+     * often an app may start a scan.
+     */
+    private fun scheduleScanRetry(errorCode: Int) {
+        if (errorCode == ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED) {
+            Log.e(TAG, "BLE scan settings unsupported, not retrying")
             return
         }
 
         scanRetryAttempts++
-        val retryDelay = SCAN_RETRY_BACKOFF_MS * scanRetryAttempts
-        Log.d(TAG, "Retrying BLE scan in ${retryDelay}ms ($scanRetryAttempts/$MAX_SCAN_RETRY_ATTEMPTS)")
+        val retryDelay =
+            (SCAN_RETRY_BACKOFF_MS * scanRetryAttempts).coerceAtMost(MAX_SCAN_RETRY_BACKOFF_MS)
+        Log.d(TAG, "Retrying BLE scan in ${retryDelay}ms (attempt $scanRetryAttempts)")
         cleanupHandler.removeCallbacks(scanRetryRunnable)
         cleanupHandler.postDelayed(scanRetryRunnable, retryDelay)
     }
@@ -565,7 +573,7 @@ class BLEManager(private val context: Context) {
         private const val CLEANUP_INTERVAL_MS = 10000L
         private const val STALE_DEVICE_TIMEOUT_MS = 15000L
         private const val LID_CLOSE_TIMEOUT_MS = 15000L
-        private const val MAX_SCAN_RETRY_ATTEMPTS = 3
-        private const val SCAN_RETRY_BACKOFF_MS = 1000L
+        private const val SCAN_RETRY_BACKOFF_MS = 5000L
+        private const val MAX_SCAN_RETRY_BACKOFF_MS = 30000L
     }
 }
