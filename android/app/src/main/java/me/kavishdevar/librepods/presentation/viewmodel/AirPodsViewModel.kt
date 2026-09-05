@@ -400,6 +400,12 @@ class AirPodsViewModel(
     }
 
     fun observeControl(identifier: ControlCommandIdentifiers) {
+        // init() runs again on every rebind to the service, and only the newest
+        // listener per identifier is remembered here. Without dropping the previous
+        // one the manager keeps them all and calls every one of them for the rest of
+        // the process, none of which onCleared can reach.
+        listeners.remove(identifier)?.let { controlRepo.remove(identifier, it) }
+
         val listener = controlRepo.observe(identifier) { value ->
             if (identifier == ControlCommandIdentifiers.ALLOW_OFF_OPTION) {
                 // Apple keeps this switch on the AirPods themselves, so what the buds
