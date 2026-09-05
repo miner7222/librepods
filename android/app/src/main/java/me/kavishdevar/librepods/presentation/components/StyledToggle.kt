@@ -80,7 +80,14 @@ fun StyledToggle(
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
     header: Boolean = false,
-    firstInColumn: Boolean = false
+    firstInColumn: Boolean = false,
+    /**
+     * Material carries its own 12dp above and below so that toggles set down one
+     * after another are not touching. A screen that already spaces its sections
+     * would then give this one 28dp where its list rows get 16, so it can say so
+     * and take the spacing on itself.
+     */
+    spacedByCaller: Boolean = false
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
@@ -92,8 +99,8 @@ fun StyledToggle(
     }
     Column(
         modifier = Modifier.padding(
-            top = if (m3eEnabled) 12.dp else appleTopPadding,
-            bottom = if (m3eEnabled) 12.dp else 0.dp
+            top = if (!m3eEnabled) appleTopPadding else if (spacedByCaller) 0.dp else 12.dp,
+            bottom = if (m3eEnabled && !spacedByCaller) 12.dp else 0.dp
         )
     ) {
         title?.let {
@@ -242,7 +249,10 @@ private fun StyledToggleContent(
                             text = it,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier
-                                .padding(top = if (header) 2.dp else 4.dp, bottom = if (header) 8.dp else 4.dp)
+                                // No inset above outside the header style: the list
+                                // rows put their supporting line straight under the
+                                // title, and this sat 8dp off it.
+                                .padding(top = if (header) 2.dp else 0.dp, bottom = if (header) 8.dp else 4.dp)
                                 .padding(horizontal = if (header) 8.dp else 0.dp),
                             color = if (header && enabled) MaterialTheme.colorScheme.onPrimaryContainer else Color.Unspecified
                         )
@@ -255,7 +265,8 @@ private fun StyledToggleContent(
                         modifier = Modifier
                             .padding(
                                 top = if (header) 8.dp else 4.dp,
-                                bottom = if (header) 2.dp else 4.dp
+                                bottom = if (header) 2.dp
+                                else if (description != null) 0.dp else 4.dp
                             )
                             .padding(horizontal = if (header) 8.dp else 0.dp),
                         color = if (header && enabled) MaterialTheme.colorScheme.onPrimaryContainer else Color.Unspecified

@@ -220,6 +220,7 @@ fun AppSettingsScreen(
         }
 
         if (state.connectionSuccessful) {
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
 
             StyledList(title = stringResource(R.string.popup_animations)) {
                 StyledToggle(
