@@ -492,6 +492,9 @@ fun AirPodsSettingsScreen(
                 }
             }
 
+            item(key = "spacer_media_volume") {
+                Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))
+            }
             item(key = "media_volume") {
                 MediaVolumeSettings()
             }
@@ -670,7 +673,8 @@ fun AirPodsSettingsScreen(
                             label = stringResource(R.string.sleep_detection),
                             checked = state.controlStates[id]?.getOrNull(0) == 0x01.toByte(),
                             onCheckedChange = { setControlCommandBoolean(id, it) },
-                            enabled = state.isPremium
+                            enabled = state.isPremium,
+                            spacedByCaller = true
                         )
                     }
                 }
@@ -696,7 +700,8 @@ fun AirPodsSettingsScreen(
                             label = stringResource(R.string.optimized_charging),
                             description = stringResource(R.string.optimized_charging_description),
                             checked = state.dynamicEndOfCharge,
-                            onCheckedChange = setDynamicEndOfCharge
+                            onCheckedChange = setDynamicEndOfCharge,
+                            spacedByCaller = true
                         )
                     }
                 }
@@ -769,7 +774,8 @@ fun AirPodsSettingsScreen(
                             label = stringResource(R.string.off_listening_mode),
                             description = stringResource(R.string.off_listening_mode_description),
                             checked = state.offListeningMode,
-                            onCheckedChange = setOffListeningMode
+                            onCheckedChange = setOffListeningMode,
+                            spacedByCaller = true
                         )
                     }
                 }
