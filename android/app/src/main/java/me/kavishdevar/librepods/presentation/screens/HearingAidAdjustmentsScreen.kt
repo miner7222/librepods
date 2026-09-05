@@ -58,6 +58,8 @@ import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -150,9 +152,8 @@ fun HearingAidAdjustmentsScreen(
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     // The first slider is a labelled section and now opens the column itself, so the
     // inset belongs to it rather than to this padding.
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        LocalAppleDesignMetrics.current.navigationBarHeight
-    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val topPadding = screenTopPadding()
+    val bottomPadding = screenBottomPadding()
 
     Column(
         modifier = Modifier

@@ -58,6 +58,8 @@ import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.experimental.and
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -83,9 +85,8 @@ fun LongPress(
     val longPressAction = if (name.lowercase() == "left") state.leftAction else state.rightAction
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        LocalAppleDesignMetrics.current.navigationBarHeight
-    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val topPadding = screenTopPadding()
+    val bottomPadding = screenBottomPadding()
 
     val scrollState = rememberScrollState()
     ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
