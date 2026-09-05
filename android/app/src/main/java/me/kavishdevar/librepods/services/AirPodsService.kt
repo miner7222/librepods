@@ -389,11 +389,14 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         ) {
             if (lidOpen) {
                 Log.d(TAG, "Lid opened")
+                // The sheet announces a connection. Opening the case while the
+                // AirPods are already connected - worn, or simply out of it -
+                // announces nothing, and iOS shows nothing for it either.
+                if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
                 showPopupOnce(
                     getSharedPreferences("settings", MODE_PRIVATE).getString("name", "AirPods Pro")
                         ?: "AirPods"
                 )
-                if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
                 val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: 0
                 val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: 0
                 val caseLevel = bleManager.getMostRecentStatus()?.caseBattery ?: 0
@@ -810,7 +813,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 } else if (intent?.action == AirPodsNotifications.AIRPODS_DISCONNECTED) {
                     device = null
 //                    isConnectedLocally = false
-                    dismissPopup()
                     releasePopupSession()
                     updateNotificationContent(false)
                     aacpManager.disconnected()
@@ -1910,7 +1912,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         showPopup(this, name)
     }
 
+    /**
+     * Closing the lid is what retracts the sheet on iOS, and it has to take the
+     * popup down with it: releasing the latch alone would let the next connection
+     * add a second window on top of the one still on screen.
+     */
     private fun releasePopupSession() {
+        dismissPopup()
         popupShownForSession = false
         popupShown = false
     }
@@ -2994,7 +3002,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     if (bluetoothDevice.address == device?.address ||
                         bluetoothDevice.address == macAddress
                     ) {
-                        dismissPopup()
                         releasePopupSession()
                     }
                 } else if ("android.bluetooth.device.action.UUID" == action) {
