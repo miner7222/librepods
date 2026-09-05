@@ -493,47 +493,17 @@ fun AirPodsSettingsScreen(
                 MediaVolumeSettings()
             }
 
-            if (!m3eEnabled) {
-                if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
-                    item(key = "off_listening") {
-                        StyledToggle(
-                            label = stringResource(R.string.off_listening_mode),
-                            description = stringResource(R.string.off_listening_mode_description),
-                            checked = state.offListeningMode,
-                            onCheckedChange = setOffListeningMode
-                        )
-                    }
-                }
-            }
-
-            if (m3eEnabled) {
-                if (capabilities.contains(Capability.STEM_CONFIG)) {
-                    item(key = "press_hold") {
-                        PressAndHoldSettings(
-                            leftAction = state.leftAction,
-                            rightAction = state.rightAction,
-                            navigateToLeftLongPress = navigateToLeftLongPress,
-                            navigateToRightLongPress = navigateToRightLongPress
-                        )
-                    }
-                }
-
-                item(key = "call_control") {
-                    val bytes =
-                        state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.CALL_MANAGEMENT_CONFIG]?.take(
-                            2
-                        )?.toByteArray() ?: byteArrayOf(0x00, 0x00)
-                    val flipped = try {
-                        bytes[1] == 0x02.toByte()
-                    } catch (_: Exception) {
-                        false
-                    }
-                    CallControlSettings(
-                        flipped = flipped,
-                        navigateToCallControlScreen = navigateToCallControlScreen
+            if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
+                item(key = "off_listening") {
+                    StyledToggle(
+                        label = stringResource(R.string.off_listening_mode),
+                        description = stringResource(R.string.off_listening_mode_description),
+                        checked = state.offListeningMode,
+                        onCheckedChange = setOffListeningMode
                     )
                 }
             }
+
 
 //                if (capabilities.contains(Capability.STEM_CONFIG) && !BuildConfig.PLAY_BUILD) {
 //                    item(key = "spacer_camera") { Spacer(modifier = Modifier.height(16.dp)) }
@@ -568,192 +538,56 @@ fun AirPodsSettingsScreen(
                 }
             }
 
-            if (m3eEnabled) {
-                item(key = "audio") {
-                    val model = state.instance?.model ?: AirPodsPro3()
-                    val adaptiveVolumeCapability =
-                        model.capabilities.contains(Capability.ADAPTIVE_VOLUME)
-                    val conversationalAwarenessCapability =
-                        model.capabilities.contains(Capability.CONVERSATION_AWARENESS)
-                    val loudSoundReductionCapability =
-                        model.capabilities.contains(Capability.LOUD_SOUND_REDUCTION)
-                    val adaptiveAudioCapability =
-                        model.capabilities.contains(Capability.ADAPTIVE_AUDIO)
-
-                    val adaptiveVolumeChecked =
-                        state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ADAPTIVE_VOLUME_CONFIG]?.getOrNull(
-                            0
-                        ) == 0x01.toByte()
-                    val conversationalAwarenessChecked =
-                        state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.CONVERSATION_DETECT_CONFIG]?.getOrNull(
-                            0
-                        ) == 0x01.toByte()
-
-                    AudioSettings(
-                        adaptiveVolumeCapability = adaptiveVolumeCapability,
-                        conversationalAwarenessCapability = conversationalAwarenessCapability,
-                        loudSoundReductionCapability = loudSoundReductionCapability,
-                        adaptiveAudioCapability = adaptiveAudioCapability,
-                        customEqCapability = true,
-                        adaptiveVolumeChecked = adaptiveVolumeChecked,
-                        onAdaptiveVolumeCheckedChange = { checked ->
-                            setControlCommandBoolean(
-                                AACPManager.Companion.ControlCommandIdentifiers.ADAPTIVE_VOLUME_CONFIG,
-                                checked
-                            )
-                        },
-                        conversationalAwarenessChecked = conversationalAwarenessChecked && state.isPremium,
-                        onConversationalAwarenessCheckedChange = { checked ->
-                            setControlCommandBoolean(
-                                AACPManager.Companion.ControlCommandIdentifiers.CONVERSATION_DETECT_CONFIG,
-                                checked
-                            )
-                        },
-                        loudSoundReductionChecked = state.loudSoundReductionEnabled,
-                        onLoudSoundReductionCheckedChange = { checked ->
-                            setATTCharacteristicValue(
-                                ATTHandles.LOUD_SOUND_REDUCTION,
-                                byteArrayOf(if (checked) 0x01.toByte() else 0x00.toByte())
-                            )
-                        },
-                        navigateToAdaptiveStrength = navigateToAdaptiveStrength,
-                        navigateToEqualizer = navigateToEqualizer,
-                        vendorIdHook = state.vendorIdHook,
-                        isPremium = state.isPremium
-                    )
-                }
-
-                item(key = "connection") {
-                    ConnectionSettings(
-                        automaticEarDetectionEnabled = state.automaticEarDetectionEnabled,
-                        onAutomaticEarDetectionChanged = onAutomaticEarDetectionChanged,
-                        automaticConnectionEnabled = state.automaticConnectionEnabled,
-                        navigateToConnectToThisDevice = navigateToConnectToThisDevice
-                    )
-                }
-
-                item(key = "microphone") {
-                    val id = AACPManager.Companion.ControlCommandIdentifiers.MIC_MODE
-
-                    val selectedModeText = when (state.controlStates[id]?.getOrNull(0) ?: 0x00.toByte()) {
-                        0x00.toByte() -> stringResource(R.string.microphone_automatic)
-                        0x01.toByte() -> stringResource(R.string.microphone_always_right)
-                        0x02.toByte() -> stringResource(R.string.microphone_always_left)
-                        else -> stringResource(R.string.microphone_automatic)
-                    }
-
+            item(key = "settings_hub") {
+                StyledList {
                     StyledListItem(
-                        name = stringResource(R.string.microphone_mode),
-                        description = selectedModeText,
-                        onClick = navigateToMicrophoneSettings
+                        name = stringResource(R.string.audio_and_routing),
+                        onClick = navigateToAudioAndRouting,
+                        leadingContent = {
+                            AppleSettingsIconTile(
+                                drawableRes = R.drawable.sf_speaker_wave_3_fill,
+                                containerColor = AppleDesignMetrics.audioAndRoutingIconTileColor
+                            )
+                        }
                     )
-                }
-
-                if (capabilities.contains(Capability.SLEEP_DETECTION)) {
-                    item(key = "sleep_detection") {
-                        val id = AACPManager.Companion.ControlCommandIdentifiers.SLEEP_DETECTION_CONFIG
-                        StyledToggle(
-                            label = stringResource(R.string.sleep_detection),
-                            checked = state.controlStates[id]?.getOrNull(0) == 0x01.toByte(),
-                            onCheckedChange = { setControlCommandBoolean(id, it) },
-                            enabled = state.isPremium
-                        )
-                    }
-                }
-
-                if (capabilities.contains(Capability.HEAD_GESTURES)) {
-                    item(key = "head_tracking") {
-                        StyledListItem(
-                            name = stringResource(R.string.head_gestures),
-                            description = if (sharedPreferences.getBoolean(
-                                    "head_gestures", false
-                                )
-                            ) stringResource(R.string.on) else stringResource(R.string.off),
-                            onClick = navigateToHeadTracking
-                        )
-                    }
-                }
-
-                if (capabilities.contains(Capability.OPTIMIZED_CHARGE_LIMIT)) {
-                    item(key = "dynamic_end_of_charge") {
-                        StyledToggle(
-                            label = stringResource(R.string.optimized_charging),
-                            description = stringResource(R.string.optimized_charging_description),
-                            checked = state.dynamicEndOfCharge,
-                            onCheckedChange = setDynamicEndOfCharge
-                        )
-                    }
-                }
-
-                item(key = "accessibility") {
                     StyledListItem(
-                        name = stringResource(R.string.accessibility), onClick = navigateToAccessibility
+                        name = stringResource(R.string.controls_and_gestures),
+                        onClick = navigateToControlsAndGestures,
+                        leadingContent = {
+                            AppleSettingsIconTile(
+                                drawableRes = R.drawable.sf_hand_pinch_fill,
+                                containerColor = AppleDesignMetrics.controlsAndGesturesIconTileColor
+                            )
+                        }
                     )
-                }
-            } else {
-                item(key = "settings_hub") {
-                    StyledList {
-                        StyledListItem(
-                            name = stringResource(R.string.audio_and_routing),
-                            onClick = navigateToAudioAndRouting,
-                            leadingContent = {
-                                AppleSettingsIconTile(
-                                    drawableRes = R.drawable.sf_speaker_wave_3_fill,
-                                    containerColor = AppleDesignMetrics.audioAndRoutingIconTileColor
-                                )
-                            }
-                        )
-                        StyledListItem(
-                            name = stringResource(R.string.controls_and_gestures),
-                            onClick = navigateToControlsAndGestures,
-                            leadingContent = {
-                                AppleSettingsIconTile(
-                                    drawableRes = R.drawable.sf_hand_pinch_fill,
-                                    containerColor = AppleDesignMetrics.controlsAndGesturesIconTileColor
-                                )
-                            }
-                        )
-                        StyledListItem(
-                            name = stringResource(R.string.accessibility),
-                            onClick = navigateToAccessibility,
-                            leadingContent = {
-                                AppleSettingsIconTile(
-                                    drawableRes = R.drawable.sf_accessibility,
-                                    containerColor = AppleDesignMetrics.accessibilityIconTileColor
-                                )
-                            }
-                        )
-                    }
-                }
-
-                item(key = "battery_settings") {
-                    StyledList {
-                        StyledListItem(
-                            name = stringResource(R.string.battery),
-                            onClick = navigateToBattery,
-                            leadingContent = {
-                                AppleSettingsIconTile(
-                                    drawableRes = R.drawable.sf_battery_100percent,
-                                    containerColor = AppleDesignMetrics.batteryIconTileColor
-                                )
-                            }
-                        )
-                    }
+                    StyledListItem(
+                        name = stringResource(R.string.accessibility),
+                        onClick = navigateToAccessibility,
+                        leadingContent = {
+                            AppleSettingsIconTile(
+                                drawableRes = R.drawable.sf_accessibility,
+                                containerColor = AppleDesignMetrics.accessibilityIconTileColor
+                            )
+                        }
+                    )
                 }
             }
 
-            if (m3eEnabled) {
-                if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
-                    item(key = "off_listening") {
-                        StyledToggle(
-                            label = stringResource(R.string.off_listening_mode),
-                            description = stringResource(R.string.off_listening_mode_description),
-                            checked = state.offListeningMode,
-                            onCheckedChange = setOffListeningMode
-                        )
-                    }
+            item(key = "battery_settings") {
+                StyledList {
+                    StyledListItem(
+                        name = stringResource(R.string.battery),
+                        onClick = navigateToBattery,
+                        leadingContent = {
+                            AppleSettingsIconTile(
+                                drawableRes = R.drawable.sf_battery_100percent,
+                                containerColor = AppleDesignMetrics.batteryIconTileColor
+                            )
+                        }
+                    )
                 }
             }
+
 
             item(key = "spacer_about") {
                 Spacer(modifier = Modifier.height(if (m3eEnabled) 32.dp else 0.dp))
