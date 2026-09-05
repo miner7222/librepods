@@ -32,6 +32,7 @@ import android.os.Looper
 import android.util.Log
 import me.kavishdevar.librepods.utils.BluetoothCryptography
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.iterator
@@ -112,7 +113,11 @@ class BLEManager(private val context: Context) {
     )
 
     private val cleanupHandler = Handler(Looper.getMainLooper())
-    private var scanRetryAttempts = 0
+    /**
+     * Read and written from the scan callback and from whichever thread asks for a
+     * scan, which is not always the main one.
+     */
+    private val scanRetryAttempts = AtomicInteger(0)
     private val missingIrkLoggedForScan = AtomicBoolean(false)
     private val scanRetryRunnable = Runnable {
         startScanning(resetRetryAttempts = false)
@@ -139,7 +144,7 @@ class BLEManager(private val context: Context) {
         try {
             cancelPendingScanRetry()
             if (resetRetryAttempts) {
-                scanRetryAttempts = 0
+                scanRetryAttempts.set(0)
                 missingIrkLoggedForScan.set(false)
             }
             Log.d(TAG, "Starting BLE scanner")
@@ -203,7 +208,7 @@ class BLEManager(private val context: Context) {
                 override fun onScanFailed(errorCode: Int) {
                     if (mScanCallback !== this) return
                     Log.e(TAG, "BLE scan failed with error code: $errorCode")
-                    scheduleScanRetry()
+                    scheduleScanRetry(errorCode)
                 }
             }
 
@@ -221,7 +226,7 @@ class BLEManager(private val context: Context) {
     fun stopScanning() {
         try {
             cancelPendingScanRetry()
-            scanRetryAttempts = 0
+            scanRetryAttempts.set(0)
             val scanCallback = mScanCallback
             mScanCallback = null
             if (mBluetoothLeScanner != null && scanCallback != null) {
@@ -237,18 +242,26 @@ class BLEManager(private val context: Context) {
 
     private fun markScanSuccessful() {
         cancelPendingScanRetry()
-        scanRetryAttempts = 0
+        scanRetryAttempts.set(0)
     }
 
-    private fun scheduleScanRetry() {
-        if (scanRetryAttempts >= MAX_SCAN_RETRY_ATTEMPTS) {
-            Log.e(TAG, "BLE scan retry limit reached")
+    /**
+     * Giving up left the app with no scanner at all until Bluetooth was toggled or
+     * the service restarted, which costs the popup, the battery readings and ear
+     * detection for the rest of the session. Keep trying at a widening interval,
+     * spaced so the retries cannot themselves trip the platform's limit on how
+     * often an app may start a scan.
+     */
+    private fun scheduleScanRetry(errorCode: Int) {
+        if (errorCode == ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED) {
+            Log.e(TAG, "BLE scan settings unsupported, not retrying")
             return
         }
 
-        scanRetryAttempts++
-        val retryDelay = SCAN_RETRY_BACKOFF_MS * scanRetryAttempts
-        Log.d(TAG, "Retrying BLE scan in ${retryDelay}ms ($scanRetryAttempts/$MAX_SCAN_RETRY_ATTEMPTS)")
+        val attempt = scanRetryAttempts.incrementAndGet()
+        val retryDelay =
+            (SCAN_RETRY_BACKOFF_MS * attempt).coerceAtMost(MAX_SCAN_RETRY_BACKOFF_MS)
+        Log.d(TAG, "Retrying BLE scan in ${retryDelay}ms (attempt $attempt)")
         cleanupHandler.removeCallbacks(scanRetryRunnable)
         cleanupHandler.postDelayed(scanRetryRunnable, retryDelay)
     }
@@ -547,7 +560,7 @@ class BLEManager(private val context: Context) {
         private const val CLEANUP_INTERVAL_MS = 10000L
         private const val STALE_DEVICE_TIMEOUT_MS = 15000L
         private const val LID_CLOSE_TIMEOUT_MS = 2500L
-        private const val MAX_SCAN_RETRY_ATTEMPTS = 3
-        private const val SCAN_RETRY_BACKOFF_MS = 1000L
+        private const val SCAN_RETRY_BACKOFF_MS = 5000L
+        private const val MAX_SCAN_RETRY_BACKOFF_MS = 30000L
     }
 }
