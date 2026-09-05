@@ -109,6 +109,8 @@ fun LibrePodsTheme(
             if (m3eEnabled) DesignSystem.Material
             else DesignSystem.Apple,
         LocalAppleDesignMetrics provides AppleDesignMetrics,
+        LocalSectionMetrics provides
+            if (m3eEnabled) MaterialSectionMetrics else AppleSectionMetrics,
         LocalIsDarkTheme provides darkTheme
     ) {
         MaterialExpressiveTheme(
