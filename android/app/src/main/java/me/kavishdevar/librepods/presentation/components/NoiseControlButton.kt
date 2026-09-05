@@ -21,6 +21,7 @@ package me.kavishdevar.librepods.presentation.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
@@ -43,7 +45,13 @@ fun NoiseControlButton(
     onClick: () -> Unit,
     textColor: Color,
     modifier: Modifier = Modifier,
-    usePadding: Boolean = true
+    usePadding: Boolean = true,
+    /**
+     * Drawn faded underneath the icon. Apple's Off glyph is the noise cancelling
+     * one with its arc dimmed rather than a person on its own, and the two renders
+     * share a canvas, so laying one over the other reproduces it.
+     */
+    underlay: ImageBitmap? = null
 ) {
     Column(
         modifier = modifier
@@ -57,14 +65,36 @@ fun NoiseControlButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            bitmap = icon,
-            contentDescription = null,
-            tint = textColor,
-            modifier = Modifier.size(40.dp)
-        )
+        Box(contentAlignment = Alignment.Center) {
+            if (underlay != null) {
+                Icon(
+                    bitmap = underlay,
+                    contentDescription = null,
+                    tint = textColor,
+                    modifier = Modifier
+                        .size(NoiseControlIconSize)
+                        .alpha(NoiseControlOffArcAlpha)
+                )
+            }
+            Icon(
+                bitmap = icon,
+                contentDescription = null,
+                tint = textColor,
+                modifier = Modifier.size(NoiseControlIconSize)
+            )
+        }
     }
 }
+
+/**
+ * Measured off the iOS 27 captures: the glyphs sat 17% over this. Every listening
+ * mode glyph draws at it - the Material control and the press-and-hold list were
+ * each picking their own size, and the same icon came out three sizes.
+ */
+val NoiseControlIconSize = 34.dp
+
+/** What Apple leaves of the Off glyph's arc; measured at half strength. */
+const val NoiseControlOffArcAlpha = 0.5f
 
 @Preview
 @Composable
