@@ -1,0 +1,40 @@
+{
+  "product": "AirPods 3 with MagSafe Charging Case (2021)",
+  "acquired": "2026-09-05",
+  "page": "https://www.apple.com/newsroom/2021/10/introducing-the-next-generation-of-airpods/",
+  "specifications": "https://support.apple.com/en-us/111863",
+  "geometry_link_recovered_from": "https://web.archive.org/web/20230103214237/https://www.apple.com/airpods-pro/",
+  "geometry": {
+    "url": "https://www.apple.com/105/media/us/airpods-3rd-generation/2021/3c0b27aa-a5fe-4365-a9ae-83c28d10fa21/ar/airpods_magsafe_charging_ios15.usdz",
+    "filename": "apple_airpods_3.usdz",
+    "sha256": "83f5690d1b1aca03e1bf5ef9ee7e3fbfea3a8dcbc008e328a4fbd26fa723928a"
+  },
+  "reference_images": [
+    {
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-3rd-gen_hero_10182021_inline.jpg.large.jpg",
+      "filename": "Apple_AirPods-3rd-gen_hero_10182021_inline.jpg.large.jpg",
+      "sha256": "9f7151cca98db96114754609f120a52e7409d7a2f7cc1fc635a6e676f62aafff"
+    },
+    {
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple_AirPods-3rd-gen_iPhone-13-pairing_10182021_inline.jpg.large.jpg",
+      "filename": "Apple_AirPods-3rd-gen_iPhone-13-pairing_10182021_inline.jpg.large.jpg",
+      "sha256": "de0254e39bde410559924143a5a06b8f2cd4efd3fad44e77ae0333f673eedd8f"
+    },
+    {
+      "url": "https://www.chargerlab.com/wp-content/uploads/2021/11/2021111511465084.jpg",
+      "filename": "chargerlab-rear.jpg",
+      "sha256": "ed34b44068ae1f51044413725721b07f266f6616698cd40414a5967d8ce5bf31",
+      "page": "https://www.chargerlab.com/teardown-of-airpods-3-charging-case/",
+      "purpose": "Real-product rear appearance reference only; not shipped or used as a texture."
+    },
+    {
+      "url": "https://images.gutefrage.net/media/fragen/bilder/airpods-verbinden-sich-nicht-mehr-3/0_big.jpg?v=1651315966113",
+      "filename": "connected-popup.jpg",
+      "sha256": "4d3a875919fd29ec2702689a1c6e7f2195c3f53c73ed21a80ab011e4d3858c75",
+      "page": "https://www.gutefrage.net/frage/airpods-verbinden-sich-nicht-mehr-3",
+      "purpose": "Product-specific connected-popup framing/color reference only; not shipped or used as a texture."
+    }
+  ],
+  "composition_reference": "tools/airpods_pro_3/render.py; same physical-scale camera and handle positions, original AirPods 3 size.",
+  "provenance": "Apple official AR geometry and textures; LibrePods hierarchy, reconstructed hinge, surface refinement, studio lighting, camera, grade and animation. Not independently authored geometry. No CC BY or GPL grant claimed for Apple-derived artwork."
+}

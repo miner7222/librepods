@@ -128,13 +128,14 @@ class AirPods2: AirPodsBase(
 class AirPods3: AirPodsBase(
     modelNumber = listOf("A2565", "A2564"),
     name = "AirPods 3",
-    budCaseRes = FallbackArtwork.Standard.budCase,
-    budsRes = FallbackArtwork.Standard.buds,
-    leftBudsRes = FallbackArtwork.Standard.leftBuds,
-    rightBudsRes = FallbackArtwork.Standard.rightBuds,
-    caseRes = FallbackArtwork.Standard.chargingCase,
-    connectedVideoRes = FallbackArtwork.Standard.connected,
-    islandVideoRes = FallbackArtwork.Standard.island,
+    budCaseRes = R.drawable.airpods_3,
+    budsRes = R.drawable.airpods_3_buds,
+    leftBudsRes = R.drawable.airpods_3_left,
+    rightBudsRes = R.drawable.airpods_3_right,
+    caseRes = R.drawable.airpods_3_case,
+    connectedVideoRes = R.raw.airpods_3_connected,
+    islandVideoRes = R.raw.airpods_3_island,
+    ringLayout = OverlayRingLayout(0.1900f, 0.3143f, 0.2804f, 0.6948f),
     capabilities = setOf(
         Capability.HEAD_GESTURES,
         Capability.PRESS_CONFIG
