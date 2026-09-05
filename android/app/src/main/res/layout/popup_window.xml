@@ -52,15 +52,67 @@
         the average of that lean. translationX rather than a margin: the lean is
         a property of the pixels, so it must not mirror under RTL.
     -->
-    <VideoView
-        android:id="@+id/video"
+    <FrameLayout
         android:layout_width="353dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:contentDescription="AirPods"
-        android:src="@raw/airpods_pro_2_connected"
-        android:translationX="4dp"
-        tools:ignore="HardcodedText" />
+        android:clipChildren="false">
+
+        <VideoView
+            android:id="@+id/video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            android:contentDescription="AirPods"
+            android:src="@raw/airpods_pro_2_connected"
+            android:translationX="4dp"
+            tools:ignore="HardcodedText" />
+
+        <!--
+            What Apple shows once a bud leaves the case: the pair and the case as
+            two separate renders, which is also what heads the settings screen.
+            The metrics are that screen's - a 246dp row split evenly, each render
+            capped at 100dp and inset 8dp - so the two read as one artwork.
+
+            It shares the clip's slot so the card keeps its height across the
+            crossfade, and carries no translationX: the lean belongs to the clip's
+            pixels, not to these renders.
+        -->
+        <LinearLayout
+            android:id="@+id/artwork"
+            android:layout_width="246dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:alpha="0"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/artwork_buds"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/buds"
+                android:maxHeight="100dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/airpods_4_buds" />
+
+            <ImageView
+                android:id="@+id/artwork_case"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/case_alt"
+                android:maxHeight="100dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/airpods_4_case" />
+        </LinearLayout>
+    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="353dp"
