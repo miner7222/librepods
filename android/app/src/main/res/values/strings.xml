@@ -101,8 +101,12 @@
     <string name="loud_sound_reduction_description">Loud Sound Reduction can actively reduce your exposure to loud environmental noises when in Transparency and Adaptive mode. Loud Sound Reduction is not active in Off mode.</string>
     <string name="loud_sound_reduction">Loud Sound Reduction</string>
     <string name="call_controls">Call Controls</string>
-    <string name="automatically_connect">Connect to this device automatically</string>
-    <string name="automatically_connect_description">When enabled, AirPods will try to connect to this device automatically. Else, they will try to autoconnect only when last connected.</string>
+    <string name="connect_to_this_device">Connect to This Device</string>
+    <string name="connect_automatically">Automatically</string>
+    <string name="connect_when_last_connected">When Last Connected to This Device</string>
+    <string name="connect_to_this_device_footer">AirPods switch the audio route from a connected device to this one when you put them in your ears.</string>
+    <string name="connect_to_this_device_description">Choose how AirPods connect to this device. AirPods can always automatically connect to this device, or only connect if this device was the last device you used them with.</string>
+    <string name="automatically_connect_requires_hook">Needs the vendor ID hook.</string>
     <string name="sleep_detection">Pause media when falling asleep</string>
     <string name="off_listening_mode">Off Listening Mode</string>
     <string name="off_listening_mode_description">When this is on, AirPods listening modes will include an Off option. Loud sound levels are not reduced when the listening mode is set to Off.</string>

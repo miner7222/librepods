@@ -60,6 +60,7 @@ fun AudioAndRoutingScreen(
     navigateToAdaptiveStrength: () -> Unit,
     navigateToEqualizer: () -> Unit,
     navigateToMicrophoneSettings: () -> Unit,
+    navigateToConnectToThisDevice: () -> Unit,
     onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -144,7 +145,7 @@ fun AudioAndRoutingScreen(
             automaticEarDetectionEnabled = state.automaticEarDetectionEnabled,
             onAutomaticEarDetectionChanged = viewModel::setAutomaticEarDetectionEnabled,
             automaticConnectionEnabled = state.automaticConnectionEnabled,
-            onAutomaticConnectionChanged = viewModel::setAutomaticConnectionEnabled
+            navigateToConnectToThisDevice = navigateToConnectToThisDevice
         )
 
         Spacer(modifier = Modifier.height(if (m3eEnabled) 16.dp else 0.dp))

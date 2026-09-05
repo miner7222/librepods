@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">「降低高音量」可在通透模式和自適應模式下，主動減少你接觸到的環境高噪音。在「關閉」模式下，「降低高音量」不會作用。</string>
     <string name="loud_sound_reduction">降低高音量</string>
     <string name="call_controls">通話控制</string>
-    <string name="automatically_connect">自動連接此裝置</string>
-    <string name="automatically_connect_description">啟用後，AirPods 將嘗試自動連接至此裝置。否則，它們僅會在上次連接過此裝置時嘗試自動連接。</string>
     <string name="sleep_detection">入睡時暫停媒體</string>
     <string name="off_listening_mode">「關閉」聽覺模式</string>
     <string name="off_listening_mode_description">開啟此選項後，AirPods 聽覺模式將包含「關閉」選項。當聽覺模式設為「關閉」時，不會降低高音量。</string>

@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.BuildConfig
+import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.billing.BillingManager
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.AACPManager.Companion.ControlCommandIdentifiers
@@ -772,6 +773,20 @@ class AirPodsViewModel(
     }
 
     fun setAutomaticConnectionEnabled(enabled: Boolean) {
+        // Apple's "automatically" leaves the AirPods waiting to be told which device
+        // should take them, and only a device they accept as Apple's can answer. With
+        // the vendor ID hook off nothing does, and turning this on costs the automatic
+        // connection that worked without it. Turning it off stays available whatever
+        // the hook is doing, or AirPods that arrive with it set could never be undone.
+        if (enabled && !_uiState.value.vendorIdHook) {
+            Toast.makeText(
+                appContext,
+                appContext.getString(R.string.automatically_connect_requires_hook),
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
         sharedPreferences.edit { putBoolean("automatic_connection_ctrl_cmd", enabled) }
         setControlCommandBoolean(ControlCommandIdentifiers.AUTOMATIC_CONNECTION_CONFIG, enabled)
         _uiState.update {

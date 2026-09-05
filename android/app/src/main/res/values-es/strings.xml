@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">Reducción de Sonidos Fuertes puede reducir activamente la exposición a entornos ruidosos en modo Transparencia y Adaptativo. Reducción de Sonidos Fuertes no está activa en modo Desactivado.</string>
     <string name="loud_sound_reduction">Reducción de Sonidos Fuertes</string>
     <string name="call_controls">Controles de Llamada</string>
-    <string name="automatically_connect">Conectar a este dispositivo automáticamente</string>
-    <string name="automatically_connect_description">Al activarse, los AirPods intentarán conectarse automáticamente a este dispositivo. Si no es posible, se intentarán conectar al último dispositivo utilizado.</string>
     <string name="sleep_detection">Pausar audio al quedarse dormido</string>
     <string name="off_listening_mode">Modo de Escucha Desactivado</string>
     <string name="off_listening_mode_description">Cuando está activado, los modos de escucha de AirPods incluyen la opción Desactivado. Cuando el modo de Escucha Desactivado está activado no se reducen ruidos fuertes.</string>

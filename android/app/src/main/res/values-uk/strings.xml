@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">Зменшення гучних звуків може активно зменшити вплив гучних навколишніх шумів на вас у режимах Проникності та Адаптування. Зменшення гучних звуків не активне у вимкненому режимі.</string>
     <string name="loud_sound_reduction">Зменшення гучних звуків</string>
     <string name="call_controls">Контроль дзвінків</string>
-    <string name="automatically_connect">Підключатися до цього пристрою автоматично</string>
-    <string name="automatically_connect_description">Коли ця опція ввімкнена, AirPods будуть автоматично підключатися до цього пристрою. Коли вимкнена, вони будуть автопідключатися лише до пристрою, до якого підключалися востаннє.</string>
     <string name="sleep_detection">Призупинити медіа при засипанні</string>
     <string name="off_listening_mode">Вимкнути режим прослуховування</string>
     <string name="off_listening_mode_description">Коли це ввімкнено, режими прослуховування AirPods будуть включати опцію «Вимкнено». Гучні звуки не зменшуються, коли режим прослуховування встановлений на «Вимкнено».</string>

@@ -163,6 +163,7 @@ fun AirPodsSettingsRoute(
     navigateToTroubleshooting: () -> Unit,
     navigateToCallControlScreen: (action: String) -> Unit,
     navigateToMicrophoneSettings: () -> Unit,
+    navigateToConnectToThisDevice: () -> Unit,
     onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -213,6 +214,7 @@ fun AirPodsSettingsRoute(
             navigateToTroubleshooting = navigateToTroubleshooting,
             navigateToCallControlScreen = navigateToCallControlScreen,
             navigateToMicrophoneSettings = navigateToMicrophoneSettings,
+            navigateToConnectToThisDevice = navigateToConnectToThisDevice,
 
             activateDemoMode = viewModel::activateDemoMode,
             reconnectFromSavedMac = viewModel::reconnectFromSavedMac
@@ -346,6 +348,7 @@ fun AirPodsSettingsScreen(
         navigateToTroubleshooting: () -> Unit,
         navigateToCallControlScreen: (action: String) -> Unit,
         navigateToMicrophoneSettings: () -> Unit,
+    navigateToConnectToThisDevice: () -> Unit,
 
         activateDemoMode: () -> Unit,
         reconnectFromSavedMac: () -> Unit,
@@ -641,7 +644,7 @@ fun AirPodsSettingsScreen(
                         automaticEarDetectionEnabled = state.automaticEarDetectionEnabled,
                         onAutomaticEarDetectionChanged = onAutomaticEarDetectionChanged,
                         automaticConnectionEnabled = state.automaticConnectionEnabled,
-                        onAutomaticConnectionChanged = onAutomaticConnectionChanged
+                        navigateToConnectToThisDevice = navigateToConnectToThisDevice
                     )
                 }
 
@@ -1145,6 +1148,7 @@ fun AirPodsSettingsScreenPreviewApple() {
                 navigateToTroubleshooting = {},
                 navigateToCallControlScreen = {},
                 navigateToMicrophoneSettings = {},
+                navigateToConnectToThisDevice = {},
 
                 activateDemoMode = {},
                 reconnectFromSavedMac = {}
@@ -1194,6 +1198,7 @@ fun AirPodsSettingsScreenPreviewMaterial() {
                 navigateToTroubleshooting = {},
                 navigateToCallControlScreen = {},
                 navigateToMicrophoneSettings = {},
+                navigateToConnectToThisDevice = {},
 
                 activateDemoMode = {},
                 reconnectFromSavedMac = {}

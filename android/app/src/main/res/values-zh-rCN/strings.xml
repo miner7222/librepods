@@ -84,8 +84,6 @@
     <string name="loud_sound_reduction_description">在通透模式和自适应模式下，响度声音降低功能可以主动减少你暴露在响亮环境噪音中的时间。此功能在关闭模式下不生效。</string>
     <string name="loud_sound_reduction">大声减弱</string>
     <string name="call_controls">通话控制</string>
-    <string name="automatically_connect">自动连接到此设备</string>
-    <string name="automatically_connect_description">启用后，AirPods 将尝试自动连接到此设备。否则，它们将仅在上次连接时尝试自动连接。</string>
     <string name="sleep_detection">入睡时暂停媒体</string>
     <string name="off_listening_mode">关闭听音模式</string>
     <string name="off_listening_mode_description">开启后，AirPods 的听音模式将包含一个“关闭”选项。当听音模式设置为“关闭”时，高音量将不会被降低。</string>

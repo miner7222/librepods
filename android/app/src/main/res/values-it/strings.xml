@@ -85,8 +85,6 @@
         <string name="loud_sound_reduction_description">La Riduzione dei Suoni Forti può ridurre attivamente la tua esposizione ai forti rumori ambientali quando in modalità Trasparenza e Adattiva. La Riduzione dei Suoni Forti non è attiva in modalità Spento.</string>
         <string name="loud_sound_reduction">Riduzione dei Suoni Forti</string>
         <string name="call_controls">Controlli Chiamata</string>
-        <string name="automatically_connect">Connetti automaticamente a questo dispositivo</string>
-        <string name="automatically_connect_description">Quando abilitato, gli AirPods tenteranno di connettersi automaticamente a questo dispositivo. Altrimenti, tenteranno di connettersi automaticamente solo se sono stati connessi in precedenza.</string>
         <string name="sleep_detection">Metti in pausa i contenuti multimediali quando ti addormenti</string>
         <string name="off_listening_mode">Modalità Ascolto Disattivata</string>
         <string name="off_listening_mode_description">Quando questa opzione è attiva, le modalità di ascolto degli AirPods includeranno un\'opzione "Spento". I livelli di suono forti non vengono ridotti quando la modalità di ascolto è impostata su "Spento".</string>

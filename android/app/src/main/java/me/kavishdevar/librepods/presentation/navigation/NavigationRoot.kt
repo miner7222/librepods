@@ -88,6 +88,7 @@ fun NavigationRoot(
         Screen.VersionInfo -> stringResource(R.string.version)
         is Screen.CallControl -> currentScreen.action
         Screen.MicrophoneSettings -> stringResource(R.string.microphone)
+        Screen.ConnectToThisDevice -> stringResource(R.string.connect_to_this_device)
         Screen.ReleaseNotes -> ""
     }
 

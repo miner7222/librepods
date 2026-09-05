@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">Giảm âm thanh lớn có thể chủ động giảm tiếp xúc với tiếng ồn môi trường lớn khi ở chế độ xuyên âm và Thích ứng. Giảm âm thanh lớn không hoạt động ở chế độ Tắt.</string>
     <string name="loud_sound_reduction">Giảm âm thanh lớn</string>
     <string name="call_controls">Điều khiển cuộc gọi</string>
-    <string name="automatically_connect">Tự động kết nối với thiết bị này</string>
-    <string name="automatically_connect_description">Khi bật, AirPods sẽ cố gắng tự động kết nối với thiết bị này. Nếu không, chúng sẽ chỉ tự động kết nối khi đã kết nối lần cuối.</string>
     <string name="sleep_detection">Tạm dừng Media khi ngủ</string>
     <string name="off_listening_mode">Chế độ nghe Tắt</string>
     <string name="off_listening_mode_description">Khi bật, các chế độ nghe của AirPods sẽ bao gồm tùy chọn Tắt. Mức âm thanh lớn không được giảm khi chế độ nghe được đặt thành Tắt.</string>

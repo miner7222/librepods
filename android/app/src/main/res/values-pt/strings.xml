@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">A Redução de Som Alto pode reduzir ativamente sua exposição a ruídos ambientais altos quando estiver nos modos Transparência e Adaptativo. A Redução de Som Alto não está ativa no modo Desligado.</string>
     <string name="loud_sound_reduction">Redução de Som Alto</string>
     <string name="call_controls">Controles de Chamada</string>
-    <string name="automatically_connect">Conectar a este dispositivo automaticamente</string>
-    <string name="automatically_connect_description">Quando habilitado, os AirPods tentarão conectar a este dispositivo automaticamente. Caso contrário, eles tentarão conectar automaticamente apenas quando conectados pela última vez.</string>
     <string name="sleep_detection">Pausar mídia ao adormecer</string>
     <string name="off_listening_mode">Modo de Escuta Desligado</string>
     <string name="off_listening_mode_description">Quando isso estiver ativado, os modos de escuta dos AirPods incluirão uma opção Desligado. Os níveis de som alto não são reduzidos quando o modo de escuta está definido como Desligado.</string>

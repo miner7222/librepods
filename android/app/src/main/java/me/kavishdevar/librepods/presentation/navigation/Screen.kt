@@ -85,6 +85,7 @@ sealed interface Screen: NavKey {
 
     @Serializable
     data object MicrophoneSettings: Screen
+    data object ConnectToThisDevice: Screen
 
     @Serializable
     data object ReleaseNotes: Screen {

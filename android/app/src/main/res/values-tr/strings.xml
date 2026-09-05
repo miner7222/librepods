@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">Yüksek Ses Azaltma, Şeffaflık ve Uyarlanabilir moddayken yüksek çevresel gürültülere maruz kalmanızı aktif olarak azaltabilir. Kapalı modda Yüksek Ses Azaltma aktif değildir.</string>
     <string name="loud_sound_reduction">Yüksek Ses Azaltma</string>
     <string name="call_controls">Arama Kontrolleri</string>
-    <string name="automatically_connect">Bu cihaza otomatik olarak bağlan</string>
-    <string name="automatically_connect_description">Etkinleştirildiğinde, AirPods bu cihaza otomatik olarak bağlanmaya çalışacaktır. Aksi takdirde, yalnızca son bağlandığında otomatik bağlanmaya çalışacaktır.</string>
     <string name="sleep_detection">Uykuya dalarken medyayı duraklat</string>
     <string name="off_listening_mode">Kapalı Dinleme Modu</string>
     <string name="off_listening_mode_description">Bu açıkken, AirPods dinleme modları bir Kapalı seçeneği içerecektir. Dinleme modu Kapalı olarak ayarlandığında yüksek ses seviyeleri azaltılmaz.</string>

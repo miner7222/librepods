@@ -85,8 +85,6 @@
     <string name="loud_sound_reduction_description">La réduction des sons forts peut réduire activement votre exposition aux bruits ambiants forts en mode Transparence et Adaptatif. La réduction des sons forts n\'est pas active en mode Désactivé.</string>
     <string name="loud_sound_reduction">Réduction des sons forts</string>
     <string name="call_controls">Contrôle des appels</string>
-    <string name="automatically_connect">Se connecter automatiquement à cet appareil</string>
-    <string name="automatically_connect_description">Quand ce mode est activé, les AirPods essaieront de se connecter automatiquement à cet appareil. Sinon, ils essaieront uniquement de se connecter automatiquement au dernier appareil connecté.</string>
     <string name="sleep_detection">Mettre en pause l\'écoute au moment de s\'endormir</string>
     <string name="off_listening_mode">Mode d\'écoute Désactivé</string>
     <string name="off_listening_mode_description">Quand ce paramètre est activé, les modes d\'écoute incluront une option Désactivé. Les sons forts ne sont pas réduits en mode Désactivé.</string>

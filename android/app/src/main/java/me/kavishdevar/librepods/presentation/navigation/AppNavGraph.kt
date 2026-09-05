@@ -31,6 +31,7 @@ import me.kavishdevar.librepods.presentation.screens.HearingAidScreen
 import me.kavishdevar.librepods.presentation.screens.HearingProtectionScreen
 import me.kavishdevar.librepods.presentation.screens.LoadingScreen
 import me.kavishdevar.librepods.presentation.screens.LongPress
+import me.kavishdevar.librepods.presentation.screens.ConnectToThisDeviceRoute
 import me.kavishdevar.librepods.presentation.screens.MicrophoneSettingsRoute
 import me.kavishdevar.librepods.presentation.screens.OpenSourceLicensesScreen
 import me.kavishdevar.librepods.presentation.screens.PurchaseScreen
@@ -116,6 +117,7 @@ fun AppNavGraph(
                                 navigateToTroubleshooting = { navigate(Screen.Troubleshooting) },
                                 navigateToCallControlScreen = { navigate(Screen.CallControl(it)) },
                                 navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
+                                navigateToConnectToThisDevice = { navigate(Screen.ConnectToThisDevice) },
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) },
                             )
                         }
@@ -128,6 +130,7 @@ fun AppNavGraph(
                                 navigateToAdaptiveStrength = { navigate(Screen.AdaptiveStrength) },
                                 navigateToEqualizer = { navigate(Screen.Equalizer) },
                                 navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
+                                navigateToConnectToThisDevice = { navigate(Screen.ConnectToThisDevice) },
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )
                         }
@@ -322,6 +325,15 @@ fun AppNavGraph(
                         NavEntry(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             MicrophoneSettingsRoute(
+                                viewModel = airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
+                        }
+
+                    is Screen.ConnectToThisDevice ->
+                        NavEntry(screen) {
+                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            ConnectToThisDeviceRoute(
                                 viewModel = airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )

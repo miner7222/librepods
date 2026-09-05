@@ -30,20 +30,25 @@ fun ConnectionSettings(
     automaticEarDetectionEnabled: Boolean,
     onAutomaticEarDetectionChanged: (Boolean) -> Unit,
     automaticConnectionEnabled: Boolean,
-    onAutomaticConnectionChanged: (Boolean) -> Unit,
+    navigateToConnectToThisDevice: () -> Unit,
 ) {
-    StyledList {
+    StyledList(description = stringResource(R.string.connect_to_this_device_footer)) {
         StyledToggle(
             label = stringResource(R.string.ear_detection),
             checked = automaticEarDetectionEnabled,
             onCheckedChange = onAutomaticEarDetectionChanged
         )
 
-        StyledToggle(
-            label = stringResource(R.string.automatically_connect),
-            description = stringResource(R.string.automatically_connect_description),
-            checked = automaticConnectionEnabled,
-            onCheckedChange = onAutomaticConnectionChanged
+        // Apple states the choice, not a switch: the row carries the option in
+        // force underneath its title and opens the pair to pick from.
+        StyledListItem(
+            name = stringResource(R.string.connect_to_this_device),
+            description = stringResource(
+                if (automaticConnectionEnabled) R.string.connect_automatically
+                else R.string.connect_when_last_connected
+            ),
+            orientation = ListItemOrientation.Vertical,
+            onClick = navigateToConnectToThisDevice
         )
     }
 }
