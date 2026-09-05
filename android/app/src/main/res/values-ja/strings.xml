@@ -83,8 +83,6 @@
     <string name="loud_sound_reduction_description">「大きな音の低減」により、外部音取り込みモードや適応型モードの使用中に、周囲の大きな騒音にさらされるのを積極的に軽減できます。オフモードでは機能しません。</string>
     <string name="loud_sound_reduction">大きな音の低減</string>
     <string name="call_controls">通話コントロール</string>
-    <string name="automatically_connect">このデバイスに自動的に接続</string>
-    <string name="automatically_connect_description">有効にすると、AirPodsはこのデバイスに自動的に接続しようとします。無効の場合、最後に接続していたのがこのデバイスのときのみ自動接続します。</string>
     <string name="sleep_detection">入眠時にメディアを一時停止</string>
     <string name="off_listening_mode">“オフ”のリスニングモード</string>
     <string name="off_listening_mode_description">オンにすると、AirPodsのリスニングモードに「オフ」の選択肢が追加されます。リスニングモードが「オフ」に設定されている場合、大きな音のレベルは低減されません。</string>

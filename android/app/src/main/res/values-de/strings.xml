@@ -86,8 +86,6 @@
     <string name="loud_sound_reduction_description">Reduzierung lauter Töne kann deine Belastung durch laute Umgebungsgeräusche im Transparenz- und Adaptiv-Modus aktiv reduzieren. Im Modus „Aus“ ist Reduzierung lauter Töne nicht aktiv.</string>
     <string name="loud_sound_reduction">Reduzierung lauter Töne</string>
     <string name="call_controls">Anrufsteuerung</string>
-    <string name="automatically_connect">Automatisch mit diesem Gerät verbinden</string>
-    <string name="automatically_connect_description">Wenn aktiviert, versuchen die AirPods, sich automatisch mit diesem Gerät zu verbinden. Sonst nur, wenn sie zuletzt damit verbunden waren.</string>
     <string name="sleep_detection">Medien beim Einschlafen pausieren</string>
     <string name="off_listening_mode">Hörmodus „Aus“</string>
     <string name="off_listening_mode_description">Wenn aktiviert, enthält die Auswahl der Hörmodi auch „Aus“. Im Modus „Aus“ werden laute Töne nicht reduziert.</string>

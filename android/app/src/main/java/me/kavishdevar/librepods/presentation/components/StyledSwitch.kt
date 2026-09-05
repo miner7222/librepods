@@ -125,6 +125,19 @@ fun StyledSwitch(
     val totalDrag = remember { mutableFloatStateOf(0f) }
     val tapThreshold = 10f
     val isFirstComposition = remember { mutableStateOf(true) }
+
+    /**
+     * Bumped by every gesture that has finished asking. The caller is free to turn
+     * the request down, and the thumb has to end up where checked actually is
+     * rather than where the gesture pointed - otherwise a refused tap leaves it
+     * sitting at the far end of a track whose colour never changed.
+     */
+    val settleRequest = remember { mutableStateOf(0) }
+    LaunchedEffect(checked, settleRequest.value) {
+        if (isFirstComposition.value) return@LaunchedEffect
+        animatedFraction.animateTo(if (checked) 1f else 0f, progressAnimationSpec)
+    }
+
     LaunchedEffect(checked) {
         if (!isFirstComposition.value) {
             if (checked) {
@@ -133,10 +146,6 @@ fun StyledSwitch(
                 haptics.performHapticFeedback(HapticFeedbackType.ToggleOff)
             }
             coroutineScope {
-                launch {
-                    val targetFrac = if (checked) 1f else 0f
-                    animatedFraction.animateTo(targetFrac, progressAnimationSpec)
-                }
                 if (progressAnimation.value > 0f) return@coroutineScope
                 launch {
                     progressAnimation.animateTo(1f, tween(175, easing = FastOutSlowInEasing))
@@ -197,21 +206,12 @@ fun StyledSwitch(
                     onDragStopped = {
                         scope.launch {
                             if (totalDrag.floatValue < tapThreshold) {
-                                val newChecked = !checked
-                                onCheckedChange(newChecked)
-                                val snappedFraction = if (newChecked) 1f else 0f
-                                coroutineScope {
-                                    launch { progressAnimation.animateTo(0f, progressAnimationSpec) }
-                                    launch { animatedFraction.animateTo(snappedFraction, progressAnimationSpec) }
-                                }
+                                onCheckedChange(!checked)
                             } else {
-                                val snappedFraction = if (animatedFraction.value >= 0.5f) 1f else 0f
-                                onCheckedChange(snappedFraction >= 0.5f)
-                                coroutineScope {
-                                    launch { progressAnimation.animateTo(0f, progressAnimationSpec) }
-                                    launch { animatedFraction.animateTo(snappedFraction, progressAnimationSpec) }
-                                }
+                                onCheckedChange(animatedFraction.value >= 0.5f)
                             }
+                            settleRequest.value++
+                            progressAnimation.animateTo(0f, progressAnimationSpec)
                         }
                     }
                 ) else Modifier)

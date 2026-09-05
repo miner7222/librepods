@@ -82,8 +82,6 @@
     <string name="loud_sound_reduction_description">주변음 허용 및 적응형 모드에서 주변의 큰 소리를 줄여줍니다. 소음 제어를 ‘끔’으로 설정하면 작동하지 않습니다.</string>
     <string name="loud_sound_reduction">큰 소리 줄이기</string>
     <string name="call_controls">통화 제어</string>
-    <string name="automatically_connect">이 기기에 자동으로 연결</string>
-    <string name="automatically_connect_description">켜면 AirPods가 이 기기에 자동으로 연결을 시도합니다. 끄면 이 기기가 AirPods에 마지막으로 연결했던 기기일 때만 자동으로 연결합니다.</string>
     <string name="sleep_detection">잠들면 미디어 일시 정지</string>
     <string name="off_listening_mode">소음 제어에 ‘끔’ 옵션 표시</string>
     <string name="off_listening_mode_description">켜면 소음 제어 모드 목록에서 ‘끔’을 선택할 수 있습니다. ‘끔’을 선택하면 노이즈 캔슬링과 주변음 허용이 꺼지고, 큰 소리도 줄여주지 않습니다.</string>
