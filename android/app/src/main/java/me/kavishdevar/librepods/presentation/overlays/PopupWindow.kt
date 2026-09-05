@@ -30,6 +30,7 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -80,6 +81,7 @@ class PopupWindow(
     private var autoCloseRunnable: Runnable? = null
     private var batteryUpdateReceiver: BroadcastReceiver? = null
     private var dimAnimator: ValueAnimator? = null
+    private var showingBudsInCase: Boolean? = null
     private var sheetWidthPx = 0
 
     @Suppress("DEPRECATION")
@@ -175,6 +177,8 @@ class PopupWindow(
         name: String = "AirPods Pro",
         batteryNotification: AirPodsNotifications.BatteryNotification,
         videoRes: Int = FallbackArtwork.Pro.connected,
+        budsRes: Int = FallbackArtwork.Pro.buds,
+        caseRes: Int = FallbackArtwork.Pro.chargingCase,
         ringLayout: OverlayRingLayout = OverlayRingLayout()
     ) {
         try {
@@ -190,7 +194,8 @@ class PopupWindow(
                 mView.findViewById<Guideline>(R.id.ring_guide_case)
                     .setGuidelinePercent(ringLayout.chargingCase)
 
-                updateBatteryStatus(batteryNotification)
+                mView.findViewById<ImageView>(R.id.artwork_buds).setImageResource(budsRes)
+                mView.findViewById<ImageView>(R.id.artwork_case).setImageResource(caseRes)
 
                 val vid = mView.findViewById<VideoView>(R.id.video)
                 vid.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
@@ -200,10 +205,26 @@ class PopupWindow(
                 }
                 vid.setVideoPath("android.resource://${context.packageName}/$videoRes")
                 vid.resolveAdjustedSize(vid.width, vid.height)
-                vid.start()
                 vid.setOnCompletionListener {
                     vid.start()
                 }
+                // A surface with nothing drawn into it yet is black, and the card
+                // used to open on that. Keep the clip hidden until playback says it
+                // has put a frame up, then bring it in - or park it, if a bud has
+                // already been taken out and the still is what belongs there.
+                vid.setOnInfoListener { _, what, _ ->
+                    if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                        if (showingBudsInCase != false) {
+                            vid.animate().alpha(1f).setDuration(ARRIVING_FADE_MS).start()
+                        } else {
+                            vid.pause()
+                        }
+                    }
+                    false
+                }
+                vid.start()
+
+                updateBatteryStatus(batteryNotification)
 
                 try {
                     mWindowManager.addView(mView, mParams)
@@ -287,6 +308,15 @@ class PopupWindow(
         val combinedBuds = unifiedBudBattery(batteryList)
         val showCombinedBuds = combinedBuds != null
 
+        // One ring is not the same as being in the case. Two buds out together, both
+        // off charge and reading within a few percent of each other, merge into one
+        // ring exactly as they do sitting in the case - and the clip came back with
+        // it. The case is what settles it: the buds report its charge through
+        // whichever of them is seated, so with both of them out it has nothing to
+        // report and drops out altogether.
+        val caseReporting = case != null && case.status != BatteryStatus.DISCONNECTED
+        showBudsInCase(showCombinedBuds && caseReporting)
+
         val badgeVisibility = if (showCombinedBuds) View.GONE else View.VISIBLE
         updateBatteryBadge(R.id.left_battery_badge, badgeVisibility, left?.level)
         updateBatteryBadge(R.id.right_battery_badge, badgeVisibility, right?.level)
@@ -332,6 +362,46 @@ class PopupWindow(
             case?.level,
             case?.status
         )
+    }
+
+    /**
+     * The clip is the buds resting in their case, so it only holds while the case
+     * still reports them as one. The moment a bud is taken out and the battery
+     * splits in two, Apple swaps in the still - the same render the settings screen
+     * heads with - and swaps back once both are seated again.
+     *
+     * Both directions are a plain crossfade on alpha, and the clip's visibility is
+     * never touched: hiding a VideoView tears its surface down, and bringing it
+     * back showed a black frame until playback had drawn into the new one.
+     */
+    private fun showBudsInCase(inCase: Boolean) {
+        if (showingBudsInCase == inCase) return
+        val settling = showingBudsInCase == null
+        showingBudsInCase = inCase
+
+        val video = mView.findViewById<VideoView>(R.id.video)
+        val artwork = mView.findViewById<View>(R.id.artwork)
+        video.animate().cancel()
+        artwork.animate().cancel()
+
+        if (settling) {
+            // The clip stays at nothing either way; the first rendered frame is what
+            // brings it in, and only if it is still the one that belongs there.
+            artwork.alpha = if (inCase) 0f else 1f
+            return
+        }
+
+        if (inCase) {
+            video.start()
+            video.animate().alpha(1f).setDuration(ARRIVING_FADE_MS).start()
+            artwork.animate().alpha(0f).setDuration(LEAVING_FADE_MS).start()
+            return
+        }
+
+        artwork.animate().alpha(1f).setDuration(ARRIVING_FADE_MS).start()
+        video.animate().alpha(0f).setDuration(LEAVING_FADE_MS).withEndAction {
+            video.pause()
+        }.start()
     }
 
     /**
@@ -487,6 +557,10 @@ class PopupWindow(
         /** Dismissal is quicker and never overshoots past the screen edge. */
         const val DISMISS_STIFFNESS = 900f
         const val DISMISS_DIM_DURATION_MS = 240L
+
+        /** Whatever is arriving lands before the one it replaces has finished leaving. */
+        const val ARRIVING_FADE_MS = 120L
+        const val LEAVING_FADE_MS = 200L
 
         /** What the badge sits at until its component reads 100%. */
         const val BADGE_FILLING_ALPHA = 0.6f
