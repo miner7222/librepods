@@ -269,11 +269,23 @@ class AirPodsViewModel(
     }
 
     override fun onCleared() {
+        // The screen can be torn down before it ever binds to the service, and then
+        // there is nothing here to release: init() assigns appContext last, so its
+        // absence means none of the rest was ever set either and reaching for any of
+        // it would raise on the uninitialised field.
+        if (!::appContext.isInitialized) return
+
         listeners.forEach { (id, listener) ->
             controlRepo.remove(id, listener)
         }
         service.aacpManager.customEqCallback = null
-        appContext.unregisterReceiver(broadcastReceiver)
+        if (::broadcastReceiver.isInitialized) {
+            try {
+                appContext.unregisterReceiver(broadcastReceiver)
+            } catch (_: IllegalArgumentException) {
+                // Already gone; nothing to take down.
+            }
+        }
     }
 
     private fun loadName() {
