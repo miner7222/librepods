@@ -361,7 +361,10 @@ class BLEManager(private val context: Context) {
                         Log.d(TAG, "Lid state ${if (parsedStatus.lidOpen) "opened" else "closed"} (detected from new device)")
                     }
                 } else {
-                    if (parsedStatus != previousStatus) {
+                    // lastSeen moves with every advertisement, so comparing the whole
+                    // status made "changed" mean "received" - and the listener writes
+                    // a battery snapshot to disk each time it is called.
+                    if (parsedStatus.copy(lastSeen = previousStatus.lastSeen) != previousStatus) {
                         listener.onDeviceStatusChanged(parsedStatus, previousStatus)
                     }
 
