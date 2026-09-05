@@ -1459,7 +1459,28 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
+    private var a2dpConnectionReceiver: BroadcastReceiver? = null
+
+    private fun unregisterA2dpConnectionReceiver() {
+        val receiver = a2dpConnectionReceiver ?: return
+        a2dpConnectionReceiver = null
+        try {
+            unregisterReceiver(receiver)
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "A2DP connection receiver was already gone", e)
+        }
+    }
+
+    /**
+     * Waits for the AirPods' own A2DP link to come up so playback can resume with
+     * it. Only one of these may be outstanding: it takes itself down on the connect
+     * it is waiting for, and that connect never arrives when A2DP was up the whole
+     * time, so every bud going back in used to leave another one registered for the
+     * life of the service - each of them replaying the play command.
+     */
     private fun registerA2dpConnectionReceiver() {
+        unregisterA2dpConnectionReceiver()
+
         val a2dpConnectionStateReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED") {
@@ -1483,7 +1504,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         MediaController.sendPlay()
                         MediaController.iPausedTheMedia = false
 
-                        context.unregisterReceiver(this)
+                        if (a2dpConnectionReceiver === this) {
+                            unregisterA2dpConnectionReceiver()
+                        }
                     }
                 }
             }
@@ -1491,6 +1514,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
         val a2dpIntentFilter =
             IntentFilter("android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
+        a2dpConnectionReceiver = a2dpConnectionStateReceiver
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter, RECEIVER_EXPORTED)
         } else {
@@ -3779,6 +3803,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        unregisterA2dpConnectionReceiver()
         try {
             bleManager.stopScanning()
         } catch (e: Exception) {
