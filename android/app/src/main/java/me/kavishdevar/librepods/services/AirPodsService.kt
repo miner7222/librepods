@@ -889,7 +889,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                                 if (profile == BluetoothProfile.A2DP) {
                                     val connectedDevices = proxy.connectedDevices
-                                    if (connectedDevices.isNotEmpty()) {
+                                    // Any A2DP device at all used to count as these
+                                    // AirPods being connected, so a pair of other
+                                    // earphones had the service announce a connection
+                                    // and reach for a socket to AirPods that were not
+                                    // even in the room.
+                                    if (connectedDevices.any { it.address == device.address }) {
 //                                        if (!CrossDevice.isAvailable) {
                                         CoroutineScope(Dispatchers.IO).launch {
                                             connectToSocket(bluetoothAdapter, device)
