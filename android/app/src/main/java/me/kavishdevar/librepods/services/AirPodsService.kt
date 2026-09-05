@@ -1970,6 +1970,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             name,
             batteryNotification,
             overlayModel?.connectedVideoRes ?: FallbackArtwork.Pro.connected,
+            overlayModel?.budsRes ?: FallbackArtwork.Pro.buds,
+            overlayModel?.caseRes ?: FallbackArtwork.Pro.chargingCase,
             overlayModel?.ringLayout ?: OverlayRingLayout()
         )
     }
