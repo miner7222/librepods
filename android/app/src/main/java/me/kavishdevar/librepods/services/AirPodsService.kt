@@ -157,6 +157,9 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "AirPodsService"
+
+/** Only ever spent on requests that actually arrived while an attempt was failing. */
+private const val MAX_SOCKET_CONNECT_ATTEMPTS = 3
 private const val BATTERY_SNAPSHOT_LEFT_LEVEL = "battery_snapshot_left_level"
 private const val BATTERY_SNAPSHOT_LEFT_STATUS = "battery_snapshot_left_status"
 private const val BATTERY_SNAPSHOT_RIGHT_LEVEL = "battery_snapshot_right_level"
@@ -329,6 +332,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
     private var handleIncomingCallOnceConnected = false
     private val socketConnectionInProgress = AtomicBoolean(false)
+    private val socketConnectionRequeued = AtomicBoolean(false)
 
     lateinit var bleManager: BLEManager
 
@@ -3230,14 +3234,28 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     ) {
         if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
         if (!socketConnectionInProgress.compareAndSet(false, true)) {
-            Log.d(TAG, "Socket connection already in progress, skipping duplicate request")
+            // ACL, UUID and BLE all ask for the socket, and the attempt in flight can
+            // be the one that fails. Remember that somebody else asked so the failure
+            // is followed by another try rather than dropping the request.
+            Log.d(TAG, "Socket connection already in progress, queueing another attempt")
+            socketConnectionRequeued.set(true)
             return
         }
 
         try {
-            if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
-            connectToSocketGuarded(adapter, device, manual)
+            var attempts = 0
+            do {
+                socketConnectionRequeued.set(false)
+                if (BluetoothConnectionManager.aacpSocket?.isConnected == true) return
+                connectToSocketGuarded(adapter, device, manual)
+                attempts++
+            } while (
+                BluetoothConnectionManager.aacpSocket?.isConnected != true &&
+                attempts < MAX_SOCKET_CONNECT_ATTEMPTS &&
+                socketConnectionRequeued.compareAndSet(true, false)
+            )
         } finally {
+            socketConnectionRequeued.set(false)
             socketConnectionInProgress.set(false)
         }
     }
