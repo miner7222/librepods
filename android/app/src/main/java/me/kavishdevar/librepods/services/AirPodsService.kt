@@ -821,7 +821,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                                 if (profile == BluetoothProfile.A2DP) {
                                     val connectedDevices = proxy.connectedDevices
-                                    if (connectedDevices.isNotEmpty()) {
+                                    // Any A2DP device at all used to count as these
+                                    // AirPods being connected, so a pair of other
+                                    // earphones had the service announce a connection
+                                    // and reach for a socket to AirPods that were not
+                                    // even in the room.
+                                    if (connectedDevices.any { it.address == device.address }) {
 //                                        if (!CrossDevice.isAvailable) {
                                         CoroutineScope(Dispatchers.IO).launch {
                                             connectToSocket(bluetoothAdapter, device)
@@ -1399,7 +1404,28 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
+    private var a2dpConnectionReceiver: BroadcastReceiver? = null
+
+    private fun unregisterA2dpConnectionReceiver() {
+        val receiver = a2dpConnectionReceiver ?: return
+        a2dpConnectionReceiver = null
+        try {
+            unregisterReceiver(receiver)
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "A2DP connection receiver was already gone", e)
+        }
+    }
+
+    /**
+     * Waits for the AirPods' own A2DP link to come up so playback can resume with
+     * it. Only one of these may be outstanding: it takes itself down on the connect
+     * it is waiting for, and that connect never arrives when A2DP was up the whole
+     * time, so every bud going back in used to leave another one registered for the
+     * life of the service - each of them replaying the play command.
+     */
     private fun registerA2dpConnectionReceiver() {
+        unregisterA2dpConnectionReceiver()
+
         val a2dpConnectionStateReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED") {
@@ -1423,7 +1449,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         MediaController.sendPlay()
                         MediaController.iPausedTheMedia = false
 
-                        context.unregisterReceiver(this)
+                        if (a2dpConnectionReceiver === this) {
+                            unregisterA2dpConnectionReceiver()
+                        }
                     }
                 }
             }
@@ -1431,6 +1459,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
         val a2dpIntentFilter =
             IntentFilter("android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
+        a2dpConnectionReceiver = a2dpConnectionStateReceiver
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter, RECEIVER_EXPORTED)
         } else {
@@ -2739,7 +2768,16 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 //            return
 //        }
 
-        if (bleManager.getMostRecentStatus()?.isLeftInEar == false && bleManager.getMostRecentStatus()?.isRightInEar == false) {
+        // Silence is not a reading. With no recent advertisement there is nothing
+        // saying the AirPods are being worn, and reaching for the audio on that guess
+        // is what stops whatever the phone is already playing through something else.
+        // Taken once, too: two calls can land either side of a fresh advertisement.
+        val recentStatus = bleManager.getMostRecentStatus()
+        if (recentStatus == null) {
+            Log.d(TAG, "No recent AirPods broadcast, not taking over audio")
+            return
+        }
+        if (!recentStatus.isLeftInEar && !recentStatus.isRightInEar) {
             Log.d(TAG, "Both AirPods are out of ear, not taking over audio")
             return
         }
@@ -2755,7 +2793,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
 
-        val shouldTakeOver = when (bleManager.getMostRecentStatus()?.connectionState) {
+        val shouldTakeOver = when (recentStatus.connectionState) {
             "Disconnected" -> config.takeoverWhenDisconnected
             "Idle" -> config.takeoverWhenIdle
             "Music" -> config.takeoverWhenMusic
@@ -3393,6 +3431,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        unregisterA2dpConnectionReceiver()
         try {
             bleManager.stopScanning()
         } catch (e: Exception) {
