@@ -267,17 +267,13 @@ private fun MediaVolumeSettings() {
     val appleMetrics = LocalAppleDesignMetrics.current
     val volumeLabel = stringResource(R.string.volume)
 
-    Column(
-        modifier = Modifier.padding(
-            bottom = if (m3eEnabled) 0.dp else appleMetrics.cardGap
-        )
-    ) {
+    Column {
         if (!m3eEnabled) {
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceContainer)
                     .padding(horizontal = appleMetrics.cardHorizontalInset)
-                    .padding(top = 4.dp, bottom = appleMetrics.sectionHeaderBottomGap)
+                    .padding(bottom = appleMetrics.sectionHeaderBottomGap)
             ) {
                 Text(
                     text = volumeLabel,
