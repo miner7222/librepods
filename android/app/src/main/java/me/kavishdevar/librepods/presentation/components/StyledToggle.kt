@@ -327,8 +327,10 @@ private fun StyledToggleContent(
                     )
 
                     if (description != null) {
-                        // No spacer: the two styles' line leading already puts ~6dp
-                        // between the ink, which is what iOS shows.
+                        // Leading alone leaves about 5dp between the ink; Apple
+                        // sets the two apart by 9dp. Measured off the iOS 27
+                        // captures against this build.
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodySmall,

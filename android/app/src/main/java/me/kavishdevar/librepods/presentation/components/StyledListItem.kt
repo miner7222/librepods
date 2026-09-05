@@ -331,8 +331,10 @@ private fun StyledListItemContent(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         if (descriptionText != null && orientation == ListItemOrientation.Vertical) {
-                            // No spacer: the two styles' line leading already puts ~6dp
-                            // between the ink, which is what iOS shows.
+                            // Leading alone leaves about 5dp between the ink; Apple
+                            // sets the two apart by 9dp. Measured off the iOS 27
+                            // captures against this build.
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = descriptionText,
                                 style = MaterialTheme.typography.bodySmall,
