@@ -103,14 +103,12 @@ fun BatteryIndicator(
                 Icon(
                     painter = painterResource(prefix),
                     contentDescription = prefixContentDescription,
-                    // iOS draws the two bud badges at the secondary label's opacity
-                    // and the case badge at full strength; measured on both themes.
-                    tint = when (prefix) {
-                        R.drawable.sf_l_circle_fill, R.drawable.sf_r_circle_fill ->
-                            MaterialTheme.colorScheme.secondaryLabel
-
-                        else -> batteryTextColor
-                    },
+                    // iOS holds the badge at the secondary label's opacity while the
+                    // component is still filling and takes it to full strength once
+                    // it reads 100%. The case badge follows the buds rather than
+                    // sitting at full strength throughout.
+                    tint = if (batteryPercentage >= 100) batteryTextColor
+                    else MaterialTheme.colorScheme.secondaryLabel,
                     modifier = Modifier.fillMaxSize()
                 )
             }

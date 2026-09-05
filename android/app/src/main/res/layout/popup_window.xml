@@ -462,7 +462,8 @@
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_chargingcase_wireless_fill"
-                    android:tint="@color/popup_text" />
+                    android:alpha="0.6"
+                    android:tint="@color/popup_secondary_text" />
 
                 <TextView
                     android:id="@+id/case_battery"
