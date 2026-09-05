@@ -467,6 +467,11 @@ class BLEManager(private val context: Context) {
 
         for (device in staleDevices) {
             deviceStatusMap.remove(device.key)
+            // Resolvable addresses rotate every few minutes and never come back, so
+            // what was learned about one has to go when the address does. Left alone
+            // these two grew for as long as the service ran.
+            verifiedAddresses.remove(device.key)
+            lastValidCaseBatteryMap.remove(device.key)
             Log.d(TAG, "Removed stale device from tracking: ${device.key}")
         }
 
