@@ -3181,7 +3181,16 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 //            return
 //        }
 
-        if (bleManager.getMostRecentStatus()?.isLeftInEar == false && bleManager.getMostRecentStatus()?.isRightInEar == false) {
+        // Silence is not a reading. With no recent advertisement there is nothing
+        // saying the AirPods are being worn, and reaching for the audio on that guess
+        // is what stops whatever the phone is already playing through something else.
+        // Taken once, too: two calls can land either side of a fresh advertisement.
+        val recentStatus = bleManager.getMostRecentStatus()
+        if (recentStatus == null) {
+            Log.d(TAG, "No recent AirPods broadcast, not taking over audio")
+            return
+        }
+        if (!recentStatus.isLeftInEar && !recentStatus.isRightInEar) {
             Log.d(TAG, "Both AirPods are out of ear, not taking over audio")
             return
         }
@@ -3197,7 +3206,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
 
-        val shouldTakeOver = when (bleManager.getMostRecentStatus()?.connectionState) {
+        val shouldTakeOver = when (recentStatus.connectionState) {
             "Disconnected" -> config.takeoverWhenDisconnected
             "Idle" -> config.takeoverWhenIdle
             "Music" -> config.takeoverWhenMusic
