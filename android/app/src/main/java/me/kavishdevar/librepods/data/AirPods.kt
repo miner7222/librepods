@@ -64,8 +64,8 @@ object FallbackArtwork {
     }
 
     /**
-     * Any AirPods Pro without artwork of its own. These clips came from upstream with no
-     * known provenance; the spacing and tone are ours, recomposited to the reference popup.
+     * Any AirPods Pro without artwork of its own. Apple-derived Pro 2 renders use the
+     * Pro 3 composition at the original Pro 2 scale; see tools/airpods_pro_2.
      */
     object Pro {
         val budCase = R.drawable.airpods_pro_2
@@ -204,18 +204,14 @@ class AirPodsPro2Lightning: AirPodsBase(
     modelNumber = listOf("A2931", "A2699", "A2698"),
     name = "AirPods Pro 2 with Magsafe Charging Case (Lightning)",
     displayName = "AirPods Pro",
-    // budCaseRes = R.drawable.airpods_pro_2
     budCaseRes = R.drawable.airpods_pro_2,
-    // budsRes = R.drawable.airpods_pro_2_buds
     budsRes = R.drawable.airpods_pro_2_buds,
-    // leftBudsRes = R.drawable.airpods_pro_2_left
     leftBudsRes = R.drawable.airpods_pro_2_left,
-    // rightBudsRes = R.drawable.airpods_pro_2_right
     rightBudsRes = R.drawable.airpods_pro_2_right,
-    // caseRes = R.drawable.airpods_pro_2_case
     caseRes = R.drawable.airpods_pro_2_case,
     connectedVideoRes = R.raw.airpods_pro_2_connected,
     islandVideoRes = R.raw.airpods_pro_2_island,
+    ringLayout = OverlayRingLayout(0.1829f, 0.3357f, 0.2231f, 0.7018f),
     capabilities = setOf(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
@@ -236,18 +232,14 @@ class AirPodsPro2USBC: AirPodsBase(
     modelNumber = listOf("A3047", "A3048", "A3049"),
     name = "AirPods Pro 2 with Magsafe Charging Case (USB-C)",
     displayName = "AirPods Pro",
-    // budCaseRes = R.drawable.airpods_pro_2
     budCaseRes = R.drawable.airpods_pro_2,
-    // budsRes = R.drawable.airpods_pro_2_buds
     budsRes = R.drawable.airpods_pro_2_buds,
-    // leftBudsRes = R.drawable.airpods_pro_2_left
     leftBudsRes = R.drawable.airpods_pro_2_left,
-    // rightBudsRes = R.drawable.airpods_pro_2_right
     rightBudsRes = R.drawable.airpods_pro_2_right,
-    // caseRes = R.drawable.airpods_pro_2_case
     caseRes = R.drawable.airpods_pro_2_case,
     connectedVideoRes = R.raw.airpods_pro_2_connected,
     islandVideoRes = R.raw.airpods_pro_2_island,
+    ringLayout = OverlayRingLayout(0.1829f, 0.3357f, 0.2231f, 0.7018f),
     capabilities = setOf(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,

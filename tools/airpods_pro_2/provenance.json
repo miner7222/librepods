@@ -1,0 +1,35 @@
+{
+  "product": "AirPods Pro 2 (2022 Lightning charging case)",
+  "acquired": "2026-09-05",
+  "page": "https://www.apple.com/newsroom/2022/09/apple-announces-the-next-generation-of-airpods-pro/",
+  "specifications": "https://support.apple.com/en-us/111851",
+  "geometry_link_recovered_from": "https://web.archive.org/web/20230103214237/https://www.apple.com/airpods-pro/",
+  "geometry": {
+    "url": "https://www.apple.com/105/media/us/airpods-pro/2022/d2deeb8e-83eb-48ea-9721-f567cf0fffa8/ar/airpods_pro_with_magsafe_charging_case_ios15.usdz",
+    "filename": "apple_airpods_pro_2.usdz",
+    "sha256": "d6b0649eb8bbaecf329603d4f366c7b4d9af2d7bb46c70293d6cc5456719c486"
+  },
+  "reference_images": [
+    {
+      "url": "https://www.apple.com/newsroom/images/product/airpods/standard/Apple-AirPods-Pro-2nd-gen-hero-220907_big.jpg.large.jpg",
+      "filename": "Apple-AirPods-Pro-2nd-gen-hero-220907_big.jpg.large.jpg",
+      "sha256": "b9839614f08e17362bbb1fbcafb05b488a81daf36d1bbaa7da95f2583e464628"
+    },
+    {
+      "url": "https://headphonesaddict.com/wp-content/uploads/2024/02/Apple-AirPods-Pro-2-case-button.jpg",
+      "filename": "headphonesaddict-rear.jpg",
+      "sha256": "99b8b61c1b8e272afa6ab5862df7053eafda6de81d121c588c1736b82893209d",
+      "page": "https://headphonesaddict.com/apple-airpods-pro-2-usb-c-review/",
+      "purpose": "Real-product rear appearance reference only; not shipped or used as a texture."
+    },
+    {
+      "url": "https://cdn.alza.cz/Foto/or/articles/37626/img/airpods-pro-2022-recenze-kapacity-baterie.jpg",
+      "filename": "connected-popup.jpg",
+      "sha256": "ae636b4972d0ba9ed62239f669dfdd46ef8d1da978aa4aed66165e9d421d1238",
+      "page": "https://www.alza.de/apple-airpods-pro-2022",
+      "purpose": "Product-specific connected-popup framing/color reference only; not shipped or used as a texture."
+    }
+  ],
+  "composition_reference": "tools/airpods_pro_3/render.py; same physical-scale camera and handle positions. Previous Pro 2 pixels were not used for measurements.",
+  "provenance": "Apple official AR geometry and textures, converted to Blender; LibrePods hierarchy, reconstructed hinge, shell shading refinement, lighting, camera, grade and animation. Not independently authored geometry. No CC BY or GPL grant claimed for Apple-derived artwork."
+}

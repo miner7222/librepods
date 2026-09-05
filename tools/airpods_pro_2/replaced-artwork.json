@@ -1,0 +1,37 @@
+{
+  "provenance": "Previous Pro 2 artwork inherited from upstream; video spacing later recomposited. Not a reliable layout measurement reference.",
+  "files": [
+    {
+      "path": "android/app/src/main/res/raw-night/airpods_pro_2_connected.mp4",
+      "sha256": "b1c1d432d6b0e07a31843d83423520e4650143b8d83c2f3f86c47e1cb7d0ebc5"
+    },
+    {
+      "path": "android/app/src/main/res/raw/airpods_pro_2_island.mp4",
+      "sha256": "0465e735766139713d61a5a6d6d7be9e2afa63c7a84753ccf602d35a762fd9a5"
+    },
+    {
+      "path": "android/app/src/main/res/raw/airpods_pro_2_connected.mp4",
+      "sha256": "ea6ef074bd31229921b60e56737a7ffc479d3089e897b14eec1e301a46456f62"
+    },
+    {
+      "path": "android/app/src/main/res-apple/drawable/airpods_pro_2_left.png",
+      "sha256": "34fc7f278387fd35ab1c4bac87abb12b2dbe274d8d12adbe7f169df526c76048"
+    },
+    {
+      "path": "android/app/src/main/res-apple/drawable/airpods_pro_2_buds.png",
+      "sha256": "5c645c62b6b3011616ee4cab94a8629c520c12e5d861f04c1cc92e0198a3ac51"
+    },
+    {
+      "path": "android/app/src/main/res-apple/drawable/airpods_pro_2_right.png",
+      "sha256": "0e1328faf92941d4037d2905db91bba5764a29371640894b1007a2c0c79580d7"
+    },
+    {
+      "path": "android/app/src/main/res-apple/drawable/airpods_pro_2_case.png",
+      "sha256": "c56d349776a9873616fc5449444e7cd2ebf225ca5d0d85c60c86af900d5c6594"
+    },
+    {
+      "path": "android/app/src/main/res-apple/drawable/airpods_pro_2.png",
+      "sha256": "f300d00ccfd74a39d785b02d97d16264c4db65e19d8db9cdb3d512073960261f"
+    }
+  ]
+}

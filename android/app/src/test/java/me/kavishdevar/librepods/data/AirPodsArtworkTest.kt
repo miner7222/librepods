@@ -21,10 +21,14 @@ class AirPodsArtworkTest {
     }
 
     @Test
-    fun airPodsPro2UsesItsOwnArtwork() {
-        for (number in listOf("A2931", "A2699", "A2698")) {
+    fun airPodsPro2LightningAndUsbcUseTheirOwnArtwork() {
+        for (number in listOf("A2931", "A2699", "A2698", "A3047", "A3048", "A3049")) {
             val model = requireNotNull(AirPodsModels.getModelByModelNumber(number))
             assertEquals(R.drawable.airpods_pro_2, model.budCaseRes)
+            assertEquals(R.drawable.airpods_pro_2_buds, model.budsRes)
+            assertEquals(R.drawable.airpods_pro_2_left, model.leftBudsRes)
+            assertEquals(R.drawable.airpods_pro_2_right, model.rightBudsRes)
+            assertEquals(R.drawable.airpods_pro_2_case, model.caseRes)
             assertEquals(R.raw.airpods_pro_2_connected, model.connectedVideoRes)
             assertEquals(R.raw.airpods_pro_2_island, model.islandVideoRes)
         }
