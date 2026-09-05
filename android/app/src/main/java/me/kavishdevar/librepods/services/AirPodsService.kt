@@ -842,6 +842,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     device = null
 //                    isConnectedLocally = false
                     releasePopupSession()
+                    islandShownForSession = false
                     updateNotificationContent(false)
                     aacpManager.disconnected()
                     BluetoothConnectionManager.aacpSocket = null
@@ -1430,11 +1431,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 data[0] == 0x00.toByte(), data[1] == 0x00.toByte()
             )
 
-            if (inEarData.sorted() == listOf(false, false) && newInEarData.sorted() != listOf(
-                    false, false
-                ) && islandWindow?.isVisible != true
+            if (newInEarData.contains(true) && !islandShownForSession &&
+                islandWindow?.isVisible != true
             ) {
-                showIsland(
+                islandShownForSession = showIsland(
                     this@AirPodsService,
                     (batteryNotification.getBattery()
                         .find { it.component == BatteryComponent.LEFT }?.level ?: 0).coerceAtMost(
@@ -1978,6 +1978,16 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
      */
     private var popupShownForSession = false
 
+    /**
+     * iOS raises the island the first time a bud goes in on a connection and stays
+     * quiet for every removal and refit after that, so this holds for the length of
+     * the connection. It also stands in for the in-ear transition: the ear state
+     * carries over from the previous connection, and AirPods that never left the
+     * ears reconnect reporting the same thing they last reported, which is a
+     * transition that never comes.
+     */
+    private var islandShownForSession = false
+
     fun showPopupOnce(name: String) {
         if (popupShownForSession) return
         popupShownForSession = true
@@ -2047,16 +2057,21 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         type: IslandType = IslandType.CONNECTED,
         reversed: Boolean = false,
         otherDeviceName: String? = null
-    ) {
+    ): Boolean {
         Log.d(TAG, "Showing island window")
         if (!sharedPreferences.getBoolean("show_island_popup", true)) {
-            return
+            return false
         }
         if (!Settings.canDrawOverlays(service)) {
             Log.d(TAG, "No permission for SYSTEM_ALERT_WINDOW")
-            return
+            return false
         }
         CoroutineScope(Dispatchers.Main).launch {
+            // Overwriting the reference on its own left the window it replaced on
+            // screen with nothing holding it, so nothing could ever close it. The
+            // in-ear path checked isVisible first; the takeover and hand-off paths
+            // did not.
+            islandWindow?.close()
             islandWindow = IslandWindow(service.applicationContext)
             islandWindow!!.show(
                 sharedPreferences.getString("name", "AirPods Pro").toString(),
@@ -2068,6 +2083,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 overlayModel()?.islandVideoRes ?: FallbackArtwork.Pro.island
             )
         }
+        return true
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -3084,6 +3100,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         bluetoothDevice.address == macAddress
                     ) {
                         releasePopupSession()
+                        islandShownForSession = false
                     }
                 } else if ("android.bluetooth.device.action.UUID" == action) {
                     val savedMac = context?.getSharedPreferences("settings", MODE_PRIVATE)
