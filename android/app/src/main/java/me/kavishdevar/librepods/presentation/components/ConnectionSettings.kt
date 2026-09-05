@@ -22,6 +22,8 @@ package me.kavishdevar.librepods.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.R
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -32,7 +34,12 @@ fun ConnectionSettings(
     automaticConnectionEnabled: Boolean,
     navigateToConnectToThisDevice: () -> Unit,
 ) {
-    StyledList(description = stringResource(R.string.connect_to_this_device_footer)) {
+    // Material opens the option screen with the same note, and repeating it here
+    // would put it above the card rather than under it.
+    val isApple = LocalDesignSystem.current == DesignSystem.Apple
+    StyledList(
+        description = if (isApple) stringResource(R.string.connect_to_this_device_footer) else null
+    ) {
         StyledToggle(
             label = stringResource(R.string.ear_detection),
             checked = automaticEarDetectionEnabled,

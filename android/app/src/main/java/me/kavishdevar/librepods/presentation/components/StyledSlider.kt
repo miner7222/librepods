@@ -289,6 +289,15 @@ fun StyledSlider(
                             .padding(top = 4.dp, bottom = 12.dp)
                     )
                 }
+                description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(0.8f),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
                 SegmentedListItem(
                     shapes = ListItemDefaults.shapes().copy(
                         shape = defaultShape,
@@ -303,13 +312,6 @@ fun StyledSlider(
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            description?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
                             if (startLabel != null || endLabel != null) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth()
