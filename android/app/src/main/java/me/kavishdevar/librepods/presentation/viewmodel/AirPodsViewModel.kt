@@ -268,11 +268,23 @@ class AirPodsViewModel(
     }
 
     override fun onCleared() {
+        // The screen can be torn down before it ever binds to the service, and then
+        // there is nothing here to release: init() assigns appContext last, so its
+        // absence means none of the rest was ever set either and reaching for any of
+        // it would raise on the uninitialised field.
+        if (!::appContext.isInitialized) return
+
         listeners.forEach { (id, listener) ->
             controlRepo.remove(id, listener)
         }
         service.aacpManager.customEqCallback = null
-        appContext.unregisterReceiver(broadcastReceiver)
+        if (::broadcastReceiver.isInitialized) {
+            try {
+                appContext.unregisterReceiver(broadcastReceiver)
+            } catch (_: IllegalArgumentException) {
+                // Already gone; nothing to take down.
+            }
+        }
     }
 
     private fun loadName() {
@@ -317,6 +329,18 @@ class AirPodsViewModel(
     }
 
     private fun observeBroadcasts() {
+        // init() runs again on every rebind to the service, and the field only holds
+        // the newest receiver. Without taking the previous one down it stays
+        // registered for the life of the process, still updating state that
+        // onCleared can no longer reach.
+        if (::broadcastReceiver.isInitialized) {
+            try {
+                appContext.unregisterReceiver(broadcastReceiver)
+            } catch (_: IllegalArgumentException) {
+                // Already gone; nothing to take down.
+            }
+        }
+
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val action = intent?.action ?: return
@@ -399,6 +423,12 @@ class AirPodsViewModel(
     }
 
     fun observeControl(identifier: ControlCommandIdentifiers) {
+        // init() runs again on every rebind to the service, and only the newest
+        // listener per identifier is remembered here. Without dropping the previous
+        // one the manager keeps them all and calls every one of them for the rest of
+        // the process, none of which onCleared can reach.
+        listeners.remove(identifier)?.let { controlRepo.remove(identifier, it) }
+
         val listener = controlRepo.observe(identifier) { value ->
             _uiState.update { state ->
                 val current = state.controlStates[identifier]
