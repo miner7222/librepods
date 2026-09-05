@@ -90,6 +90,8 @@ import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import me.kavishdevar.librepods.services.ServiceManager
 import me.kavishdevar.librepods.utils.HeadTracking
@@ -118,9 +120,8 @@ fun HeadTrackingScreen(
     val backdrop = rememberLayerBackdrop()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        LocalAppleDesignMetrics.current.navigationBarHeight + LocalAppleDesignMetrics.current.cardColumnTopInset
-    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val topPadding = screenTopPadding(columnInset = true)
+    val bottomPadding = screenBottomPadding()
 
     var gestureText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()

@@ -55,6 +55,8 @@ import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 
 @Composable
@@ -64,10 +66,8 @@ fun AdaptiveStrengthScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     // Without the banner the slider opens the column and carries the inset itself.
-    val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        LocalAppleDesignMetrics.current.navigationBarHeight +
-        if (!state.isPremium) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
-    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val topPadding = screenTopPadding(columnInset = true)
+    val bottomPadding = screenBottomPadding()
 
     Column(
         modifier = Modifier

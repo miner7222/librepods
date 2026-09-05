@@ -95,6 +95,8 @@ import me.kavishdevar.librepods.presentation.theme.AppTheme
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.theme.MaterialTypography
 import me.kavishdevar.librepods.presentation.viewmodel.AppSettingsViewModel
 import me.kavishdevar.librepods.utils.XposedState
@@ -127,10 +129,8 @@ fun AppSettingsScreen(
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val opensWithPremiumBanner =
         (!state.isPremium && state.connectionSuccessful) || state.timeUntilFOSSPremiumExpiry > 0L
-    val topPadding = if (m3eEnabled) 16.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        LocalAppleDesignMetrics.current.navigationBarHeight +
-        if (opensWithPremiumBanner) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
-    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val topPadding = screenTopPadding(columnInset = true, materialInset = 16.dp)
+    val bottomPadding = screenBottomPadding()
 
     Column(
         modifier = Modifier
