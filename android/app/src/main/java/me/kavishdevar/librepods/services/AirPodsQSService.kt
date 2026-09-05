@@ -270,7 +270,7 @@ class AirPodsQSService : TileService() {
 
      private fun getModeIcon(mode: Int): Int {
          return when (mode) {
-             NoiseControlMode.OFF.ordinal + 1 -> R.drawable.noise_cancellation
+             NoiseControlMode.OFF.ordinal + 1 -> R.drawable.noise_control_off
              NoiseControlMode.TRANSPARENCY.ordinal + 1 -> R.drawable.transparency
              NoiseControlMode.ADAPTIVE.ordinal + 1 -> R.drawable.adaptive
              NoiseControlMode.NOISE_CANCELLATION.ordinal + 1 -> R.drawable.noise_cancellation

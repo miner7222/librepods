@@ -174,11 +174,27 @@ fun NoiseControlSettings(
                                     .copy(containerColor = MaterialTheme.colorScheme.surface),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Icon(
-                                    bitmap = ImageBitmap.imageResource(iconRes),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(42.dp)
-                                )
+                                Box(contentAlignment = Alignment.Center) {
+                                    // Apple's Off glyph is the noise cancelling one
+                                    // with its arc dimmed, and the two renders share
+                                    // a canvas, so one goes faded under the other.
+                                    if (mode == NoiseControlMode.OFF) {
+                                        Icon(
+                                            bitmap = ImageBitmap.imageResource(
+                                                R.drawable.noise_cancellation
+                                            ),
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(NoiseControlIconSize)
+                                                .alpha(NoiseControlOffArcAlpha)
+                                        )
+                                    }
+                                    Icon(
+                                        bitmap = ImageBitmap.imageResource(iconRes),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(NoiseControlIconSize)
+                                    )
+                                }
                             }
 
                             Text(
@@ -302,6 +318,11 @@ fun NoiseControlSettings(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             if (showOffListeningMode) {
+                                // No underlay on this pass: the row above draws the
+                                // same buttons over it, and two half-strength arcs
+                                // stacked read as three quarters. Only the slot under
+                                // the selected pill is hidden here, which is why the
+                                // arc looked right there and nowhere else.
                                 NoiseControlButton(
                                     icon = ImageBitmap.imageResource(R.drawable.noise_control_off),
                                     onClick = { onModeSelected(NoiseControlMode.OFF) },
@@ -380,6 +401,7 @@ fun NoiseControlSettings(
                             if (showOffListeningMode) {
                                 NoiseControlButton(
                                     icon = ImageBitmap.imageResource(R.drawable.noise_control_off),
+                                    underlay = ImageBitmap.imageResource(R.drawable.noise_cancellation),
                                     onClick = { onModeSelected(NoiseControlMode.OFF) },
                                     textColor = if (noiseControlMode.value == NoiseControlMode.OFF) textColorSelected else textColor,
                                     modifier = Modifier.weight(1f),
