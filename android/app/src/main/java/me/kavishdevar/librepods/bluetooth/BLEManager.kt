@@ -359,7 +359,10 @@ class BLEManager(private val context: Context) {
                     listener.onBroadcastFromNewAddress(parsedStatus)
                     Log.d(TAG, "New AirPods device detected: $address")
                 } else {
-                    if (parsedStatus != previousStatus) {
+                    // lastSeen moves with every advertisement, so comparing the whole
+                    // status made "changed" mean "received" - and the listener writes
+                    // a battery snapshot to disk each time it is called.
+                    if (parsedStatus.copy(lastSeen = previousStatus.lastSeen) != previousStatus) {
                         listener.onDeviceStatusChanged(parsedStatus, previousStatus)
                     }
 
