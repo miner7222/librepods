@@ -298,6 +298,48 @@ fun StyledSlider(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+                val hasEndLabels = startLabel != null || endLabel != null
+                val sliderRow = @Composable {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        startIcon?.let {
+                            Icon(
+                                painter = painterResource(it),
+                                contentDescription = null,
+                                modifier = Modifier.size(19.dp)
+                            )
+                            Spacer(Modifier.width(12.dp))
+                        }
+
+                        Slider(
+                            modifier = Modifier.weight(1f),
+                            value = value,
+                            onValueChange = { newValue ->
+                                onValueChange(
+                                    if (snapPoints.isNotEmpty()) {
+                                        snapIfClose(newValue, snapPoints, snapThreshold)
+                                    } else {
+                                        newValue
+                                    }
+                                )
+                            },
+                            valueRange = valueRange,
+                            enabled = enabled
+                        )
+
+                        endIcon?.let {
+                            Spacer(Modifier.width(12.dp))
+                            Icon(
+                                painter = painterResource(it),
+                                contentDescription = null,
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
+                    }
+                }
+
                 SegmentedListItem(
                     shapes = ListItemDefaults.shapes().copy(
                         shape = defaultShape,
@@ -309,80 +351,29 @@ fun StyledSlider(
                     enabled = enabled,
                     modifier = Modifier.heightIn(min = 58.dp),
                     content = {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            if (startLabel != null || endLabel != null) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    startLabel?.let {
-                                        Text(
-                                            text = it,
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                    }
+                        if (hasEndLabels) {
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                startLabel?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
 
-                                    Spacer(Modifier.weight(1f))
+                                Spacer(Modifier.weight(1f))
 
-                                    endLabel?.let {
-                                        Text(
-                                            text = it,
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                    }
+                                endLabel?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
                             }
+                        } else {
+                            sliderRow()
                         }
                     },
-                    supportingContent = {
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                startIcon?.let {
-                                    Icon(
-                                        painter = painterResource(it),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                    Spacer(Modifier.width(12.dp))
-                                }
-
-                                Slider(
-                                    modifier = Modifier.weight(1f),
-                                    value = value,
-                                    onValueChange = { newValue ->
-                                        val snapped =
-                                            if (snapPoints.isNotEmpty()) {
-                                                snapIfClose(
-                                                    newValue,
-                                                    snapPoints,
-                                                    snapThreshold
-                                                )
-                                            } else {
-                                                newValue
-                                            }
-
-                                        onValueChange(snapped)
-                                    },
-                                    valueRange = valueRange,
-                                    enabled = enabled
-                                )
-
-                                endIcon?.let {
-                                    Spacer(Modifier.width(12.dp))
-                                    Icon(
-                                        painter = painterResource(it),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    supportingContent = if (hasEndLabels) sliderRow else null
                 )
 
                 if (index + 1 != count) {
