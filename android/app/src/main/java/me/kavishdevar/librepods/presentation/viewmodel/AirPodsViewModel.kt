@@ -318,6 +318,18 @@ class AirPodsViewModel(
     }
 
     private fun observeBroadcasts() {
+        // init() runs again on every rebind to the service, and the field only holds
+        // the newest receiver. Without taking the previous one down it stays
+        // registered for the life of the process, still updating state that
+        // onCleared can no longer reach.
+        if (::broadcastReceiver.isInitialized) {
+            try {
+                appContext.unregisterReceiver(broadcastReceiver)
+            } catch (_: IllegalArgumentException) {
+                // Already gone; nothing to take down.
+            }
+        }
+
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val action = intent?.action ?: return
