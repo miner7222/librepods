@@ -21,8 +21,6 @@ package me.kavishdevar.librepods.presentation.components
 
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -38,11 +36,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
@@ -81,18 +76,20 @@ fun BatteryIndicator(
     batteryPercentage: Int,
     status: Int,
     @DrawableRes prefix: Int = 0,
-    previousCharging: Boolean = false,
 ) {
     val isDarkTheme = LocalIsDarkTheme.current
-    val batteryTextColor = MaterialTheme.colorScheme.onSurface
+    // The rings at the top of settings are drawn in the secondary label, badge and
+    // reading alike, and iOS holds them there whatever the battery says - the 100%
+    // buds on the captures are the same grey as the 91% case. Compositing that
+    // label over the grouped background gives #85858A, which is what the captures
+    // measure. The popup is the opposite and stays opaque; it is laid out in XML
+    // and carries its own colour.
+    val batteryTextColor = MaterialTheme.colorScheme.secondaryLabel
     val batteryFillColor =
         if (batteryPercentage > 25) MaterialTheme.colorScheme.appleGreen
         else MaterialTheme.colorScheme.appleRed
 
-    val initialScale = if (previousCharging) 1f else 0f
-    val scaleAnim = remember { Animatable(initialScale) }
     val charging = status == BatteryStatus.CHARGING || status == BatteryStatus.OPTIMIZED_CHARGING
-    val targetScale = if (charging) 1f else 0f
     val prefixContentDescription = when (prefix) {
         R.drawable.sf_l_circle_fill -> stringResource(R.string.left)
         R.drawable.sf_r_circle_fill -> stringResource(R.string.right)
@@ -107,22 +104,13 @@ fun BatteryIndicator(
                 Icon(
                     painter = painterResource(prefix),
                     contentDescription = prefixContentDescription,
-                    // iOS holds the badge at the secondary label's opacity while the
-                    // component is still filling and takes it to full strength once
-                    // it reads 100%. The case badge follows the buds rather than
-                    // sitting at full strength throughout.
-                    tint = if (batteryPercentage >= 100) batteryTextColor
-                    else MaterialTheme.colorScheme.secondaryLabel,
+                    tint = batteryTextColor,
                     modifier = Modifier.fillMaxSize()
                 )
             }
         )
     } else {
         emptyMap()
-    }
-
-    LaunchedEffect(previousCharging, charging) {
-        scaleAnim.animateTo(targetScale, animationSpec = tween(durationMillis = 250))
     }
 
     Column(
@@ -217,12 +205,17 @@ fun BatteryIndicator(
                 }
             }
 
-            Icon(
-                painter = painterResource(R.drawable.sf_bolt_fill),
-                contentDescription = stringResource(R.string.charging),
-                tint = batteryFillColor,
-                modifier = Modifier.size(17.dp).scale(scaleAnim.value)
-            )
+            // The bolt is simply there or not. The sheet grows one in as it
+            // arrives; the rings at the top of settings are read, not announced,
+            // and the reference does not move them.
+            if (charging) {
+                Icon(
+                    painter = painterResource(R.drawable.sf_bolt_fill),
+                    contentDescription = stringResource(R.string.charging),
+                    tint = batteryFillColor,
+                    modifier = Modifier.size(17.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -258,8 +251,7 @@ fun BatteryIndicatorPreview() {
         BatteryIndicator(
             batteryPercentage = 50,
             status = BatteryStatus.OPTIMIZED_CHARGING,
-            prefix = R.drawable.sf_l_circle_fill,
-            previousCharging = false
+            prefix = R.drawable.sf_l_circle_fill
         )
     }
 }
