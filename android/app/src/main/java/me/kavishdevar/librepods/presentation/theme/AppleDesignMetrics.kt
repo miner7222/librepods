@@ -55,6 +55,8 @@ object AppleDesignMetrics {
     val audioAndRoutingIconTile = verticalTile(0xFFEB4962, 0xFFEA4459)
     val controlsAndGesturesIconTile = verticalTile(0xFF9F9FA4, 0xFF8E8E93)
     val accessibilityIconTile = verticalTile(0xFF4090F7, 0xFF3B86F7)
+    /** The reference gives hearing health the same blue it gives accessibility. */
+    val hearingHealthIconTile = verticalTile(0xFF4090F7, 0xFF3B86F7)
     val batteryIconTile = verticalTile(0xFF70D272, 0xFF65C566)
 
     val navigationBarHeight = 44.dp

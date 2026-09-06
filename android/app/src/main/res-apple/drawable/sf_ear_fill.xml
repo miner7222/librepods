@@ -1,0 +1,19 @@
+<!--
+    SF Symbols "ear.fill", exported from the SF Symbols app.
+
+    The tile scales this to 21dp of width, and the reference draws the ear 13.0dp
+    wide in a 28dp tile - so the glyph is given room either side and takes 63 percent
+    of the viewport, which lands it at 13.2 by 18.2.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="27.65dp"
+    android:height="24dp"
+    android:viewportWidth="94.946"
+    android:viewportHeight="82.422">
+    <group android:translateX="17.688">
+        <path
+            android:fillColor="#FF000000"
+            android:fillType="evenOdd"
+            android:pathData="M0 64.648C0 75.537 6.641 82.422 17.236 82.422C24.951 82.422 30.713 79.15 34.424 72.705L38.184 66.064C46.24 51.953 59.57 49.414 59.57 30.322C59.57 12.158 47.803 0 30.176 0C12.109 0 0 12.158 0 30.322ZM10.254 48.145L10.254 28.906C10.254 18.018 17.871 10.742 30.176 10.742C41.992 10.742 49.268 18.018 49.268 28.906C49.268 30.664 47.754 32.178 45.996 32.178C44.189 32.178 42.676 30.664 42.676 28.906C42.676 21.875 38.135 17.334 30.176 17.334C21.728 17.334 16.846 21.875 16.846 28.906L16.846 33.789L27.93 33.789C34.326 33.789 38.623 37.695 38.623 43.555C38.623 45.996 37.549 49.023 35.937 51.074L30.957 57.373C30.225 58.301 29.248 58.789 28.271 58.789C26.465 58.789 24.951 57.324 24.951 55.518C24.951 54.736 25.244 53.906 25.83 53.223L30.42 47.461C31.25 46.387 31.885 44.922 31.885 43.799C31.885 41.699 30.371 40.332 28.027 40.332L16.846 40.332L16.846 48.145C16.846 49.902 15.332 51.416 13.525 51.416C11.768 51.416 10.254 49.902 10.254 48.145Z" />
+    </group>
+</vector>

@@ -42,7 +42,9 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.ATTHandles
+import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.components.StyledButton
+import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
@@ -52,12 +54,18 @@ import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 
 @Composable
-fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -> Unit) {
+fun HearingProtectionScreen(
+    viewModel: AirPodsViewModel,
+    navigateToPurchase: () -> Unit,
+    navigateToHearingAid: () -> Unit = {}
+) {
     val backdrop = rememberLayerBackdrop()
     val state by viewModel.uiState.collectAsState()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val opensWithPremiumBanner = !state.isPremium
+    val hasHearingAid = state.vendorIdHook &&
+        state.instance?.model?.capabilities?.contains(Capability.HEARING_AID) == true
     // A titled section opens the column and brings the inset with it, so
     // asking for it here as well opens the screen a whole inset lower than
     // every other one that starts with a subheading. The premium banner is a
@@ -90,6 +98,15 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        if (hasHearingAid) {
+            StyledListItem(
+                name = stringResource(R.string.hearing_aid),
+                onClick = navigateToHearingAid,
+                firstInColumn = !opensWithPremiumBanner
+            )
+            Spacer(modifier = Modifier.height(if (m3eEnabled) 12.dp else 0.dp))
+        }
+
         if (state.vendorIdHook) {
             StyledToggle(
                 title = stringResource(R.string.environmental_noise),
@@ -103,7 +120,7 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
                     )
                 },
                 enabled = state.isPremium,
-                firstInColumn = !opensWithPremiumBanner
+                firstInColumn = !opensWithPremiumBanner && !hasHearingAid
             )
 
             Spacer(modifier = Modifier.height(if (m3eEnabled) 12.dp else 0.dp))
@@ -121,7 +138,7 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
                 )
             },
             enabled = state.isPremium,
-            firstInColumn = !opensWithPremiumBanner && !state.vendorIdHook
+            firstInColumn = !opensWithPremiumBanner && !state.vendorIdHook && !hasHearingAid
         )
         Spacer(modifier = Modifier.height(bottomPadding))
     }
