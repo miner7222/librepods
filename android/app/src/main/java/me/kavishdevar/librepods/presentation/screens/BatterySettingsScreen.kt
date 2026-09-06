@@ -77,11 +77,15 @@ fun BatterySettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        Text(
-            text = stringResource(R.string.battery_intro),
-            style = appleMetrics.sectionFooterStyle,
-            color = MaterialTheme.colorScheme.secondaryLabel
-        )
+        // iOS opens the screen with a paragraph of preamble; M3 does not, and
+        // this one says nothing the two toggles below it do not.
+        if (!m3eEnabled) {
+            Text(
+                text = stringResource(R.string.battery_intro),
+                style = appleMetrics.sectionFooterStyle,
+                color = MaterialTheme.colorScheme.secondaryLabel
+            )
+        }
 
         // No spacer: the toggle is the first card here, and asking for the column
         // inset lands it iOS's 27.5 below the paragraph.
