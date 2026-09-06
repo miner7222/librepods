@@ -16,9 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+
 package me.kavishdevar.librepods.presentation.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import android.content.res.Configuration
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -42,12 +46,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Label
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -300,10 +310,36 @@ fun StyledSlider(
                             Spacer(Modifier.width(12.dp))
                         }
 
+                        // M3 puts the value in a label above the handle for as
+                        // long as the handle is held. Label is the piece that does
+                        // it: it watches the same interaction source the thumb does
+                        // and shows its content while that source is pressed.
+                        val sliderInteractions = remember { MutableInteractionSource() }
+                // Label shows while its interaction source reports a press, and a slider
+                // hands the press over to a drag as soon as the finger moves - which is the
+                // moment the number is actually wanted. So the label watches a source of its
+                // own, holding one press for as long as the value is being changed.
+                val labelInteractions = remember { MutableInteractionSource() }
+                val labelPress = remember { PressInteraction.Press(Offset.Zero) }
+                var showValue by remember { mutableStateOf(false) }
+                LaunchedEffect(showValue) {
+                    if (showValue) labelInteractions.emit(labelPress)
+                    else labelInteractions.emit(PressInteraction.Release(labelPress))
+                }
+                        // Per cent of the slider's own range. Reading the raw value
+                        // as one only works where the range happens to be 0..100:
+                        // the volume runs to the stream's maximum, which is 15 on
+                        // this phone, so a full slider was announcing itself as 15%.
+                        val span = valueRange.endInclusive - valueRange.start
+                        val percent =
+                            if (span <= 0f) 0
+                            else (((value - valueRange.start) / span) * 100f)
+                                .fastRoundToInt().coerceIn(0, 100)
                         Slider(
                             modifier = Modifier.weight(1f),
                             value = value,
                             onValueChange = { newValue ->
+                                showValue = true
                                 onValueChange(
                                     if (snapPoints.isNotEmpty()) {
                                         snapIfClose(newValue, snapPoints, snapThreshold)
@@ -312,8 +348,42 @@ fun StyledSlider(
                                     }
                                 )
                             },
+                            onValueChangeFinished = { showValue = false },
                             valueRange = valueRange,
-                            enabled = enabled
+                            enabled = enabled,
+                            interactionSource = sliderInteractions,
+                            thumb = {
+                                Label(
+                                    label = {
+                                        // M3's value indicator is a pill of the inverse surface carrying a
+                                        // label-large number. A plain tooltip is the nearest ready-made thing
+                                        // and it is the wrong one: square corners, small print, and padding
+                                        // that leaves space for a caret it never draws, which pushed the
+                                        // number off to one side of its own balloon.
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    MaterialTheme.colorScheme.inverseSurface,
+                                                    CircleShape
+                                                )
+                                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "$percent",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.inverseOnSurface
+                                            )
+                                        }
+                                    },
+                                    interactionSource = labelInteractions
+                                ) {
+                                    SliderDefaults.Thumb(
+                                        interactionSource = sliderInteractions,
+                                        enabled = enabled
+                                    )
+                                }
+                            }
                         )
 
                         if (showPercentage) {
