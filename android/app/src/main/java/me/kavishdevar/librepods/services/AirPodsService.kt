@@ -461,7 +461,16 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
 
         override fun onBatteryChanged(device: BLEManager.AirPodsStatus) {
-            if (aacpBatteryReported.get()) return
+            // With the link up the broadcast has nothing to add about the buds, but
+            // it is the only thing that knows whether the case is on a charger once
+            // they are both out of it - and it says so on its own schedule, not the
+            // link's. Take that much and leave the rest alone.
+            if (aacpBatteryReported.get()) {
+                batteryNotification.fillDisconnectedFromLive(broadcastBattery())
+                batteryNotification.settleCase(broadcastCaseCharging())
+                updateBattery()
+                return
+            }
             val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: 0
             val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: 0
             val caseLevel = bleManager.getMostRecentStatus()?.caseBattery ?: 0
@@ -1030,6 +1039,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             override fun onBatteryInfoReceived(batteryInfo: ByteArray) {
                 aacpBatteryReported.set(true)
                 if (batteryNotification.setBattery(batteryInfo)) {
+                    batteryNotification.fillDisconnectedFromLive(broadcastBattery())
+                    batteryNotification.settleCase(broadcastCaseCharging())
                     persistBatterySnapshot()
                     applyRememberedBattery()
                 }
@@ -1734,6 +1745,41 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
         return batteries.map { Battery(it.component, 0, BatteryStatus.DISCONNECTED) }
     }
+
+    /**
+     * What the proximity broadcast last said, for the components the buds' own link
+     * has stopped speaking for.
+     *
+     * The case is the one that needs it. Its charge reaches the buds through
+     * whichever of them is seated, so a packet sent with both of them out carries
+     * the case as level 0 and the unavailable status - the reading goes blank while
+     * the case is sitting there charging perfectly well. It broadcasts its own state
+     * regardless, which is how an empty case on a charger is known to be on one, and
+     * the scanner has been parsing that all along; it was thrown away whenever the
+     * link was up. Entries older than fifteen seconds are dropped from the scanner's
+     * map, so there is no stale reading to inherit here.
+     */
+    private fun broadcastBattery(): List<Battery> {
+        val status = bleManager.getMostRecentStatus() ?: return emptyList()
+        fun reading(component: Int, level: Int?, charging: Boolean) = Battery(
+            component,
+            level ?: 0,
+            when {
+                level == null -> BatteryStatus.DISCONNECTED
+                charging -> BatteryStatus.CHARGING
+                else -> BatteryStatus.NOT_CHARGING
+            }
+        )
+        return listOf(
+            reading(BatteryComponent.LEFT, status.leftBattery, status.isLeftCharging),
+            reading(BatteryComponent.RIGHT, status.rightBattery, status.isRightCharging),
+            reading(BatteryComponent.CASE, status.caseBattery, status.isCaseCharging)
+        )
+    }
+
+    /** What the broadcast last said about the case's charger, if anything. */
+    private fun broadcastCaseCharging(): Boolean? =
+        bleManager.getMostRecentStatus()?.isCaseCharging
 
     private fun applyRememberedBattery() {
         batteryNotification.fillDisconnectedFrom(rememberedBattery() ?: return)

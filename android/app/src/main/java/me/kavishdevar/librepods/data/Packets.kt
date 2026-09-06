@@ -183,11 +183,24 @@ class AirPodsNotifications {
         private var second: Battery = Battery(BatteryComponent.RIGHT, 0, BatteryStatus.DISCONNECTED)
         private var case: Battery = Battery(BatteryComponent.CASE, 0, BatteryStatus.DISCONNECTED)
 
+        /**
+         * The last case level that actually arrived.
+         *
+         * It only reaches the buds through whichever of them is seated, so a packet
+         * sent with both of them out drops it. Nothing about the case has changed,
+         * though: it is sitting there with the charge it had a moment ago, and the
+         * reference goes on showing it. Cleared when the link goes, so a session
+         * never opens on the last one's number.
+         */
+        private var lastKnownCaseLevel: Int? = null
+
         private fun batteryOrUnavailable(component: Int, level: Int, status: Int): Battery {
-            // The case reports through whichever bud is sitting in it, so with both
-            // buds out it has nothing to report and sends 0 instead of dropping out.
-            // That arrives as "0%, charging", which cannot be true, and a case that
-            // really were flat could not report itself either. Treat it as absent.
+            // Over the buds' own link the case reports through whichever of them is
+            // sitting in it, so with both out it has nothing to say and sends 0
+            // instead of dropping out. That arrives as "0%, charging", which cannot
+            // be true, and a case that really were flat could not report itself
+            // either. Treat it as absent - the proximity broadcast still carries the
+            // case's own reading, and [fillDisconnectedFromLive] puts it back.
             if (component == BatteryComponent.CASE && level == 0) {
                 return Battery(component, 0, BatteryStatus.DISCONNECTED)
             }
@@ -223,6 +236,35 @@ class AirPodsNotifications {
             first = batteryOrUnavailable(BatteryComponent.LEFT, leftLevel, if (leftCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
             second = batteryOrUnavailable(BatteryComponent.RIGHT, rightLevel, if (rightCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
             case = batteryOrUnavailable(BatteryComponent.CASE, caseLevel, if (caseCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
+            settleCase(caseCharging)
+        }
+
+        /**
+         * Settles the case reading from the two places its halves arrive.
+         *
+         * The level comes over the buds' link, from whichever of them is seated -
+         * and from the last time one was, when both are out and the link sends the
+         * case as unavailable.
+         *
+         * The charger is not on that link at all. Across every packet the case is
+         * either not charging or not there, sitting on one or not; the link has no
+         * value for it. It is in the proximity broadcast, which flips its charging
+         * bit the moment the case goes on, so that is what decides it whenever the
+         * broadcast has spoken recently.
+         *
+         * @param charging what the broadcast last said, or null if it has not spoken.
+         */
+        fun settleCase(charging: Boolean?) {
+            val live = case.status != BatteryStatus.DISCONNECTED
+            if (live) lastKnownCaseLevel = case.level
+            val level = if (live) case.level else lastKnownCaseLevel ?: return
+            val status = when {
+                charging == true -> BatteryStatus.CHARGING
+                charging == false -> BatteryStatus.NOT_CHARGING
+                live -> case.status
+                else -> BatteryStatus.NOT_CHARGING
+            }
+            case = batteryOrUnavailable(BatteryComponent.CASE, level, status)
         }
 
         fun restoreBatterySnapshot(batteries: List<Battery>) {
@@ -247,6 +289,7 @@ class AirPodsNotifications {
             first = Battery(first.component, 0, BatteryStatus.DISCONNECTED)
             second = Battery(second.component, 0, BatteryStatus.DISCONNECTED)
             case = Battery(case.component, 0, BatteryStatus.DISCONNECTED)
+            lastKnownCaseLevel = null
         }
 
         /**
@@ -260,6 +303,26 @@ class AirPodsNotifications {
                 if (current.status != BatteryStatus.DISCONNECTED) return current
                 val fallback = byComponent[current.component] ?: return current
                 return restoredBatteryOrUnavailable(current.component, fallback)
+            }
+            first = merge(first)
+            second = merge(second)
+            case = merge(case)
+        }
+
+        /**
+         * Substitutes live readings for whichever components are no longer reporting.
+         *
+         * The same merge [fillDisconnectedFrom] does, without its one concession to
+         * age: a remembered charge is downgraded on the way back in because nothing
+         * can still be charging after it has gone away, while this one is being said
+         * right now.
+         */
+        fun fillDisconnectedFromLive(live: List<Battery>) {
+            val byComponent = live.associateBy { it.component }
+            fun merge(current: Battery): Battery {
+                if (current.status != BatteryStatus.DISCONNECTED) return current
+                val fresh = byComponent[current.component] ?: return current
+                return batteryOrUnavailable(current.component, fresh.level, fresh.status)
             }
             first = merge(first)
             second = merge(second)
