@@ -133,4 +133,8 @@ internal fun handleNoiseControlWidgetIntent(context: Context, intent: Intent, lo
         AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE.value,
         mode.toByte()
     )
+    // Nothing else redraws these, so the tap would land and the highlight stay
+    // where it was until something unrelated happened to refresh them.
+    service.updateNoiseControlWidget()
+    service.updateNoiseControlGridWidget()
 }
