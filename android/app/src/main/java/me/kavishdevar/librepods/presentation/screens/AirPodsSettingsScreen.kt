@@ -105,6 +105,7 @@ import me.kavishdevar.librepods.BuildConfig
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.ATTHandles
+import me.kavishdevar.librepods.data.AirPodsModels
 import me.kavishdevar.librepods.data.AirPodsPro3
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.MaterialIcons
@@ -433,11 +434,20 @@ fun AirPodsSettingsScreen(
             }
 
             item(key = "battery") {
+                // The connected instance arrives a moment after the screen does, and
+                // dropping straight to a Pro 2 in the meantime is what made the rings
+                // flash the wrong AirPods. The overlays do not: they fall back to the
+                // model number this device was last seen with, which is on disk
+                // before the screen is built. Use the same chain here.
+                val artwork = state.instance?.model
+                    ?: lastConnectedModelNumber?.let {
+                        AirPodsModels.getModelForOverlays(it, state.modelName)
+                    }
                 BatteryView(
                     batteryList = state.battery,
-                    budsRes = state.instance?.model?.budsRes ?: R.drawable.airpods_pro_2_buds,
-                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case,
-                    ringLayout = state.instance?.model?.ringLayout ?: me.kavishdevar.librepods.data.OverlayRingLayout()
+                    budsRes = artwork?.budsRes ?: R.drawable.airpods_pro_2_buds,
+                    caseRes = artwork?.caseRes ?: R.drawable.airpods_pro_2_case,
+                    ringLayout = artwork?.ringLayout ?: me.kavishdevar.librepods.data.OverlayRingLayout()
                 )
             }
             item(key = "spacer_battery") {
