@@ -41,6 +41,7 @@ import android.view.MotionEvent
 import android.view.TouchDelegate
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -66,6 +67,14 @@ import me.kavishdevar.librepods.presentation.theme.withAppNightMode
 
 // 93% of a turn leaves about 25 degrees open just before twelve o'clock,
 // which is where the charging bolt sits.
+/**
+ * The ring's outer diameter.
+ *
+ * A fixed size, not a fraction of the card: measured off two references on phones of
+ * different widths it comes to 36.3 and 36.7 points either way, while the card around
+ * it grows with the screen. 37 is that, and the 38 that briefly stood here came from
+ * reading the first of those as a proportion.
+ */
 private const val POPUP_RING_DP = 37
 
 @SuppressLint("InflateParams", "ClickableViewAccessibility")
@@ -82,6 +91,12 @@ class PopupWindow(
     private var batteryUpdateReceiver: BroadcastReceiver? = null
     private var dimAnimator: ValueAnimator? = null
     private var showingBudsInCase: Boolean? = null
+    private var showingArrangement: List<Boolean>? = null
+    private var videoRendered = false
+    private var pendingCells: (() -> Unit)? = null
+    private var pendingInCase = false
+    private var paintedInCase: Boolean? = null
+    private var fadingArtwork = false
     private var artworkRingLayout = OverlayRingLayout()
     private var sheetWidthPx = 0
 
@@ -138,7 +153,11 @@ class PopupWindow(
         }
 
         val ll = mView.findViewById<LinearLayout>(R.id.linear_layout)
-        ll.minimumHeight = (sheetWidthPx * 1.026f).toInt()
+        // The reference card is 1.1019 times as tall as it is wide - measured off a
+        // recording of it, and steady across every frame. Ours held to 1.026, which
+        // is where the room under the readings went: the layout inside was already
+        // in proportion, the card around it was not.
+        ll.minimumHeight = (sheetWidthPx * 1.1019f).toInt()
         ll.setOnClickListener {
             close()
         }
@@ -180,7 +199,8 @@ class PopupWindow(
         videoRes: Int = FallbackArtwork.Pro.connected,
         budsRes: Int = FallbackArtwork.Pro.buds,
         caseRes: Int = FallbackArtwork.Pro.chargingCase,
-        ringLayout: OverlayRingLayout = OverlayRingLayout()
+        ringLayout: OverlayRingLayout = OverlayRingLayout(),
+        artworkScale: Float = 1f
     ) {
         try {
             if (mView.windowToken == null && mView.parent == null && !isClosing) {
@@ -199,6 +219,16 @@ class PopupWindow(
                 mView.findViewById<ImageView>(R.id.artwork_buds).setImageResource(budsRes)
                 mView.findViewById<ImageView>(R.id.artwork_case).setImageResource(caseRes)
 
+                // The canvas is the card for most models; for the ones whose renders
+                // are drawn large inside it, a little less than the card.
+                if (artworkScale != 1f) {
+                    val group = mView.findViewById<View>(R.id.artwork_group)
+                    group.layoutParams = (group.layoutParams as LinearLayout.LayoutParams).apply {
+                        width = (sheetWidthPx * artworkScale).toInt()
+                        gravity = Gravity.CENTER_HORIZONTAL
+                    }
+                }
+
                 val vid = mView.findViewById<VideoView>(R.id.video)
                 vid.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
                 vid.setOnErrorListener { _, what, extra ->
@@ -212,14 +242,15 @@ class PopupWindow(
                 }
                 // A surface with nothing drawn into it yet is black, and the card
                 // used to open on that. Keep the clip hidden until playback says it
-                // has put a frame up, then bring it in - or park it, if a bud has
-                // already been taken out and the still is what belongs there.
+                // has put a frame up, then bring it in - or leave it at nothing, if a
+                // bud has already been taken out and the still is what belongs there.
+                // It keeps playing either way; the reference's clip runs behind the
+                // still the whole time it is up.
                 vid.setOnInfoListener { _, what, _ ->
                     if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                        videoRendered = true
                         if (showingBudsInCase != false) {
                             vid.animate().alpha(1f).setDuration(ARRIVING_FADE_MS).start()
-                        } else {
-                            vid.pause()
                         }
                     }
                     false
@@ -310,19 +341,41 @@ class PopupWindow(
         val combinedBuds = unifiedBudBattery(batteryList)
         val showCombinedBuds = combinedBuds != null
 
-        // One ring is not the same as being in the case. Two buds out together, both
-        // off charge and reading within a few percent of each other, merge into one
-        // ring exactly as they do sitting in the case - and the clip came back with
-        // it. The case is what settles it: the buds report its charge through
-        // whichever of them is seated, so with both of them out it has nothing to
-        // report and drops out altogether.
-        val caseReporting = case != null && case.status != BatteryStatus.DISCONNECTED
-        showBudsInCase(showCombinedBuds && caseReporting)
+        // Everything that changes the shape of the card, not just which artwork is
+        // up: the buds' rings merging, a badge coming or going, the case dropping
+        // out.
+        showArrangement(
+            showCombinedBuds,
+            listOf(
+                showCombinedBuds,
+                combinedBuds?.level != null,
+                !showCombinedBuds && left?.level != null,
+                !showCombinedBuds && right?.level != null,
+                case?.level != null
+            )
+        ) {
+            applyBatteryCells(left, right, case, combinedBuds, showCombinedBuds)
+        }
+    }
 
+    /**
+     * The readings, held back until the sheet is empty when the artwork is changing
+     * under them: the buds' two rings become one at the same moment the clip
+     * replaces the still, and letting that happen in front of the reader turns a
+     * fade into a flicker.
+     */
+    @SuppressLint("SetTextI18n")
+    private fun applyBatteryCells(
+        left: Battery?,
+        right: Battery?,
+        case: Battery?,
+        combinedBuds: Battery?,
+        showCombinedBuds: Boolean
+    ) {
         val badgeVisibility = if (showCombinedBuds) View.GONE else View.VISIBLE
-        updateBatteryBadge(R.id.left_battery_badge, badgeVisibility, left?.level)
-        updateBatteryBadge(R.id.right_battery_badge, badgeVisibility, right?.level)
-        updateBatteryBadge(R.id.case_battery_badge, badgeVisibility, case?.level)
+        updateBatteryBadge(R.id.left_battery_badge, badgeVisibility)
+        updateBatteryBadge(R.id.right_battery_badge, badgeVisibility)
+        updateBatteryBadge(R.id.case_battery_badge, badgeVisibility)
 
         updateBatteryCell(
             R.id.combined_buds_battery_cell,
@@ -367,66 +420,149 @@ class PopupWindow(
     }
 
     /**
-     * The clip is the buds resting in their case, so it only holds while the case
-     * still reports them as one. The moment a bud is taken out and the battery
-     * splits in two, Apple swaps in the still - the same render the settings screen
-     * heads with - and swaps back once both are seated again.
+     * The card's whole arrangement: which of the two renders is up, how many rings
+     * sit under it, and which badges they carry.
      *
-     * Both directions are a plain crossfade on alpha, and the clip's visibility is
-     * never touched: hiding a VideoView tears its surface down, and bringing it
-     * back showed a black frame until playback had drawn into the new one.
+     * The clip is the pair being in the same place - both seated in the case or both
+     * out of it. Take one bud out and leave the other in and the reference swaps in
+     * the still, the same render the settings screen heads with, and swaps back the
+     * moment they match again. That is the reading the merged ring already carries:
+     * the buds merge when their charge states agree, which they do both in the case
+     * and both out of it, and split when one of them is seated and the other is not.
+     * An earlier reading of this made the clip mean 'in the case' and asked the case
+     * for its own battery to confirm it, which left the still up with both buds out
+     * and the case saying nothing.
+     *
+     * The two renders do not put the case in the same place: the still has its
+     * right edge at 87.8 percent of the canvas while the clip breathes between 85.1
+     * and 75.9, so any moment with both of them up shows the case in two places at
+     * once. The reference never has one. It fades everything that is changing - the
+     * artwork and the readings under it - out to nothing over 300ms, holds the empty
+     * card for about 90, and brings the new state back over 900. Frame by frame
+     * there is a stretch where the card carries nothing but its title, which is
+     * what lets the geometry change without anyone watching it.
+     *
+     * The clip's visibility is never touched: hiding a VideoView tears its surface
+     * down, and bringing it back showed a black frame until playback had drawn into
+     * the new one.
      */
-    private fun showBudsInCase(inCase: Boolean) {
-        mView.findViewById<Guideline>(R.id.ring_guide_combined)
-            .setGuidelinePercent(if (inCase) artworkRingLayout.movingBudPair else artworkRingLayout.budPair)
-        mView.findViewById<Guideline>(R.id.ring_guide_case)
-            .setGuidelinePercent(if (inCase) artworkRingLayout.movingCase else artworkRingLayout.chargingCase)
-        if (showingBudsInCase == inCase) return
-        val settling = showingBudsInCase == null
+    private fun showArrangement(
+        inCase: Boolean,
+        cells: List<Boolean>,
+        applyCells: () -> Unit
+    ) {
+        val arrangement = cells + inCase
+        val settling = showingArrangement == null
+        val changed = showingArrangement != arrangement
+        showingArrangement = arrangement
         showingBudsInCase = inCase
 
-        val video = mView.findViewById<VideoView>(R.id.video)
-        val artwork = mView.findViewById<View>(R.id.artwork)
-        video.animate().cancel()
-        artwork.animate().cancel()
-
+        // A swap already on its way down takes the new state as its destination
+        // rather than starting again. The readings arrive several times a second and
+        // the parts of an arrangement do not all land in the same packet - the buds'
+        // rings merge on the buds alone, the artwork waits for the case to report as
+        // well - so a single change of state reaches here two or three times. Every
+        // one of them applied on the spot is the flicker the fade exists to avoid,
+        // and every one of them restarting the fade is a swap that never finishes.
+        if (pendingCells != null) {
+            pendingCells = applyCells
+            pendingInCase = inCase
+            // The one restart worth making: the picture is changing after all, and
+            // the fade that is running began for the rings alone.
+            if (paintedInCase != inCase && !fadingArtwork) fadeOut(true)
+            return
+        }
+        if (!changed) {
+            applyCells()
+            return
+        }
         if (settling) {
-            // The clip stays at nothing either way; the first rendered frame is what
-            // brings it in, and only if it is still the one that belongs there.
-            artwork.alpha = if (inCase) 0f else 1f
+            applyArtwork(inCase)
+            applyCells()
             return
         }
 
-        if (inCase) {
-            video.start()
-            video.animate().alpha(1f).setDuration(ARRIVING_FADE_MS).start()
-            artwork.animate().alpha(0f).setDuration(LEAVING_FADE_MS).start()
-            return
-        }
-
-        artwork.animate().alpha(1f).setDuration(ARRIVING_FADE_MS).start()
-        video.animate().alpha(0f).setDuration(LEAVING_FADE_MS).withEndAction {
-            video.pause()
-        }.start()
+        pendingCells = applyCells
+        pendingInCase = inCase
+        fadeOut(paintedInCase != inCase)
     }
 
     /**
-     * iOS holds the badge at the secondary label's opacity while the component is
-     * still filling and takes it to full strength once it reads 100%, the case
-     * included.
+     * Takes the card down to nothing, changes it there, and brings it back.
+     *
+     * Only what is actually changing goes: taking a second bud out merges its ring
+     * into the first's without touching the render behind them, and fading a picture
+     * out and back to the identical picture reads as a blink. The rings always
+     * travel because the arrangement is what brought us here; the artwork joins them
+     * only when the clip and the still are trading places.
      */
-    private fun updateBatteryBadge(badgeId: Int, visibility: Int, level: Int?) {
+    private fun fadeOut(includeArtwork: Boolean) {
+        fadingArtwork = includeArtwork
+        val artworkGroup = mView.findViewById<View>(R.id.artwork_group)
+        val ringRow = mView.findViewById<View>(R.id.ring_row)
+        if (includeArtwork) artworkGroup.animate().cancel()
+        ringRow.animate().cancel()
+
+        val ease = AccelerateDecelerateInterpolator()
+        if (includeArtwork) {
+            artworkGroup.animate().alpha(0f).setDuration(FADE_OUT_MS)
+                .setInterpolator(ease).start()
+        }
+        ringRow.animate().alpha(0f).setDuration(FADE_OUT_MS).setInterpolator(ease)
+            .withEndAction {
+                applyArtwork(pendingInCase)
+                pendingCells?.invoke()
+                pendingCells = null
+                val returning =
+                    if (fadingArtwork) arrayOf(artworkGroup, ringRow) else arrayOf(ringRow)
+                fadingArtwork = false
+                for (v in returning) {
+                    v.animate().alpha(1f).setStartDelay(FADE_HOLD_MS)
+                        .setDuration(FADE_IN_MS).setInterpolator(ease)
+                        .withEndAction { v.animate().setStartDelay(0) }
+                        .start()
+                }
+            }.start()
+    }
+
+    /**
+     * Which of the two layers is up, and where the rings belong under it.
+     *
+     * Called with the card empty, so everything here is instant. The clip is left
+     * running whichever layer is showing: on the reference its three-second breath
+     * keeps its cadence unbroken straight through ten seconds of the still being up,
+     * so it is not paused behind it and it does not start from the top on the way
+     * back - it fades in already part-way through, wherever the loop has got to.
+     */
+    private fun applyArtwork(inCase: Boolean) {
+        paintedInCase = inCase
+        mView.findViewById<Guideline>(R.id.ring_guide_combined).setGuidelinePercent(
+            if (inCase) artworkRingLayout.movingBudPair else artworkRingLayout.budPair
+        )
+        mView.findViewById<Guideline>(R.id.ring_guide_case).setGuidelinePercent(
+            if (inCase) artworkRingLayout.movingCase else artworkRingLayout.chargingCase
+        )
+        mView.findViewById<View>(R.id.artwork).alpha = if (inCase) 0f else 1f
+        // Until the surface has drawn once it is black, not transparent, so the clip
+        // is left at nothing and the rendering callback brings it in instead.
+        mView.findViewById<VideoView>(R.id.video).alpha =
+            if (inCase && videoRendered) 1f else 0f
+    }
+
+    /**
+     * The sheet draws its readings at full strength whatever the level says. That is
+     * what separates it from the rings at the top of settings, which are in the
+     * secondary label throughout - on the captures the sheet shows 100% and 91% in
+     * the same black, and settings shows the same two in the same grey. This was
+     * dimming the badge until its component reached 100%, which is neither.
+     */
+    private fun updateBatteryBadge(badgeId: Int, visibility: Int) {
         val badge = mView.findViewById<ImageView>(badgeId)
         badge.visibility = visibility
-
-        val full = (level ?: 0) >= 100
         badge.imageTintList = ColorStateList.valueOf(
-            ContextCompat.getColor(
-                context,
-                if (full) R.color.popup_text else R.color.popup_secondary_text
-            )
+            ContextCompat.getColor(context, R.color.popup_text)
         )
-        badge.alpha = if (full) 1f else BADGE_FILLING_ALPHA
+        badge.alpha = 1f
     }
 
     private fun updateBatteryCell(
@@ -566,10 +702,18 @@ class PopupWindow(
 
         /** Whatever is arriving lands before the one it replaces has finished leaving. */
         const val ARRIVING_FADE_MS = 120L
-        const val LEAVING_FADE_MS = 200L
 
-        /** What the badge sits at until its component reads 100%. */
-        const val BADGE_FILLING_ALPHA = 0.6f
+        /**
+         * The swap, read off a recording of the iOS sheet at 60fps in both directions.
+         *
+         * Leaving takes 280 and 330ms, the empty card holds for about 90, and arriving
+         * takes 950 and 850. Both curves are the symmetric one - a fifth of the way
+         * across at a quarter of the time, half at half - which is what
+         * AccelerateDecelerateInterpolator draws.
+         */
+        const val FADE_OUT_MS = 300L
+        const val FADE_HOLD_MS = 90L
+        const val FADE_IN_MS = 900L
 
         const val DIM_AMOUNT = 0.3f
         const val BLUR_BEHIND_RADIUS_DP = 48

@@ -2091,7 +2091,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             overlayModel?.connectedVideoRes ?: FallbackArtwork.Pro.connected,
             overlayModel?.budsRes ?: FallbackArtwork.Pro.buds,
             overlayModel?.caseRes ?: FallbackArtwork.Pro.chargingCase,
-            overlayModel?.ringLayout ?: OverlayRingLayout()
+            overlayModel?.ringLayout ?: OverlayRingLayout(),
+            overlayModel?.artworkScale ?: 1f
         )
     }
 

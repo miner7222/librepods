@@ -25,8 +25,16 @@ data class OverlayRingLayout(
     val rightBud: Float = 0.4090f,
     val budPair: Float = 0.3075f,
     val chargingCase: Float = 0.7135f,
-    val movingBudPair: Float = 0.2582f,
-    val movingCase: Float = 0.6905f,
+    /*
+     * These two are where the reference puts its rings, not where the clip puts the
+     * renders they sit under. The clip's bud pair holds its centre at 25.77 percent
+     * of the canvas through the whole breath and its case at 69.00, while the sheet
+     * draws the rings at 26.72 and 68.80 - a little inside each of them. Measured
+     * from the ring's right edge, which is exact for a part-drawn arc where its
+     * bounding box is not.
+     */
+    val movingBudPair: Float = 0.2680f,
+    val movingCase: Float = 0.6876f,
 )
 
 open class AirPodsBase(
@@ -43,7 +51,17 @@ open class AirPodsBase(
     val capabilities: Set<Capability>,
     val connectedVideoRes: Int,
     val islandVideoRes: Int,
-    val ringLayout: OverlayRingLayout = OverlayRingLayout()
+    val ringLayout: OverlayRingLayout = OverlayRingLayout(),
+    /**
+     * How much of the card this model's artwork canvas is drawn across.
+     *
+     * The renders share a 1050 x 354 canvas, but they are not all drawn at the same
+     * size inside it: the AirPods 4's fill 73.4 percent of its width and land on the
+     * reference's own artwork within half a point when the canvas is the card, while
+     * the Pro 3's fill 78.8 and come out too big by the same margin. The clip agrees
+     * with the stills either way, so one number covers both.
+     */
+    val artworkScale: Float = 1f
 )
 
 /**
@@ -160,7 +178,9 @@ class AirPods4: AirPodsBase(
     caseIconRes = R.drawable.airpods_4_case_icon,
     connectedVideoRes = R.raw.airpods_4_connected,
     islandVideoRes = R.raw.airpods_4_island,
-    ringLayout = OverlayRingLayout(0.2052f, 0.4090f, 0.3075f, 0.7135f),
+    // Read off the reference for this artwork: the rings sit at 20.94, 41.05 and
+    // 71.45 percent of the card, a little inside the renders they belong to.
+    ringLayout = OverlayRingLayout(0.2094f, 0.4105f, 0.3099f, 0.7145f),
     // The standard AirPods 4 supports Personalized Volume even though Adaptive
     // Audio remains exclusive to the noise-cancelling model.
     capabilities = setOf(
@@ -182,7 +202,9 @@ class AirPods4ANC: AirPodsBase(
     caseIconRes = R.drawable.airpods_4_case_icon,
     connectedVideoRes = R.raw.airpods_4_connected,
     islandVideoRes = R.raw.airpods_4_island,
-    ringLayout = OverlayRingLayout(0.2052f, 0.4090f, 0.3075f, 0.7135f),
+    // Read off the reference for this artwork: the rings sit at 20.94, 41.05 and
+    // 71.45 percent of the card, a little inside the renders they belong to.
+    ringLayout = OverlayRingLayout(0.2094f, 0.4105f, 0.3099f, 0.7145f),
     // No OFF_LISTENING_MODE: the Off mode is in this one's cycle already. The
     // switch that puts it there is the Pro 2's and the Pro 3's, whose cycles leave
     // it out until it is turned on.
@@ -210,7 +232,8 @@ class AirPodsPro1: AirPodsBase(
     caseIconRes = R.drawable.airpods_pro_1_case_icon,
     connectedVideoRes = R.raw.airpods_pro_1_connected,
     islandVideoRes = R.raw.airpods_pro_1_island,
-    ringLayout = OverlayRingLayout(0.1743f, 0.3786f, 0.2762f, 0.7114f),
+    // Read off a reference capture of this model: 18.68, 38.32 and 69.77.
+    ringLayout = OverlayRingLayout(0.1868f, 0.3832f, 0.2850f, 0.6977f),
     capabilities = setOf(
         Capability.LISTENING_MODE,
         // Press and hold picks between the noise control cycle and the assistant,
@@ -292,7 +315,10 @@ class AirPodsPro3: AirPodsBase(
     caseIconRes = R.drawable.airpods_pro_3_case_icon,
     connectedVideoRes = R.raw.airpods_pro_3_connected,
     islandVideoRes = R.raw.airpods_pro_3_island,
-    ringLayout = OverlayRingLayout(0.1748f, 0.3614f, 0.2681f, 0.6952f),
+    // Read off a reference capture of this model: 20.34, 37.78 and 68.03.
+    ringLayout = OverlayRingLayout(0.2034f, 0.3778f, 0.2906f, 0.6803f),
+    // 78.7 percent of the card against the reference's 71.9.
+    artworkScale = 0.913f,
     capabilities = setOf(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
