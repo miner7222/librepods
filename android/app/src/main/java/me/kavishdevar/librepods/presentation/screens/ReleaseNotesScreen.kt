@@ -82,6 +82,7 @@ import me.kavishdevar.librepods.data.updates.updates
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
 import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,7 +97,7 @@ fun ReleaseNotesScreen(
     )
 
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val bottomPadding = screenBottomPadding(scaffolded = false)
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 

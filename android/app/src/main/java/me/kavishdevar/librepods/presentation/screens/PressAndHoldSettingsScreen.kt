@@ -90,7 +90,7 @@ fun LongPress(
     val longPressAction = if (name.lowercase() == "left") state.leftAction else state.rightAction
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val topPadding = screenTopPadding()
+    val topPadding = screenTopPadding(materialInset = 8.dp)
     val bottomPadding = screenBottomPadding()
 
     val scrollState = rememberScrollState()
@@ -101,7 +101,6 @@ fun LongPress(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
-            .padding(top = if (m3eEnabled) 8.dp else 0.dp)
             .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))

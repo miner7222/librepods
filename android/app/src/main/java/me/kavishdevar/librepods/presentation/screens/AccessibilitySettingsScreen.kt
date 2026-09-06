@@ -101,7 +101,11 @@ fun AccessibilitySettingsScreen(
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val opensWithPremiumBanner = !state.isPremium
-    val topPadding = screenTopPadding(columnInset = true)
+    // The first thing on this screen is a titled section, which brings the
+    // column inset with it; asking for it here as well opened the screen 27.5
+    // below every other one that starts with a subheading. The premium banner
+    // is a plain button and does still need it.
+    val topPadding = screenTopPadding(columnInset = opensWithPremiumBanner)
     val bottomPadding = screenBottomPadding()
 
     val scrollState = rememberScrollState()

@@ -65,8 +65,12 @@ fun AdaptiveStrengthScreen(viewModel: AirPodsViewModel, navigateToPurchase: () -
     val backdrop = rememberLayerBackdrop()
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    // Without the banner the slider opens the column and carries the inset itself.
-    val topPadding = screenTopPadding(columnInset = true)
+    val opensWithPremiumBanner = !state.isPremium
+    // A titled section opens the column and brings the inset with it, so
+    // asking for it here as well opens the screen a whole inset lower than
+    // every other one that starts with a subheading. The premium banner is a
+    // plain button and does still need it.
+    val topPadding = screenTopPadding(columnInset = opensWithPremiumBanner)
     val bottomPadding = screenBottomPadding()
 
     Column(
