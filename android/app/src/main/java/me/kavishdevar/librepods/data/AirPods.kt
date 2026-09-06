@@ -173,6 +173,7 @@ class AirPods4ANC: AirPodsBase(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
+        Capability.OFF_LISTENING_MODE,
         Capability.ADAPTIVE_AUDIO,
         Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME,
