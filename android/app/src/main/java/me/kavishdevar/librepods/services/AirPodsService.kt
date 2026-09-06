@@ -853,7 +853,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 }
             }
         }
-        val showIslandReceiver = object : BroadcastReceiver() {
+        showIslandReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == "me.kavishdevar.librepods.cross_device_island") {
                     showIsland(
@@ -880,10 +880,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(showIslandReceiver, showIslandIntentFilter, RECEIVER_EXPORTED)
+            registerReceiver(showIslandReceiver!!, showIslandIntentFilter, RECEIVER_EXPORTED)
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag") registerReceiver(
-                showIslandReceiver, showIslandIntentFilter
+                showIslandReceiver!!, showIslandIntentFilter
             )
         }
 
@@ -2098,7 +2098,14 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     //    var isConnectedLocally = false
     var device: BluetoothDevice? = null
 
-    private lateinit var earReceiver: BroadcastReceiver
+    /**
+     * Held so the service can let it go. Both this and the battery receiver below
+     * drop themselves when DISCONNECT_RECEIVERS arrives, but that broadcast is sent
+     * by the activity as it is destroyed, and the service outlives the activity - so
+     * a service that ends without one was leaving its receivers registered.
+     */
+    private var showIslandReceiver: BroadcastReceiver? = null
+
     object BatteryChangedIntentReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action == Intent.ACTION_BATTERY_CHANGED) {
@@ -3905,7 +3912,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             e.printStackTrace()
         }
         try {
-            unregisterReceiver(earReceiver)
+            showIslandReceiver?.let { unregisterReceiver(it) }
+            showIslandReceiver = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
+            unregisterReceiver(BatteryChangedIntentReceiver)
         } catch (e: Exception) {
             e.printStackTrace()
         }
