@@ -29,6 +29,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -38,7 +39,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 @Composable
 fun AppleSettingsIconTile(
     @DrawableRes drawableRes: Int,
-    containerColor: Color,
+    containerBrush: Brush,
     modifier: Modifier = Modifier
 ) {
     val metrics = LocalAppleDesignMetrics.current
@@ -48,7 +49,7 @@ fun AppleSettingsIconTile(
             modifier = Modifier
                 .size(metrics.settingsHubIconTileSize)
                 .background(
-                    color = containerColor,
+                    brush = containerBrush,
                     shape = RoundedCornerShape(metrics.settingsHubIconTileCornerRadius)
                 ),
             contentAlignment = Alignment.Center

@@ -114,7 +114,8 @@ import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.components.AboutCard
 import me.kavishdevar.librepods.presentation.components.AppleDisconnectedContent
-import me.kavishdevar.librepods.presentation.components.AppleSettingsIconTile
+import me.kavishdevar.librepods.presentation.components.SettingsHubAccent
+import me.kavishdevar.librepods.presentation.components.SettingsHubIcon
 import me.kavishdevar.librepods.presentation.components.AudioSettings
 import me.kavishdevar.librepods.presentation.components.BatteryView
 import me.kavishdevar.librepods.presentation.components.CallControlSettings
@@ -544,9 +545,11 @@ fun AirPodsSettingsScreen(
                         name = stringResource(R.string.audio_and_routing),
                         onClick = navigateToAudioAndRouting,
                         leadingContent = {
-                            AppleSettingsIconTile(
-                                drawableRes = R.drawable.sf_speaker_wave_3_fill,
-                                containerColor = AppleDesignMetrics.audioAndRoutingIconTileColor
+                            SettingsHubIcon(
+                                appleRes = R.drawable.sf_speaker_wave_3_fill,
+                                appleContainerBrush = AppleDesignMetrics.audioAndRoutingIconTile,
+                                materialRes = R.drawable.ic_volume_up,
+                                accent = SettingsHubAccent.Primary
                             )
                         }
                     )
@@ -554,9 +557,11 @@ fun AirPodsSettingsScreen(
                         name = stringResource(R.string.controls_and_gestures),
                         onClick = navigateToControlsAndGestures,
                         leadingContent = {
-                            AppleSettingsIconTile(
-                                drawableRes = R.drawable.sf_hand_pinch_fill,
-                                containerColor = AppleDesignMetrics.controlsAndGesturesIconTileColor
+                            SettingsHubIcon(
+                                appleRes = R.drawable.sf_hand_pinch_fill,
+                                appleContainerBrush = AppleDesignMetrics.controlsAndGesturesIconTile,
+                                materialRes = R.drawable.ic_touch_app,
+                                accent = SettingsHubAccent.Tertiary
                             )
                         }
                     )
@@ -564,9 +569,11 @@ fun AirPodsSettingsScreen(
                         name = stringResource(R.string.accessibility),
                         onClick = navigateToAccessibility,
                         leadingContent = {
-                            AppleSettingsIconTile(
-                                drawableRes = R.drawable.sf_accessibility,
-                                containerColor = AppleDesignMetrics.accessibilityIconTileColor
+                            SettingsHubIcon(
+                                appleRes = R.drawable.sf_accessibility,
+                                appleContainerBrush = AppleDesignMetrics.accessibilityIconTile,
+                                materialRes = R.drawable.ic_accessibility_new,
+                                accent = SettingsHubAccent.Secondary
                             )
                         }
                     )
@@ -579,9 +586,11 @@ fun AirPodsSettingsScreen(
                         name = stringResource(R.string.battery),
                         onClick = navigateToBattery,
                         leadingContent = {
-                            AppleSettingsIconTile(
-                                drawableRes = R.drawable.sf_battery_100percent,
-                                containerColor = AppleDesignMetrics.batteryIconTileColor
+                            SettingsHubIcon(
+                                appleRes = R.drawable.sf_battery_100percent,
+                                appleContainerBrush = AppleDesignMetrics.batteryIconTile,
+                                materialRes = R.drawable.ic_battery_android_full,
+                                accent = SettingsHubAccent.Secondary
                             )
                         }
                     )
