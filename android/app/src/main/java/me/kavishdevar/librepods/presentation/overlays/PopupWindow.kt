@@ -32,8 +32,6 @@ import android.graphics.Rect
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -86,8 +84,6 @@ class PopupWindow(
     private val context: Context = baseContext.withAppNightMode()
     private val mView: View
     private var isClosing = false
-    private var autoCloseHandler = Handler(Looper.getMainLooper())
-    private var autoCloseRunnable: Runnable? = null
     private var batteryUpdateReceiver: BroadcastReceiver? = null
     private var dimAnimator: ValueAnimator? = null
     private var showingBudsInCase: Boolean? = null
@@ -131,10 +127,6 @@ class PopupWindow(
         mView = layoutInflater.inflate(R.layout.popup_window, null)
         mParams.x = 0
 
-        mView.setOnClickListener {
-            close()
-        }
-
         val closeButton = mView.findViewById<ImageButton>(R.id.close_button)
         closeButton.setOnClickListener {
             close()
@@ -158,9 +150,6 @@ class PopupWindow(
         // is where the room under the readings went: the layout inside was already
         // in proportion, the card around it was not.
         ll.minimumHeight = (sheetWidthPx * 1.1019f).toInt()
-        ll.setOnClickListener {
-            close()
-        }
 
         @Suppress("DEPRECATION")
         mView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
@@ -285,10 +274,13 @@ class PopupWindow(
                     animateDim(DIM_AMOUNT, PRESENT_DIM_DURATION_MS)
                 }
 
+                // Nothing times the sheet out. On a recording of the reference it
+                // is still up half a minute after it arrived, through the buds being
+                // taken out and put back, and it goes when the lid closes or the
+                // AirPods drop off - both of which already take this one down - or
+                // when the reader dismisses it. Twelve seconds took it away while it
+                // was still the answer to a case that was standing open.
                 registerBatteryUpdateReceiver()
-
-                autoCloseRunnable = Runnable { close() }
-                autoCloseHandler.postDelayed(autoCloseRunnable!!, 12000)
             }
         } catch (e: Exception) {
             Log.e("PopupWindow", "Error opening popup: ${e.message}")
@@ -652,7 +644,6 @@ class PopupWindow(
             if (isClosing) return
             isClosing = true
 
-            autoCloseRunnable?.let { autoCloseHandler.removeCallbacks(it) }
             unregisterBatteryUpdateReceiver()
 
             val vid = mView.findViewById<VideoView>(R.id.video)

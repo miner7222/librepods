@@ -3937,6 +3937,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     override fun onDestroy() {
         clearPacketLogs()
         Log.d(TAG, "Service stopped is being destroyed for some reason!")
+        dismissPopup()
 
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
 
