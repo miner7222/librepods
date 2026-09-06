@@ -236,22 +236,27 @@ fun AccessibilitySettingsScreen(
             }
         }
 
-        StyledToggle(
-            title = stringResource(R.string.noise_control_section),
-            label = stringResource(R.string.noise_cancellation_single_airpod),
-            description = stringResource(R.string.noise_cancellation_single_airpod_description),
-            checked = state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE]?.getOrNull(
-                0
-            ) == 0x01.toByte(),
-            onCheckedChange = {
-                viewModel.setControlCommandBoolean(
-                    AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE, it
-                )
-            },
-            enabled = state.isPremium,
-            firstInColumn = !opensWithPremiumBanner &&
-                !state.capabilities.contains(Capability.PRESS_CONFIG)
-        )
+        // Cancelling noise with one bud in, and shaping what Transparency lets
+        // through, are both settings about listening modes. A pair that has none was
+        // being offered them anyway.
+        if (state.capabilities.contains(Capability.LISTENING_MODE)) {
+            StyledToggle(
+                title = stringResource(R.string.noise_control_section),
+                label = stringResource(R.string.noise_cancellation_single_airpod),
+                description = stringResource(R.string.noise_cancellation_single_airpod_description),
+                checked = state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE]?.getOrNull(
+                    0
+                ) == 0x01.toByte(),
+                onCheckedChange = {
+                    viewModel.setControlCommandBoolean(
+                        AACPManager.Companion.ControlCommandIdentifiers.ONE_BUD_ANC_MODE, it
+                    )
+                },
+                enabled = state.isPremium,
+                firstInColumn = !opensWithPremiumBanner &&
+                    !state.capabilities.contains(Capability.PRESS_CONFIG)
+            )
+        }
 
         if (state.capabilities.contains(Capability.LOUD_SOUND_REDUCTION) && state.vendorIdHook) {
             StyledToggle(
@@ -268,7 +273,9 @@ fun AccessibilitySettingsScreen(
             )
         }
 
-        if (!hearingAidEnabled && state.vendorIdHook) {
+        if (!hearingAidEnabled && state.vendorIdHook &&
+            state.capabilities.contains(Capability.LISTENING_MODE)
+        ) {
             StyledListItem(
                 name = stringResource(R.string.customize_transparency_mode),
                 onClick = navigateToTransparencyCustomization,

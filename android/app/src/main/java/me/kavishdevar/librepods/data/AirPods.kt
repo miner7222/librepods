@@ -142,8 +142,9 @@ class AirPods3: AirPodsBase(
     connectedVideoRes = R.raw.airpods_3_connected,
     islandVideoRes = R.raw.airpods_3_island,
     ringLayout = OverlayRingLayout(0.2048f, 0.4090f, 0.3075f, 0.7135f),
+    // Head gestures are for the AirPods 4 and the Pro 2 and later, not this one -
+    // it has the motion sensors for spatial audio, which is a different feature.
     capabilities = setOf(
-        Capability.HEAD_GESTURES,
         Capability.PRESS_CONFIG
     )
 )
@@ -160,6 +161,8 @@ class AirPods4: AirPodsBase(
     connectedVideoRes = R.raw.airpods_4_connected,
     islandVideoRes = R.raw.airpods_4_island,
     ringLayout = OverlayRingLayout(0.2052f, 0.4090f, 0.3075f, 0.7135f),
+    // The standard AirPods 4 supports Personalized Volume even though Adaptive
+    // Audio remains exclusive to the noise-cancelling model.
     capabilities = setOf(
         Capability.HEAD_GESTURES,
         Capability.SLEEP_DETECTION,
@@ -180,11 +183,13 @@ class AirPods4ANC: AirPodsBase(
     connectedVideoRes = R.raw.airpods_4_connected,
     islandVideoRes = R.raw.airpods_4_island,
     ringLayout = OverlayRingLayout(0.2052f, 0.4090f, 0.3075f, 0.7135f),
+    // No OFF_LISTENING_MODE: the Off mode is in this one's cycle already. The
+    // switch that puts it there is the Pro 2's and the Pro 3's, whose cycles leave
+    // it out until it is turned on.
     capabilities = setOf(
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
-        Capability.OFF_LISTENING_MODE,
         Capability.ADAPTIVE_AUDIO,
         Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME,
@@ -208,6 +213,9 @@ class AirPodsPro1: AirPodsBase(
     ringLayout = OverlayRingLayout(0.1743f, 0.3786f, 0.2762f, 0.7114f),
     capabilities = setOf(
         Capability.LISTENING_MODE,
+        // Press and hold picks between the noise control cycle and the assistant,
+        // and both are the Pro 1's to pick from.
+        Capability.STEM_CONFIG,
         Capability.PRESS_CONFIG
     )
 )
@@ -231,6 +239,7 @@ class AirPodsPro2Lightning: AirPodsBase(
         Capability.STEM_CONFIG,
         Capability.LOUD_SOUND_REDUCTION,
         Capability.OFF_LISTENING_MODE,
+        Capability.PPE,
         Capability.SLEEP_DETECTION,
         Capability.HEARING_AID,
         Capability.ADAPTIVE_AUDIO,
@@ -260,6 +269,7 @@ class AirPodsPro2USBC: AirPodsBase(
         Capability.STEM_CONFIG,
         Capability.LOUD_SOUND_REDUCTION,
         Capability.OFF_LISTENING_MODE,
+        Capability.PPE,
         Capability.SLEEP_DETECTION,
         Capability.HEARING_AID,
         Capability.ADAPTIVE_AUDIO,
