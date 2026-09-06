@@ -120,9 +120,9 @@ fun StyledToggle(
                 .fillMaxWidth()
                 .background(
                     if (m3eEnabled) if (header) MaterialTheme.colorScheme.primaryContainer else Color.Transparent else MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(if (m3eEnabled) (if (header) 64.dp else 16.dp) else appleMetrics.cardCornerRadius)
+                    RoundedCornerShape(if (m3eEnabled) (if (header) 48.dp else 16.dp) else appleMetrics.cardCornerRadius)
                 )
-                .clip(RoundedCornerShape(if (m3eEnabled) (if (header) 64.dp else 16.dp) else appleMetrics.cardCornerRadius))
+                .clip(RoundedCornerShape(if (m3eEnabled) (if (header) 48.dp else 16.dp) else appleMetrics.cardCornerRadius))
         ) {
             if (m3eEnabled) {
                 StyledToggleContent(
@@ -202,33 +202,9 @@ private fun StyledToggleContent(
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
 
     if (m3eEnabled) {
-        val defaultShape = when {
-            count == 1 -> RoundedCornerShape(24.dp)
-
-            index == 0 -> RoundedCornerShape(
-                topStart = 24.dp,
-                topEnd = 24.dp,
-                bottomStart = 8.dp,
-                bottomEnd = 8.dp
-            )
-
-            index == count - 1 -> RoundedCornerShape(
-                topStart = 8.dp,
-                topEnd = 8.dp,
-                bottomStart = 24.dp,
-                bottomEnd = 24.dp
-            )
-
-            else -> RoundedCornerShape(8.dp)
-        }
         Column {
             SegmentedListItem(
-                shapes = ListItemDefaults.shapes().copy(
-                    shape = defaultShape,
-                    pressedShape = RoundedCornerShape(24.dp),
-                    selectedShape = RoundedCornerShape(24.dp),
-                    hoveredShape = RoundedCornerShape(24.dp),
-                ),
+                shapes = segmentedCardShapes(index, count),
                 onClick = { onCheckedChange(!currentChecked) },
                 trailingContent = {
                     Switch(

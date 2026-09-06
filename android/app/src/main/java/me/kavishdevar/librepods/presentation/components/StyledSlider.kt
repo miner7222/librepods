@@ -252,26 +252,6 @@ fun StyledSlider(
 ) {
     when (LocalDesignSystem.current) {
         DesignSystem.Material -> {
-            val defaultShape = when {
-                count == 1 -> RoundedCornerShape(24.dp)
-
-                index == 0 -> RoundedCornerShape(
-                    topStart = 24.dp,
-                    topEnd = 24.dp,
-                    bottomStart = 8.dp,
-                    bottomEnd = 8.dp
-                )
-
-                index == count - 1 -> RoundedCornerShape(
-                    topStart = 8.dp,
-                    topEnd = 8.dp,
-                    bottomStart = 24.dp,
-                    bottomEnd = 24.dp
-                )
-
-                else -> RoundedCornerShape(8.dp)
-            }
-
             Column(
                 modifier = Modifier.padding(
                     top = sliderSectionTopGap(
@@ -341,12 +321,7 @@ fun StyledSlider(
                 }
 
                 SegmentedListItem(
-                    shapes = ListItemDefaults.shapes().copy(
-                        shape = defaultShape,
-                        pressedShape = RoundedCornerShape(24.dp),
-                        selectedShape = RoundedCornerShape(24.dp),
-                        hoveredShape = RoundedCornerShape(24.dp),
-                    ),
+                    shapes = segmentedCardShapes(index, count),
                     onClick = {},
                     enabled = enabled,
                     modifier = Modifier.heightIn(min = 58.dp),
