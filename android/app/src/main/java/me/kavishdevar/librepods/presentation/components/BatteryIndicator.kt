@@ -67,6 +67,8 @@ import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
@@ -227,11 +229,16 @@ fun BatteryIndicator(
             },
             color = batteryTextColor,
             inlineContent = prefixInlineContent,
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.pretendard)),
-                textAlign = TextAlign.Center
-            ),
+            // The percentage under the ring is a value read off a control, and
+            // it was in iOS's typeface on both themes.
+            style =
+                if (LocalDesignSystem.current == DesignSystem.Material)
+                    MaterialTheme.typography.labelLarge.copy(textAlign = TextAlign.Center)
+                else TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily(Font(R.font.pretendard)),
+                    textAlign = TextAlign.Center
+                ),
         )
     }
 }

@@ -213,11 +213,8 @@ fun HeadTrackingScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 stringResource(R.string.velocity),
-                style = if (m3eEnabled) TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily(Font(R.font.pretendard))
+                style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized.copy(
+                    color = textColor.copy(alpha = 0.6f)
                 ) else LocalAppleDesignMetrics.current.sectionHeaderStyle.copy(
                     color = textColor.copy(alpha = 0.6f)
                 ),
@@ -297,24 +294,33 @@ fun HeadTrackingScreen(
                     }
                     Text(
                         text = text,
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily(Font(R.font.pretendard)),
-                            textAlign = TextAlign.Center
-                        ),
+                        style =
+                            if (m3eEnabled) MaterialTheme.typography.titleLarge.copy(
+                                textAlign = TextAlign.Center
+                            )
+                            else TextStyle(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = FontFamily(Font(R.font.pretendard)),
+                                textAlign = TextAlign.Center
+                            ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 } else {
                     Text(
                         text = text,
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily(Font(R.font.pretendard)),
-                            color = textColor,
-                            textAlign = TextAlign.Center
-                        ),
+                        style =
+                            if (m3eEnabled) MaterialTheme.typography.titleLarge.copy(
+                                color = textColor,
+                                textAlign = TextAlign.Center
+                            )
+                            else TextStyle(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = FontFamily(Font(R.font.pretendard)),
+                                color = textColor,
+                                textAlign = TextAlign.Center
+                            ),
                         modifier = Modifier
                             .fillMaxWidth()
                     )

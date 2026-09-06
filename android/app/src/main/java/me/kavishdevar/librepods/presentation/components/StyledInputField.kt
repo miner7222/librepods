@@ -118,11 +118,13 @@ fun StyledInputField(
                 BasicTextField(
                     state = inputState,
                     lineLimits = if (singleLine) TextFieldLineLimits.SingleLine else TextFieldLineLimits.Default,
-                    textStyle = TextStyle(
-                        fontSize = 16.sp,
-                        color = textColor,
-                        fontFamily = FontFamily(Font(R.font.pretendard))
-                    ),
+                    textStyle =
+                        if (m3eEnabled) MaterialTheme.typography.bodyLarge.copy(color = textColor)
+                        else TextStyle(
+                            fontSize = 16.sp,
+                            color = textColor,
+                            fontFamily = FontFamily(Font(R.font.pretendard))
+                        ),
                     cursorBrush = SolidColor(textColor),
                     decorator = { innerTextField ->
                         Row(
@@ -140,12 +142,16 @@ fun StyledInputField(
                                 ) {
                                     Text(
                                         text = placeholder,
-                                        style = TextStyle(
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Light,
-                                            fontFamily = FontFamily(Font(R.font.pretendard)),
-                                            color = textColor.copy(alpha = 0.8f)
-                                        ),
+                                        style =
+                                            if (m3eEnabled) MaterialTheme.typography.bodyLarge.copy(
+                                                color = textColor.copy(alpha = 0.8f)
+                                            )
+                                            else TextStyle(
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Light,
+                                                fontFamily = FontFamily(Font(R.font.pretendard)),
+                                                color = textColor.copy(alpha = 0.8f)
+                                            ),
                                         modifier = Modifier
                                             .offset(y = yOffset)
                                     )
