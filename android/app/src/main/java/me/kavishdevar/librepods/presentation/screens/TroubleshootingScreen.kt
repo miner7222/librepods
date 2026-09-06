@@ -99,6 +99,9 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.utils.LogCollector
 import java.io.File
 import java.text.SimpleDateFormat
@@ -156,7 +159,19 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     val textColor = if (LocalIsDarkTheme.current) Color.White else Color.Black
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val accentColor = if (LocalIsDarkTheme.current) Color(0xFF007AFF) else Color(0xFF3C6DF5)
-    val buttonBgColor = if (LocalIsDarkTheme.current) Color(0xFF333333) else Color(0xFFDDDDDD)
+    // Nine buttons on this screen shared one hard-coded grey and a 10dp corner in
+    // both themes, which is neither theme'''s idea of a button. These are secondary
+    // actions, so M3 gives them the tonal button: secondary container behind an on
+    // secondary container label. Apple draws the same kind of thing - Disconnect,
+    // Reset, Try Head Gestures - as an opaque card in a 28dp pill with the accent
+    // for a label, and its accent lives in the same role, so only the container and
+    // the corner actually differ.
+    val actionButtonShape =
+        if (m3eEnabled) ButtonDefaults.shape else RoundedCornerShape(28.dp)
+    val buttonBgColor =
+        if (m3eEnabled) MaterialTheme.colorScheme.secondaryContainer
+        else MaterialTheme.colorScheme.surface
+    val buttonFgColor = MaterialTheme.colorScheme.onSecondaryContainer
 
     val isDarkTheme = LocalIsDarkTheme.current
 
@@ -222,10 +237,12 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-            LocalAppleDesignMetrics.current.navigationBarHeight +
-            if (m3eEnabled) LocalAppleDesignMetrics.current.cardColumnTopInset else 0.dp
-        val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+        // This worked the inset out itself, in Apple's terms - status bar, floating
+        // bar, column - and Material's scaffold had already applied its own, so the
+        // heading opened 150 below the title instead of the 16 every other screen
+        // leaves.
+        val topPadding = screenTopPadding()
+        val bottomPadding = screenBottomPadding()
 
         Column(
             modifier = Modifier
@@ -238,7 +255,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
             Spacer(modifier = Modifier.height(topPadding))
             Spacer(
                 modifier = Modifier.height(
-                    if (m3eEnabled) 0.dp else LocalAppleDesignMetrics.current.sectionHeaderColumnTopInset
+                    LocalSectionMetrics.current.sectionHeaderColumnTopInset
                 )
             )
 
@@ -369,10 +386,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                 Button(
                     onClick = { showTroubleshootingSteps = true },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = actionButtonShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = buttonBgColor,
-                        contentColor = textColor
+                        contentColor = buttonFgColor
                     ),
                     enabled = !isCollectingLogs
                 ) {
@@ -437,10 +454,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         }
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = actionButtonShape,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = buttonBgColor,
-                                        contentColor = textColor
+                                        contentColor = buttonFgColor
                                     )
                                 ) {
                                     Text(stringResource(R.string.open_xposed_settings))
@@ -525,10 +542,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         }
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = actionButtonShape,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = buttonBgColor,
-                                        contentColor = textColor
+                                        contentColor = buttonFgColor
                                     )
                                 ) {
                                     Text(stringResource(R.string.continue_action))
@@ -583,10 +600,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                     }
                                                 }
                                             },
-                                            shape = RoundedCornerShape(10.dp),
+                                            shape = actionButtonShape,
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = buttonBgColor,
-                                                contentColor = textColor
+                                                contentColor = buttonFgColor
                                             ),
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -627,10 +644,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                 )
                                             }
                                         },
-                                        shape = RoundedCornerShape(10.dp),
+                                        shape = actionButtonShape,
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = buttonBgColor,
-                                            contentColor = textColor
+                                            contentColor = buttonFgColor
                                         ),
                                         modifier = Modifier.width(150.dp)
                                     ) {
@@ -652,10 +669,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                                 )
                                             }
                                         },
-                                        shape = RoundedCornerShape(10.dp),
+                                        shape = actionButtonShape,
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = buttonBgColor,
-                                            contentColor = textColor
+                                            contentColor = buttonFgColor
                                         ),
                                         modifier = Modifier.width(150.dp)
                                     ) {
@@ -676,10 +693,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                         showTroubleshootingSteps = false
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = actionButtonShape,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = buttonBgColor,
-                                        contentColor = textColor
+                                        contentColor = buttonFgColor
                                     )
                                 ) {
                                     Text(stringResource(R.string.widget_done))
@@ -928,10 +945,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     )
                                 }
                             },
-                            shape = RoundedCornerShape(10.dp),
+                            shape = actionButtonShape,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = buttonBgColor,
-                                contentColor = textColor
+                                contentColor = buttonFgColor
                             ),
                             modifier = Modifier.weight(1f)
                         ) {
@@ -949,10 +966,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                                     saveLauncher.launch(file.absolutePath)
                                 }
                             },
-                            shape = RoundedCornerShape(10.dp),
+                            shape = actionButtonShape,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = buttonBgColor,
-                                contentColor = textColor
+                                contentColor = buttonFgColor
                             ),
                             modifier = Modifier.weight(1f)
                         ) {
