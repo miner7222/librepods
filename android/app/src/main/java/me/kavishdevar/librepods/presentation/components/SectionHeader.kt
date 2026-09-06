@@ -25,7 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
@@ -92,3 +94,11 @@ fun sectionTopGap(
     firstInColumn -> metrics.cardColumnTopInset
     else -> whenNeither
 }
+
+/** The rounded rectangle a group of rows sits in. */
+@Composable
+fun sectionCardShape(): Shape =
+    RoundedCornerShape(
+        if (LocalDesignSystem.current == DesignSystem.Material) 16.dp
+        else LocalAppleDesignMetrics.current.cardCornerRadius
+    )

@@ -106,9 +106,9 @@ fun StyledListItem(
                 .heightIn(min = if (m3eEnabled) 48.dp else appleMetrics.listRowMinHeight)
                 .background(
                     if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius)
+                    sectionCardShape()
                 )
-                .clip(RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius))
+                .clip(sectionCardShape())
         ) {
             StyledListItemContent(
                 name = name,

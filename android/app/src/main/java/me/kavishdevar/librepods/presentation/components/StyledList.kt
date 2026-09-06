@@ -52,8 +52,8 @@ fun StyledList(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface, RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius))
-                .clip(RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius))
+                .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface, sectionCardShape())
+                .clip(sectionCardShape())
         ) {
             if (m3eEnabled && description != null) {
                 Text(
