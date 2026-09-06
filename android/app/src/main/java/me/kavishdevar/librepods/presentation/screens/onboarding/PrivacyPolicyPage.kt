@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +36,10 @@ fun PrivacyPolicyPage(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                // The permissions page pads its card on all four sides; this one
+                // padded the sides only and made up the ends with spacers, which
+                // left 44 below the button where that page leaves 16.
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -185,17 +189,23 @@ fun PrivacyPolicyPage(
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            // The permissions page that follows sizes its row to medium; this is
+            // the same move at the same point of the same flow, so it matches, and
+            // takes its shape, padding and label from that height the way M3 does.
+            val buttonHeight = ButtonDefaults.MediumContainerHeight
             Button(
                 onClick = onForward,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(buttonHeight),
+                shapes = ButtonDefaults.shapesFor(buttonHeight),
+                contentPadding = ButtonDefaults.contentPaddingFor(buttonHeight)
             ) {
                 Text(
                     text = stringResource(R.string.i_agree),
-                    style = MaterialTheme.typography.labelMediumEmphasized
+                    style = ButtonDefaults.textStyleFor(buttonHeight)
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
