@@ -16,19 +16,19 @@
         android:layout_height="wrap_content"
         android:gravity="end"
         android:orientation="horizontal"
-        android:paddingBottom="54dp">
+        android:paddingBottom="60dp">
 
         <TextView
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="16dp"
             android:fontFamily="@font/pretendard"
             android:gravity="center"
             android:text="AirPods Pro"
             android:textColor="@color/popup_text"
-            android:textFontWeight="600"
-            android:textSize="28sp"
+            android:textFontWeight="700"
+            android:textSize="30sp"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText" />
 
@@ -46,10 +46,16 @@
             tools:ignore="HardcodedText" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- The artwork canvas is the card. Apple's renders put the buds and the case
+         at fixed fractions of a 1050x354 canvas, and on the reference sheet those
+         fractions land at the same fractions of the card - the buds' centre at
+         30.7 percent either way. Holding the canvas to a fixed 353dp inside a card
+         wider than that drew the whole composition, rings included, at 92 percent
+         and pulled both halves in towards the middle. -->
     <FrameLayout
-        android:layout_width="353dp"
+        android:id="@+id/artwork_group"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:clipChildren="false">
 
         <VideoView
@@ -62,34 +68,39 @@
             tools:ignore="HardcodedText" />
 
         <!-- Full-canvas transparent layers share the video coordinate system.
-             The same layers and aspect ratio are used by settings BatteryView. -->
+             The same layers and aspect ratio are used by settings BatteryView.
+             adjustViewBounds takes the height from the canvas, so the stills keep
+             the clip's frame however wide the card turns out to be. -->
         <FrameLayout
             android:id="@+id/artwork"
             android:layout_width="match_parent"
-            android:layout_height="119dp"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content"
             android:alpha="0">
             <ImageView
                 android:id="@+id/artwork_buds"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
                 android:contentDescription="@string/buds"
                 android:scaleType="fitCenter"
                 android:src="@drawable/airpods_4_buds" />
             <ImageView
                 android:id="@+id/artwork_case"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
                 android:contentDescription="@string/case_alt"
                 android:scaleType="fitCenter"
                 android:src="@drawable/airpods_4_case" />
         </FrameLayout>
     </FrameLayout>
 
+    <!-- The guidelines below are fractions of the artwork canvas, so this row has
+         to be as wide as it is or the rings sit off their own renders. -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="353dp"
+        android:id="@+id/ring_row"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="14dp"
         android:clipChildren="false">
 
@@ -257,7 +268,7 @@
                     android:id="@+id/left_battery_badge"
                     android:layout_width="14dp"
                     android:layout_height="16dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_l_circle_fill"
@@ -343,7 +354,7 @@
                     android:id="@+id/right_battery_badge"
                     android:layout_width="14dp"
                     android:layout_height="16dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_r_circle_fill"
@@ -429,7 +440,7 @@
                     android:id="@+id/case_battery_badge"
                     android:layout_width="17dp"
                     android:layout_height="17dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="5dp"
                     android:importantForAccessibility="no"
                     android:scaleType="fitCenter"
                     android:src="@drawable/sf_chargingcase_wireless_fill"

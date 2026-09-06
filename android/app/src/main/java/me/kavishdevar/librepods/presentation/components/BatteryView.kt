@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -51,13 +50,22 @@ import me.kavishdevar.librepods.data.BatteryStatus
 import kotlin.io.encoding.ExperimentalEncodingApi
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
+/**
+ * How much of the screen the artwork canvas takes, sheet and settings alike.
+ *
+ * The sheet's own card is the screen less a 3.57 percent margin either side, and the
+ * reference heads its settings with a canvas of the same width.
+ */
+private const val SHEET_WIDTH_FRACTION = 1f - 2 * 0.0357f
+
 /** Stills are two transparent layers on the shared 1050 × 354 artwork canvas. */
 @Composable
 fun BatteryView(
     batteryList: List<Battery>,
     budsRes: Int,
     caseRes: Int,
-    ringLayout: OverlayRingLayout = OverlayRingLayout()
+    ringLayout: OverlayRingLayout = OverlayRingLayout(),
+    artworkScale: Float = 1f
 ) {
     val left = batteryList.find { it.component == BatteryComponent.LEFT }
     val right = batteryList.find { it.component == BatteryComponent.RIGHT }
@@ -68,8 +76,16 @@ fun BatteryView(
     val combined = left?.status == right?.status && (leftLevel - rightLevel) in -3..3
 
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Column(Modifier.widthIn(max = 353.dp).fillMaxWidth()) {
-            Box(Modifier.fillMaxWidth().aspectRatio(1050f / 354f)) {
+        // The canvas here is as wide as the sheet's card, which is what the reference
+        // heads its settings with: measured off one, the renders span 67.87 percent
+        // of the screen, and this canvas puts them at 67.85. Held to 353dp it came to
+        // 63, and the rings with it.
+        Column(Modifier.fillMaxWidth(SHEET_WIDTH_FRACTION)) {
+            Box(
+                Modifier.fillMaxWidth(artworkScale)
+                    .align(Alignment.CenterHorizontally)
+                    .aspectRatio(1050f / 354f)
+            ) {
                 Image(
                     bitmap = ImageBitmap.imageResource(budsRes),
                     contentDescription = stringResource(R.string.buds),

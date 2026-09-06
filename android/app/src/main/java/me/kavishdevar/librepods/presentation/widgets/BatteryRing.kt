@@ -35,8 +35,14 @@ import android.util.TypedValue
  */
 object BatteryRing {
 
-    /** Rings are about a tenth of their diameter thick, popup and widget alike. */
-    const val WIDGET_STROKE_RATIO = 1f / 10.5f
+    /**
+     * How thick the ring is, popup and widget alike.
+     *
+     * An eleventh of the diameter: 3.3 points on a 36.7 point ring, scanned across
+     * the middle of the reference's own rings where a horizontal line crosses the
+     * band twice and each crossing is the width.
+     */
+    const val WIDGET_STROKE_RATIO = 1f / 11f
 
     fun bitmap(
         context: Context,
