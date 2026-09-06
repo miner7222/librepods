@@ -1,16 +1,23 @@
 package me.kavishdevar.librepods.presentation.navigation
 
-import androidx.activity.BackEventCompat.Companion.EDGE_LEFT
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.PathEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -75,6 +82,9 @@ fun AppNavGraph(
     }
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
+    val sharedAxisSlidePx = with(LocalDensity.current) {
+        SharedAxisSlideDistance.roundToPx()
+    }
 
     SharedTransitionLayout {
         NavDisplay(
@@ -357,50 +367,111 @@ fun AppNavGraph(
                 }
             },
             transitionSpec = {
-                slideInHorizontally { it } togetherWith slideOutHorizontally { -it / 4 }
+                if (m3eEnabled) sharedAxis(back = false, slidePx = sharedAxisSlidePx)
+                else appleSlide(back = false)
             },
             popTransitionSpec = {
-                slideInHorizontally { -it / 4 } togetherWith slideOutHorizontally { it }
+                if (m3eEnabled) sharedAxis(back = true, slidePx = sharedAxisSlidePx)
+                else appleSlide(back = true)
             },
-            predictivePopTransitionSpec = { swipeEdge ->
-                if (m3eEnabled) {
-                    val enterOffset: (Int) -> Int =
-                        if (swipeEdge == EDGE_LEFT) {
-                            { -it / 6 }
-                        } else {
-                            { it / 6 }
-                        }
-
-                    val exitOffset: (Int) -> Int =
-                        if (swipeEdge == EDGE_LEFT) {
-                            { it / 8 }
-                        } else {
-                            { -it / 8 }
-                        }
-
-                    fadeIn(
-                        animationSpec = tween(250)
-                    ) +
-                        slideInHorizontally(
-                            initialOffsetX = enterOffset,
-                            animationSpec = tween(250)
-                        ) togetherWith
-                        fadeOut(
-                            targetAlpha = 0.75f,
-                            animationSpec = tween(250)
-                        ) +
-                        scaleOut(
-                            targetScale = 0.85f,
-                            animationSpec = tween(250)
-                        ) +
-                        slideOutHorizontally(
-                            targetOffsetX = exitOffset,
-                            animationSpec = tween(250)
-                        )
-                } else {
-                    slideInHorizontally { -it / 4 } togetherWith slideOutHorizontally { it }
-                }
+            predictivePopTransitionSpec = {
+                if (m3eEnabled) materialPredictiveBack() else appleSlide(back = true)
             },
         )
     }
 }
+
+/**
+ * Material's emphasized easing, in the path interpolator Material publishes for
+ * Android: M 0,0 C 0.05,0 0.133333,0.06 0.166666,0.4 C 0.208333,0.82 0.25,1 1,1. It
+ * is a path rather than one cubic, which is why the guidance tells CSS and iOS to
+ * fall back to the standard set - Compose can follow the path.
+ */
+private val EmphasizedEasing = PathEasing(
+    Path().apply {
+        moveTo(0f, 0f)
+        cubicTo(0.05f, 0f, 0.133333f, 0.06f, 0.166666f, 0.4f)
+        cubicTo(0.208333f, 0.82f, 0.25f, 1f, 1f, 1f)
+    }
+)
+
+/**
+ * What MaterialSharedAxis - the transition Material names as forward-and-backward on
+ * Android - actually uses. It reads motionDurationLong1 and the emphasized
+ * interpolator off the theme, and slides a fixed
+ * mtrl_transition_shared_axis_slide_distance rather than any share of the width,
+ * which is how Material keeps a screen from crossing the whole device.
+ */
+private const val SharedAxisDurationMs = 450
+private val SharedAxisSlideDistance = 30.dp
+
+/**
+ * Material's fade-through and Google's predictive back spec agree on the handover:
+ * the leaving screen is fully transparent 35% of the way through, and only then does
+ * the arriving one begin to appear, so the two are never both half visible.
+ */
+private const val FadeThroughThreshold = 0.35f
+private val FadeOutDurationMs = (SharedAxisDurationMs * FadeThroughThreshold).toInt()
+private val FadeInDurationMs = SharedAxisDurationMs - FadeOutDurationMs
+
+/** The curve Google gives for a predictive back on a full screen surface. */
+private val PredictiveBackEasing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+
+/**
+ * Apple slides the arriving screen the whole width and drags the leaving one a
+ * quarter of it behind - the parallax Material names as the iOS default.
+ */
+private fun appleSlide(back: Boolean): ContentTransform =
+    if (back) {
+        slideInHorizontally { -it / 4 } togetherWith slideOutHorizontally { it }
+    } else {
+        slideInHorizontally { it } togetherWith slideOutHorizontally { -it / 4 }
+    }
+
+/** MaterialSharedAxis along X, in Compose. */
+private fun sharedAxis(back: Boolean, slidePx: Int): ContentTransform {
+    val direction = if (back) -1 else 1
+    return (
+        slideInHorizontally(
+            initialOffsetX = { direction * slidePx },
+            animationSpec = tween(SharedAxisDurationMs, easing = EmphasizedEasing)
+        ) + fadeIn(
+            animationSpec = tween(
+                durationMillis = FadeInDurationMs,
+                delayMillis = FadeOutDurationMs,
+                easing = LinearEasing
+            )
+        )
+    ) togetherWith (
+        slideOutHorizontally(
+            targetOffsetX = { -direction * slidePx },
+            animationSpec = tween(SharedAxisDurationMs, easing = EmphasizedEasing)
+        ) + fadeOut(animationSpec = tween(FadeOutDurationMs, easing = LinearEasing))
+    )
+}
+
+/**
+ * Google's motion spec for a predictive back between two full screen surfaces: the
+ * screen being left scales to 90% and the one returning from 110%, with the same fade
+ * through between them. No sideways travel - the shift in that spec belongs to the
+ * shared element variant. What was here slid an eighth of the way across and stopped
+ * at three quarters opacity, so the screen never finished leaving; it stopped
+ * existing where it stood.
+ */
+private fun materialPredictiveBack(): ContentTransform = (
+    scaleIn(
+        initialScale = 1.1f,
+        animationSpec = tween(SharedAxisDurationMs, easing = PredictiveBackEasing)
+    ) + fadeIn(
+        animationSpec = tween(
+            durationMillis = FadeInDurationMs,
+            delayMillis = FadeOutDurationMs,
+            easing = LinearEasing
+        )
+    )
+) togetherWith (
+    scaleOut(
+        targetScale = 0.9f,
+        animationSpec = tween(SharedAxisDurationMs, easing = PredictiveBackEasing)
+    ) + fadeOut(animationSpec = tween(FadeOutDurationMs, easing = LinearEasing))
+)
