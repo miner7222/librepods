@@ -87,7 +87,17 @@ class BLEManager(private val context: Context) {
     private var lastBroadcastTime: Long = 0
     private val processedAddresses = mutableSetOf<String>()
 
-    private val lastValidCaseBatteryMap = mutableMapOf<String, Int>()
+    /**
+     * The last case level the broadcast actually carried.
+     *
+     * A case with no bud seated cannot measure itself and sends 0xFF, so the level
+     * that stands in for it has to be remembered. It belongs to the case, not to the
+     * address the packet arrived on: those are resolvable private addresses, two of
+     * them in flight at once and both rotating. Keyed per address, and dropped again
+     * whenever an address went stale, the fallback was always empty by the time
+     * anything asked for it.
+     */
+    private var lastValidCaseBattery: Int? = null
     private val modelNames = mapOf(
         0x0E20 to "AirPods Pro",
         0x1420 to "AirPods Pro 2",
@@ -375,6 +385,13 @@ class BLEManager(private val context: Context) {
             airPodsStatusListener?.let { listener ->
                 if (previousStatus == null) {
                     listener.onBroadcastFromNewAddress(parsedStatus)
+                    // A first advertisement carries readings as much as any other
+                    // does. The addresses are resolvable private ones, dropped again
+                    // after fifteen seconds of quiet, while the broadcast comes in
+                    // bursts further apart than that - so most of what arrives is a
+                    // first advertisement from an address last seen minutes ago, and
+                    // none of it counted as battery news.
+                    listener.onBatteryChanged(parsedStatus)
                     Log.d(TAG, "New AirPods device detected: $address")
                 } else {
                     // lastSeen moves with every advertisement, so comparing the whole
@@ -394,9 +411,16 @@ class BLEManager(private val context: Context) {
                         Log.d(TAG, "Ear state changed - Left: ${parsedStatus.isLeftInEar}, Right: ${parsedStatus.isRightInEar}")
                     }
 
+                    // The charge states count too. A case with both buds out
+                    // cannot measure itself and sends its level as unknown whether or
+                    // not it is on a charger, so going on the levels alone meant
+                    // seating a bud in a charging case was never news.
                     if (parsedStatus.leftBattery != previousStatus.leftBattery ||
                         parsedStatus.rightBattery != previousStatus.rightBattery ||
-                        parsedStatus.caseBattery != previousStatus.caseBattery) {
+                        parsedStatus.caseBattery != previousStatus.caseBattery ||
+                        parsedStatus.isLeftCharging != previousStatus.isLeftCharging ||
+                        parsedStatus.isRightCharging != previousStatus.isRightCharging ||
+                        parsedStatus.isCaseCharging != previousStatus.isCaseCharging) {
                         listener.onBatteryChanged(parsedStatus)
                         Log.d(TAG, "Battery changed - Left: ${parsedStatus.leftBattery}, Right: ${parsedStatus.rightBattery}, Case: ${parsedStatus.caseBattery}")
                     }
@@ -430,7 +454,7 @@ class BLEManager(private val context: Context) {
         val model = modelNames[modelId] ?: "Unknown ($modelId)"
 
         val status = data[5].toInt() and 0xFF
-//        val flagsCase = data[7].toInt() and 0xFF
+        val flags = (data[7].toInt() shr 4) and 0x0F
         val lid = data[8].toInt() and 0xFF
         val color = colorNames[data[9].toInt()] ?: "Unknown"
         val conn = connStates[data[10].toInt()] ?: "Unknown (${data[10].toInt()})"
@@ -450,13 +474,23 @@ class BLEManager(private val context: Context) {
         val (isLeftCharging, leftBattery) = formatBattery(decrypted[leftByteIndex].toInt() and 0xFF)
         val (isRightCharging, rightBattery) = formatBattery(decrypted[rightByteIndex].toInt() and 0xFF)
 
+        // The case's level and its charger sit in different bytes, and only the
+        // level is in the encrypted one. A case with no bud seated cannot measure
+        // itself and sends 0xFF there, which the level already reads as "unknown" -
+        // but the top bit of that byte is the charging bit, so read the same way the
+        // sentinel also says "on a charger", and the sheet showed a case charging
+        // whenever it could not say how full it was. The unencrypted flags nibble
+        // carries the charger on its own: across every advertisement taken with a
+        // case going on and off one, its bit 2 tracked the charger exactly while the
+        // top bit of the encrypted byte did not.
         val rawCaseBatteryByte = decrypted[3].toInt() and 0xFF
-        val (isCaseCharging, rawCaseBattery) = formatBattery(rawCaseBatteryByte)
+        val rawCaseBattery = rawCaseBatteryByte and 0x7F
+        val isCaseCharging = (flags and 0x04) != 0
 
-        val caseBattery = if (rawCaseBatteryByte == 0xFF || (isCaseCharging && rawCaseBattery == 127)) {
-            lastValidCaseBatteryMap[address]
+        val caseBattery = if (rawCaseBatteryByte == 0xFF || rawCaseBattery == 127) {
+            lastValidCaseBattery
         } else {
-            lastValidCaseBatteryMap[address] = rawCaseBattery
+            lastValidCaseBattery = rawCaseBattery
             rawCaseBattery
         }
 
@@ -494,7 +528,6 @@ class BLEManager(private val context: Context) {
             // what was learned about one has to go when the address does. Left alone
             // these two grew for as long as the service ran.
             verifiedAddresses.remove(device.key)
-            lastValidCaseBatteryMap.remove(device.key)
             Log.d(TAG, "Removed stale device from tracking: ${device.key}")
         }
 
