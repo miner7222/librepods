@@ -417,12 +417,16 @@ fun AirPodsSettingsScreen(
                                     TimeUnit.MILLISECONDS.toDays(state.timeUntilFOSSPremiumExpiry)
                                         .toInt()
                                 )
-                            ), modifier = Modifier.padding(16.dp), style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                fontFamily = FontFamily(Font(R.font.pretendard))
-                            )
+                            ), modifier = Modifier.padding(16.dp), style =
+                                if (m3eEnabled) MaterialTheme.typography.bodyLargeEmphasized.copy(
+                                    color = Color.White
+                                )
+                                else TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontFamily = FontFamily(Font(R.font.pretendard))
+                                )
                         )
                     }
                 }

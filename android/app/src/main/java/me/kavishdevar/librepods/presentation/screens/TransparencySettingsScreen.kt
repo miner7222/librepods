@@ -59,10 +59,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.kavishdevar.librepods.R
@@ -269,11 +265,8 @@ fun TransparencySettingsScreen(
 
             Text(
                 text = stringResource(R.string.equalizer),
-                style = if (m3eEnabled) TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily(Font(R.font.pretendard))
+                style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized.copy(
+                    color = textColor.copy(alpha = 0.6f)
                 ) else LocalAppleDesignMetrics.current.sectionHeaderStyle.copy(
                     color = textColor.copy(alpha = 0.6f)
                 ),

@@ -244,11 +244,8 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
 
             Text(
                 text = stringResource(R.string.saved_logs),
-                style = if (m3eEnabled) TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily(Font(R.font.pretendard))
+                style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized.copy(
+                    color = textColor.copy(alpha = 0.6f)
                 ) else LocalAppleDesignMetrics.current.sectionHeaderStyle.copy(
                     color = textColor.copy(alpha = 0.6f)
                 ),
@@ -395,11 +392,8 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
 
                     Text(
                         text = stringResource(R.string.troubleshooting_steps),
-                        style = if (m3eEnabled) TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Light,
-                            color = textColor.copy(alpha = 0.6f),
-                            fontFamily = FontFamily(Font(R.font.pretendard))
+                        style = if (m3eEnabled) MaterialTheme.typography.bodyMedium.copy(
+                            color = textColor.copy(alpha = 0.6f)
                         ) else LocalAppleDesignMetrics.current.sectionFooterStyle.copy(
                             color = textColor.copy(alpha = 0.6f)
                         ),
@@ -843,19 +837,26 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
                     ) {
                         Text(
                             text = selectedLogFile?.name ?: stringResource(R.string.log_content),
-                            style = TextStyle(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp,
-                                fontFamily = FontFamily(Font(R.font.pretendard))
-                            ),
+                            // Another 20sp, and the same nearest heading role.
+                            style =
+                                if (m3eEnabled) MaterialTheme.typography.titleLarge
+                                else TextStyle(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp,
+                                    fontFamily = FontFamily(Font(R.font.pretendard))
+                                ),
                             color = textColor
                         )
                         Text(
                             text = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
                                 .format(Date(selectedLogFile?.lastModified() ?: 0)),
-                            fontSize = 14.sp,
-                            color = textColor.copy(alpha = 0.7f),
-                            fontFamily = FontFamily(Font(R.font.pretendard))
+                            style =
+                                if (m3eEnabled) MaterialTheme.typography.bodyMedium
+                                else TextStyle(
+                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily(Font(R.font.pretendard))
+                                ),
+                            color = textColor.copy(alpha = 0.7f)
                         )
                     }
 

@@ -156,12 +156,18 @@ fun HearingAidScreen(
 
         Text(
             text = stringResource(R.string.hearing_aid_description),
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Light,
-                color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(alpha = 0.6f),
-                fontFamily = FontFamily(Font(R.font.pretendard))
-            ),
+            style =
+                if (m3eEnabled) MaterialTheme.typography.bodySmall.copy(
+                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black)
+                        .copy(alpha = 0.6f)
+                )
+                else TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Light,
+                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black)
+                        .copy(alpha = 0.6f),
+                    fontFamily = FontFamily(Font(R.font.pretendard))
+                ),
             modifier = Modifier.padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
         )
         Spacer(modifier = Modifier.height(16.dp))

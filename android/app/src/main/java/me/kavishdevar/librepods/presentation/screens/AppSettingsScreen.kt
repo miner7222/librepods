@@ -189,12 +189,16 @@ fun AppSettingsScreen(
                     ),
                     modifier = Modifier
                         .padding(16.dp),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontFamily = FontFamily(Font(R.font.pretendard))
-                    )
+                    style =
+                        if (m3eEnabled) MaterialTheme.typography.bodyLargeEmphasized.copy(
+                            color = Color.White
+                        )
+                        else TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontFamily = FontFamily(Font(R.font.pretendard))
+                        )
                 )
             }
         }
@@ -484,7 +488,7 @@ fun AppSettingsScreen(
                 Column {
                     Text(
                         stringResource(R.string.enter_custom_camera_package),
-                        fontFamily = FontFamily(Font(R.font.pretendard)),
+                        fontFamily = if (m3eEnabled) null else FontFamily(Font(R.font.pretendard)),
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
@@ -525,8 +529,8 @@ fun AppSettingsScreen(
                     }) {
                     Text(
                         stringResource(R.string.save),
-                        fontFamily = FontFamily(Font(R.font.pretendard)),
-                        fontWeight = FontWeight.Medium
+                        fontFamily = if (m3eEnabled) null else FontFamily(Font(R.font.pretendard)),
+                        fontWeight = if (m3eEnabled) null else FontWeight.Medium
                     )
                 }
             }, dismissButton = {
@@ -534,8 +538,8 @@ fun AppSettingsScreen(
                     onClick = { viewModel.setShowCameraDialog(false) }) {
                     Text(
                         stringResource(R.string.cancel),
-                        fontFamily = FontFamily(Font(R.font.pretendard)),
-                        fontWeight = FontWeight.Medium
+                        fontFamily = if (m3eEnabled) null else FontFamily(Font(R.font.pretendard)),
+                        fontWeight = if (m3eEnabled) null else FontWeight.Medium
                     )
                 }
             })
@@ -570,7 +574,12 @@ fun AppSettingsScreen(
                )
                Text (
                    text = stringResource(R.string.describe_your_issue),
-                   style = TextStyle(
+                   // 18sp is not on the M3 scale; title medium is the heading
+                   // role nearest it.
+                   style = if (m3eEnabled) MaterialTheme.typography.titleMedium.copy(
+                       textAlign = TextAlign.Center,
+                       color = if (LocalIsDarkTheme.current) Color.White else Color.Black
+                   ) else TextStyle(
                        fontSize = 18.sp,
                        fontFamily = FontFamily(Font(R.font.pretendard)),
                        fontWeight = FontWeight.Bold,

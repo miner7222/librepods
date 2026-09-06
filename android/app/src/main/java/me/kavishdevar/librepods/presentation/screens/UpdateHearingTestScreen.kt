@@ -113,6 +113,7 @@ fun UpdateHearingTestScreen(
     setATTCharacteristicValue: (ATTHandles, ByteArray) -> Unit,
     onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
+    val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val verticalScrollState = rememberScrollState()
     ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)
 
@@ -272,10 +273,12 @@ fun UpdateHearingTestScreen(
                     },
 //                        label = { Text("Value", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.pretendard))) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.pretendard)),
-                        fontSize = 14.sp
-                    ),
+                    textStyle =
+                        if (m3eEnabled) MaterialTheme.typography.bodyMedium
+                        else TextStyle(
+                            fontFamily = FontFamily(Font(R.font.pretendard)),
+                            fontSize = 14.sp
+                        ),
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
@@ -291,10 +294,12 @@ fun UpdateHearingTestScreen(
                     },
 //                        label = { Text("Value", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.pretendard))) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.pretendard)),
-                        fontSize = 14.sp
-                    ),
+                    textStyle =
+                        if (m3eEnabled) MaterialTheme.typography.bodyMedium
+                        else TextStyle(
+                            fontFamily = FontFamily(Font(R.font.pretendard)),
+                            fontSize = 14.sp
+                        ),
                     modifier = Modifier.weight(1f)
                 )
             }
