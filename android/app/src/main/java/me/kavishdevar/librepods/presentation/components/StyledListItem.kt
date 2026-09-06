@@ -116,7 +116,7 @@ fun StyledListItem(
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = if (m3eEnabled) MaterialTheme.typography.labelSmallEmphasized else appleMetrics.sectionHeaderStyle
+                    style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized else appleMetrics.sectionHeaderStyle
                 )
             }
         }
@@ -396,7 +396,7 @@ private fun StyledListItemContent(
                     supportingContent = {
                         if (descriptionText != null) Text(
                             descriptionText,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             inlineContent = inlineContent,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
@@ -404,7 +404,7 @@ private fun StyledListItemContent(
                     content = {
                         Text(
                             text = name,
-                            style = MaterialTheme.typography.labelMediumEmphasized,
+                            style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(
                                 top = 4.dp,
                                 bottom = if (descriptionText != null) 0.dp else 4.dp

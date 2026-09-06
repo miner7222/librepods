@@ -111,7 +111,7 @@ fun StyledToggle(
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = if (m3eEnabled) MaterialTheme.typography.labelSmallEmphasized else appleMetrics.sectionHeaderStyle
+                    style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized else appleMetrics.sectionHeaderStyle
                 )
             }
         }
@@ -218,7 +218,7 @@ private fun StyledToggleContent(
                     {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier
                                 // No inset above outside the header style: the list
                                 // rows put their supporting line straight under the
@@ -232,7 +232,7 @@ private fun StyledToggleContent(
                 content = {
                     Text(
                         text = label,
-                        style = MaterialTheme.typography.labelMediumEmphasized,
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier
                             .padding(
                                 top = if (header) 8.dp else 4.dp,
@@ -245,7 +245,6 @@ private fun StyledToggleContent(
                 },
                 enabled = enabled,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.heightIn(min = 64.dp),
                 colors = if (header) ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.primaryContainer) else ListItemDefaults.segmentedColors()
             )
             if (index+1 != count) {

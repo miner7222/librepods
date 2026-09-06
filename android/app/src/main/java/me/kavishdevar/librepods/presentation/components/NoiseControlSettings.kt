@@ -145,7 +145,7 @@ fun NoiseControlSettings(
                     Text(
                         text = stringResource(R.string.noise_control),
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelSmallEmphasized
+                        style = MaterialTheme.typography.labelLargeEmphasized
                     )
                 }
                 Row(
@@ -170,6 +170,10 @@ fun NoiseControlSettings(
                                     options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                                 },
+                                // Unselected filled toggles are surface
+                                // container, which is what the screen behind them
+                                // is - so they take surface, the tone the list
+                                // items beside them use for the same reason.
                                 colors = ToggleButtonDefaults.toggleButtonColors()
                                     .copy(containerColor = MaterialTheme.colorScheme.surface),
                                 modifier = Modifier.fillMaxWidth()
@@ -199,7 +203,7 @@ fun NoiseControlSettings(
 
                             Text(
                                 text = stringResource(labelRes),
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.labelLarge,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
                                 modifier = Modifier.fillMaxWidth()

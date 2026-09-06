@@ -36,9 +36,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -94,34 +96,46 @@ fun ConfirmationDialog(
                         dismissOnClickOutside = false
                     )
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    // BasicAlertDialog brings no container of its own - that
+                    // is what separates it from AlertDialog - so the M3 dialog
+                    // surface has to be put back here, along with the padding
+                    // that belongs to it: 24 around the edge, 16 under the
+                    // headline, 24 above the actions, 8 between them. It had
+                    // been one flat 16 everywhere, on no surface at all.
+                    Surface(
+                        shape = AlertDialogDefaults.shape,
+                        color = AlertDialogDefaults.containerColor,
+                        tonalElevation = AlertDialogDefaults.TonalElevation
                     ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Text(
-                            text = message,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Row(modifier = Modifier.align(Alignment.End)) {
-                            TextButton(
-                                onClick = onDismiss
+                        Column(modifier = Modifier.padding(24.dp)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = AlertDialogDefaults.titleContentColor
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = AlertDialogDefaults.textContentColor
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Row(
+                                modifier = Modifier.align(Alignment.End),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(
-                                    text = dismissText,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-                            TextButton(
-                                onClick = onConfirm
-                            ) {
-                                Text(
-                                    text = confirmText,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
+                                TextButton(onClick = onDismiss) {
+                                    Text(
+                                        text = dismissText,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+                                TextButton(onClick = onConfirm) {
+                                    Text(
+                                        text = confirmText,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
                             }
                         }
                     }

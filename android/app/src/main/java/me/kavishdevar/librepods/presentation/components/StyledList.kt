@@ -65,20 +65,20 @@ fun StyledList(
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = if (m3eEnabled) MaterialTheme.typography.labelSmallEmphasized else appleMetrics.sectionHeaderStyle
+                    style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized else appleMetrics.sectionHeaderStyle
                 )
             }
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface, RoundedCornerShape(if (m3eEnabled) 24.dp else appleMetrics.cardCornerRadius))
-                .clip(RoundedCornerShape(if (m3eEnabled) 24.dp else appleMetrics.cardCornerRadius))
+                .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surface, RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius))
+                .clip(RoundedCornerShape(if (m3eEnabled) 16.dp else appleMetrics.cardCornerRadius))
         ) {
             if (m3eEnabled && description != null) {
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(0.8f),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )

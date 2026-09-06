@@ -101,15 +101,17 @@ fun StyledButton(
             when (materialButtonStyle) {
                 MaterialButtonStyle.Filled -> {
                     Button(
-                        modifier = modifier.height(48.dp),
+                        modifier = modifier,
                         onClick = onClick,
+                        enabled = enabled,
                         content = content
                     )
                 }
                 MaterialButtonStyle.Tonal -> {
                     FilledTonalButton(
-                        modifier = modifier.height(48.dp),
+                        modifier = modifier,
                         onClick = onClick,
+                        enabled = enabled,
                         content = content,
                         colors = ButtonDefaults.filledTonalButtonColors(containerColor = surfaceColor)
                     )
@@ -117,16 +119,18 @@ fun StyledButton(
 
                 MaterialButtonStyle.Outlined -> {
                     OutlinedButton(
-                        modifier = modifier.height(48.dp),
+                        modifier = modifier,
                         onClick = onClick,
+                        enabled = enabled,
                         content = content
                     )
                 }
 
                 MaterialButtonStyle.Normal -> {
                     TextButton(
-                        modifier = modifier.height(48.dp),
+                        modifier = modifier,
                         onClick = onClick,
+                        enabled = enabled,
                         content = content
                     )
                 }
