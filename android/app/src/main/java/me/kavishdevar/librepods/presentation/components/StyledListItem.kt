@@ -94,32 +94,12 @@ fun StyledListItem(
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
     val sectionMetrics = LocalSectionMetrics.current
-    val sectionTopGap = when {
-        title != null && firstInColumn -> sectionMetrics.sectionHeaderColumnTopInset
-        title != null -> sectionMetrics.sectionHeaderTopGap
-        firstInColumn -> sectionMetrics.cardColumnTopInset
-        else -> sectionMetrics.cardGap
-    }
+    val sectionTopGap =
+        sectionTopGap(sectionMetrics, hasHeader = title != null, firstInColumn = firstInColumn)
     Column(
         modifier = Modifier.padding(top = sectionTopGap)
     ) {
-        title?.let {
-            Box(
-                modifier = Modifier
-                    .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = if (m3eEnabled) 16.dp else appleMetrics.cardHorizontalInset)
-                    .padding(
-                        top = 4.dp,
-                        bottom = sectionMetrics.sectionHeaderBottomGap
-                    )
-            ) {
-                Text(
-                    text = it,
-                    color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = if (m3eEnabled) MaterialTheme.typography.labelLargeEmphasized else appleMetrics.sectionHeaderStyle
-                )
-            }
-        }
+        title?.let { SectionHeader(it) }
         Column(
             modifier = modifier
                 .fillMaxWidth()

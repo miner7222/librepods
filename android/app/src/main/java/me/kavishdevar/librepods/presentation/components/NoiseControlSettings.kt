@@ -134,20 +134,7 @@ fun NoiseControlSettings(
                     top = LocalSectionMetrics.current.sectionHeaderTopGap
                 )
             ) {
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(
-                            top = 4.dp,
-                            bottom = LocalSectionMetrics.current.sectionHeaderBottomGap
-                        )
-                ) {
-                    Text(
-                        text = stringResource(R.string.noise_control),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLargeEmphasized
-                    )
-                }
+                SectionHeader(stringResource(R.string.noise_control))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
