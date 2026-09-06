@@ -141,184 +141,67 @@ private fun robotoFlex(
     )
 )
 
-val display = robotoFlex(
-    wght = 800f,
-    grad = 100f,
-    wdth = 100f
-)
-
-val displayEmphasized = robotoFlex(
-    wght = 1000f,
-    slnt = -2f,
-    grad = 150f,
-    wdth = 150f,
-)
-
-val body = robotoFlex()
-
-val bodyEmphasized = robotoFlex(
-    wght = 600f,
-    wdth = 130f,
-    grad = 75f,
-)
-
-val label = robotoFlex(
-    wght = 450f,
-    grad = 50f
-)
-
-val labelEmphasized = robotoFlex(
-    wght = 600f,
-    wdth = 140f,
-    grad = 75f
-)
+/*
+ * M3 gives every role a weight, and this app cannot take it from the type scale:
+ * the weight is an axis of the variable font, fixed when the family is built, and
+ * a family's axis beats whatever fontWeight the style carries. So the weights have
+ * to be families, and three cover the scale.
+ *
+ * Regular carries display, headline, title large and body. Medium carries title
+ * medium and small, every label, and the emphasized form of everything Regular
+ * carries. Bold carries the emphasized form of title medium and small and of the
+ * labels. Nothing else separates a style from its emphasized twin - M3 is explicit
+ * that only weight and tracking change - so the extra width and grade the
+ * emphasized families used to stretch themselves by are gone with them.
+ */
+private val regular = robotoFlex(wght = 400f)
+private val medium = robotoFlex(wght = 500f)
+private val bold = robotoFlex(wght = 700f)
 
 
+/*
+ * Roboto Flex on every role, at the sizes M3 publishes. The scale had been
+ * rewritten as well as re-fonted: title sat at the headline sizes, display was
+ * shrunk below them, and body and label had both been pushed to 14/16/18 - so the
+ * two overlapped exactly and a label no longer read as smaller than the body it
+ * sat beside. Only the typeface here is ours; the fifteen sizes are M3's.
+ */
 val MaterialTypography = Typography().run {
     copy(
-        titleSmall = titleSmall.copy(
-            fontFamily = display,
-            fontSize = 24.sp,
-            lineHeight = 30.sp,
-        ),
+        displayLarge = displayLarge.copy(fontFamily = regular),
+        displayMedium = displayMedium.copy(fontFamily = regular),
+        displaySmall = displaySmall.copy(fontFamily = regular),
+        displayLargeEmphasized = displayLargeEmphasized.copy(fontFamily = medium),
+        displayMediumEmphasized = displayMediumEmphasized.copy(fontFamily = medium),
+        displaySmallEmphasized = displaySmallEmphasized.copy(fontFamily = medium),
 
-        titleMedium = titleMedium.copy(
-            fontFamily = display,
-            fontSize = 28.sp,
-            lineHeight = 32.sp,
-        ),
+        headlineLarge = headlineLarge.copy(fontFamily = regular),
+        headlineMedium = headlineMedium.copy(fontFamily = regular),
+        headlineSmall = headlineSmall.copy(fontFamily = regular),
+        headlineLargeEmphasized = headlineLargeEmphasized.copy(fontFamily = medium),
+        headlineMediumEmphasized = headlineMediumEmphasized.copy(fontFamily = medium),
+        headlineSmallEmphasized = headlineSmallEmphasized.copy(fontFamily = medium),
 
-        titleLarge = titleLarge.copy(
-            fontFamily = display,
-            fontSize = 32.sp,
-            lineHeight = 36.sp,
-        ),
+        titleLarge = titleLarge.copy(fontFamily = regular),
+        titleMedium = titleMedium.copy(fontFamily = medium),
+        titleSmall = titleSmall.copy(fontFamily = medium),
+        titleLargeEmphasized = titleLargeEmphasized.copy(fontFamily = medium),
+        titleMediumEmphasized = titleMediumEmphasized.copy(fontFamily = bold),
+        titleSmallEmphasized = titleSmallEmphasized.copy(fontFamily = bold),
 
-        titleSmallEmphasized = titleSmallEmphasized.copy(
-            fontFamily = display,
-            fontSize = 24.sp,
-            lineHeight = 30.sp,
-        ),
+        bodyLarge = bodyLarge.copy(fontFamily = regular),
+        bodyMedium = bodyMedium.copy(fontFamily = regular),
+        bodySmall = bodySmall.copy(fontFamily = regular),
+        bodyLargeEmphasized = bodyLargeEmphasized.copy(fontFamily = medium),
+        bodyMediumEmphasized = bodyMediumEmphasized.copy(fontFamily = medium),
+        bodySmallEmphasized = bodySmallEmphasized.copy(fontFamily = medium),
 
-        titleMediumEmphasized = titleMediumEmphasized.copy(
-            fontFamily = displayEmphasized,
-            fontSize = 28.sp,
-            lineHeight = 32.sp,
-        ),
-
-        titleLargeEmphasized = titleLargeEmphasized.copy(
-            fontFamily = displayEmphasized,
-            fontSize = 32.sp,
-            lineHeight = 36.sp,
-        ),
-
-        displaySmall = displaySmall.copy(
-            fontFamily = display,
-            fontSize = 32.sp,
-            lineHeight = 36.sp,
-        ),
-
-        displayMedium = displayMedium.copy(
-            fontFamily = display,
-            fontSize = 36.sp,
-            lineHeight = 40.sp,
-        ),
-
-        displayLarge = displayLarge.copy(
-            fontFamily = display,
-            fontSize = 40.sp,
-            lineHeight = 44.sp,
-        ),
-
-        displaySmallEmphasized = displaySmallEmphasized.copy(
-            fontFamily = displayEmphasized,
-            fontSize = 38.sp,
-            lineHeight = 42.sp,
-        ),
-
-        displayMediumEmphasized = displayMediumEmphasized.copy(
-            fontFamily = displayEmphasized,
-            fontSize = 42.sp,
-            lineHeight = 48.sp,
-        ),
-
-        displayLargeEmphasized = displayLargeEmphasized.copy(
-            fontFamily = displayEmphasized,
-            fontSize = 48.sp,
-            lineHeight = 52.sp,
-        ),
-
-        bodySmall = bodySmall.copy(
-            fontFamily = body,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-        ),
-
-        bodyMedium = bodyMedium.copy(
-            fontFamily = body,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-        ),
-
-        bodyLarge = bodyLarge.copy(
-            fontFamily = body,
-            fontSize = 18.sp,
-            lineHeight = 28.sp,
-        ),
-
-        bodySmallEmphasized = bodySmallEmphasized.copy(
-            fontFamily = bodyEmphasized,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-        ),
-
-        bodyMediumEmphasized = bodyMediumEmphasized.copy(
-            fontFamily = bodyEmphasized,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-        ),
-
-        bodyLargeEmphasized = bodyLargeEmphasized.copy(
-            fontFamily = bodyEmphasized,
-            fontSize = 18.sp,
-            lineHeight = 28.sp,
-        ),
-
-        labelSmall = labelSmall.copy(
-            fontFamily = label,
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-        ),
-
-        labelMedium = labelMedium.copy(
-            fontFamily = label,
-            fontSize = 16.sp,
-            lineHeight = 20.sp,
-        ),
-
-        labelLarge = labelLarge.copy(
-            fontFamily = label,
-            fontSize = 18.sp,
-            lineHeight = 22.sp,
-        ),
-
-        labelSmallEmphasized = labelSmallEmphasized.copy(
-            fontFamily = labelEmphasized,
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-        ),
-
-        labelMediumEmphasized = labelMediumEmphasized.copy(
-            fontFamily = labelEmphasized,
-            fontSize = 16.sp,
-            lineHeight = 20.sp,
-        ),
-
-        labelLargeEmphasized = labelLargeEmphasized.copy(
-            fontFamily = labelEmphasized,
-            fontSize = 18.sp,
-            lineHeight = 22.sp,
-        ),
+        labelLarge = labelLarge.copy(fontFamily = medium),
+        labelMedium = labelMedium.copy(fontFamily = medium),
+        labelSmall = labelSmall.copy(fontFamily = medium),
+        labelLargeEmphasized = labelLargeEmphasized.copy(fontFamily = bold),
+        labelMediumEmphasized = labelMediumEmphasized.copy(fontFamily = bold),
+        labelSmallEmphasized = labelSmallEmphasized.copy(fontFamily = bold),
     )
 }
 
