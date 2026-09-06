@@ -43,6 +43,13 @@ data class SectionMetrics(
     val sectionHeaderBottomGap: Dp,
     /** Above a section that starts the column without a header. */
     val cardColumnTopInset: Dp,
+    /**
+     * Above a lone action row sitting under a card - Reset under the equalizer, Try
+     * Head Gestures under the gesture settings. Apple sets both at the same distance
+     * and it is wider than the gap between two cards, so the row reads as its own
+     * section rather than a caption on the one above.
+     */
+    val actionRowGap: Dp,
 )
 
 val AppleSectionMetrics = SectionMetrics(
@@ -51,6 +58,7 @@ val AppleSectionMetrics = SectionMetrics(
     sectionHeaderColumnTopInset = AppleDesignMetrics.sectionHeaderColumnTopInset,
     sectionHeaderBottomGap = AppleDesignMetrics.sectionHeaderBottomGap,
     cardColumnTopInset = AppleDesignMetrics.cardColumnTopInset,
+    actionRowGap = 41.dp,
 )
 
 /**
@@ -65,6 +73,7 @@ val MaterialSectionMetrics = SectionMetrics(
     sectionHeaderColumnTopInset = 16.dp,
     sectionHeaderBottomGap = 12.dp,
     cardColumnTopInset = 16.dp,
+    actionRowGap = 16.dp,
 )
 
 val LocalSectionMetrics = compositionLocalOf { AppleSectionMetrics }

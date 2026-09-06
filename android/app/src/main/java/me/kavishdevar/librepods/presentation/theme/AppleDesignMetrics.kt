@@ -90,10 +90,13 @@ object AppleDesignMetrics {
             fontWeight = FontWeight.SemiBold
         )
     }
+    // Left to the typeface, Pretendard sets these paragraphs 15.4 apart; iOS runs
+    // them at a flat 16, the same in light and dark and on every screen measured.
     val sectionFooterStyle by lazy {
         TextStyle(
             fontFamily = pretendardFamily,
             fontSize = 13.sp,
+            lineHeight = 16.sp,
             fontWeight = FontWeight.Normal
         )
     }

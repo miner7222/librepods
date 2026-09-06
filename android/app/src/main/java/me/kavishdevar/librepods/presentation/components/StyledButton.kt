@@ -37,6 +37,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -133,6 +134,12 @@ fun StyledButton(
         }
         DesignSystem.Apple -> {
             val isInteractive = enabled && isInteractive
+            // A button with no colour of its own is one of Apple's plain action
+            // rows - Disconnect, Reset, Try Head Gestures - and those sit on the
+            // same opaque card as every other row. This was washing ten percent
+            // white over a blurred backdrop instead, which came out a level off the
+            // page behind it and read as neither card nor button.
+            val cardColor = MaterialTheme.colorScheme.surface
             val scope = rememberCoroutineScope()
             val haptics = LocalHapticFeedback.current
             val progressAnimation = remember { Animatable(0f) }
@@ -177,7 +184,7 @@ half4 main(float2 coord) {
                                         drawRect(tint, blendMode = BlendMode.Hue)
                                         drawRect(tint.copy(alpha = 0.75f))
                                     } else {
-                                        drawRect(Color.White.copy(0.1f))
+                                        drawRect(cardColor)
                                     }
                                     if (surfaceColor.isSpecified && enabled) {
                                         val color = if (isPressed) {
@@ -199,7 +206,12 @@ half4 main(float2 coord) {
                                     }
                                 },
                                 onDrawFront = null,
-                                highlight = { Highlight.Ambient.copy(alpha = 0f) }
+                                highlight = { Highlight.Ambient.copy(alpha = 0f) },
+                                // Apple's page runs flat right up to the edge of one
+                                // of these rows. The backdrop draws a shadow unless
+                                // told not to, and it was darkening the background
+                                // fifteen levels over eighty pixels around the card.
+                                shadow = { null }
                             )
                         } else {
                             Modifier.drawBackdrop(
@@ -246,7 +258,7 @@ half4 main(float2 coord) {
                                         drawRect(tint, blendMode = BlendMode.Hue)
                                         drawRect(tint.copy(alpha = 0.75f))
                                     } else {
-                                        drawRect(Color.White.copy(0.1f))
+                                        drawRect(cardColor)
                                     }
                                     if (surfaceColor.isSpecified) {
                                         val color = if (!isInteractive && isPressed) {

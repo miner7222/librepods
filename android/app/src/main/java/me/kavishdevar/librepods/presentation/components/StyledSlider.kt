@@ -81,6 +81,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers.GREEN_DOMINATED_EXAMPLE
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastCoerceIn
@@ -106,6 +107,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
+import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import me.kavishdevar.librepods.presentation.theme.SectionMetrics
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
@@ -239,6 +241,11 @@ fun StyledSlider(
     snapThreshold: Float = 0.05f,
     @DrawableRes startIcon: Int? = null,
     @DrawableRes endIcon: Int? = null,
+    /**
+     * Apple's sliders that sit under a switch - the tone volume, and its like - end
+     * in the value rather than an icon, in the secondary label's grey.
+     */
+    showPercentage: Boolean = false,
     startLabel: String? = null,
     endLabel: String? = null,
     independent: Boolean = false,
@@ -309,7 +316,18 @@ fun StyledSlider(
                             enabled = enabled
                         )
 
-                        endIcon?.let {
+                        if (showPercentage) {
+                            // M3 puts a slider's value in a label above the handle
+                            // while it is being dragged and says nothing about a
+                            // resting one, so this is ours: with the icons gone the
+                            // row would otherwise end in nothing at all.
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = "${value.fastRoundToInt()}%",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else endIcon?.let {
                             Spacer(Modifier.width(12.dp))
                             Icon(
                                 painter = painterResource(it),
@@ -534,14 +552,12 @@ fun StyledSlider(
                         if (description != null) {
                             Text(
                                 text = description,
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Light,
-                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
-                                        alpha = 0.6f
-                                    ),
-                                    fontFamily = FontFamily(Font(R.font.pretendard))
-                                ),
+                                // The same footer every card carries: 13sp regular
+                                // in the shared secondary label. This had its own
+                                // 12sp light and, until a moment ago, plain black at
+                                // six tenths, which is 36 levels darker.
+                                style = appleMetrics.sectionFooterStyle,
+                                color = MaterialTheme.colorScheme.secondaryLabel,
                                 modifier = Modifier
                                     .padding(top = appleMetrics.cardFooterGap)
                                     .padding(horizontal = appleMetrics.cardHorizontalInset)
@@ -595,7 +611,7 @@ fun StyledSlider(
                 val content = @Composable {
                     Box(
                         Modifier
-                            .fillMaxWidth(if (startIcon == null && endIcon == null) 0.95f else 1f)
+                            .fillMaxWidth(if (startIcon == null && endIcon == null && !showPercentage) 0.95f else 1f)
                     ) {
                         Box(
                             Modifier
@@ -642,9 +658,17 @@ fun StyledSlider(
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp)
                                         .then(
-                                            if (startIcon == null && endIcon == null) Modifier.padding(
+                                            if (startIcon == null && endIcon == null && !showPercentage) Modifier.padding(
                                                 horizontal = 8.dp
                                             ) else Modifier
+                                        )
+                                        // Apple insets the track 50pt from the card's
+                                        // edge and ends the value 6pt short of it; an
+                                        // icon used to stand in for the first of those
+                                        // and nothing for the second.
+                                        .then(
+                                            if (showPercentage) Modifier.padding(start = 20.dp)
+                                            else Modifier
                                         ),
                                 ) {
                                     Row(
@@ -700,7 +724,19 @@ fun StyledSlider(
                                                     }
                                             )
                                         }
-                                        if (endIcon != null) {
+                                        if (showPercentage) {
+                                            Text(
+                                                text = "${value.fastRoundToInt()}%",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.secondaryLabel,
+                                                modifier = Modifier
+                                                    .padding(start = 18.dp)
+                                                    .onGloballyPositioned {
+                                                        endIconWidthState.floatValue =
+                                                            it.size.width.toFloat()
+                                                    }
+                                            )
+                                        } else if (endIcon != null) {
                                             Icon(
                                                 painter = painterResource(endIcon),
                                                 contentDescription = null,
@@ -840,9 +876,14 @@ fun StyledSlider(
                                                     Highlight.Ambient.copy(alpha = progress)
                                                 },
                                                 shadow = {
+                                                    // Apple's thumb darkens the card
+                                                    // to #ECECEC under it and #F2F2F2
+                                                    // over it - seven percent black,
+                                                    // sitting a little low.
                                                     Shadow(
                                                         radius = 4f.dp,
-                                                        color = Color.Black.copy(0.05f)
+                                                        offset = DpOffset(0.dp, 1.dp),
+                                                        color = Color.Black.copy(0.07f)
                                                     )
                                                 },
                                                 innerShadow = {
@@ -913,14 +954,12 @@ fun StyledSlider(
                         if (description != null) {
                             Text(
                                 text = description,
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Light,
-                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
-                                        alpha = 0.6f
-                                    ),
-                                    fontFamily = FontFamily(Font(R.font.pretendard))
-                                ),
+                                // The same footer every card carries: 13sp regular
+                                // in the shared secondary label. This had its own
+                                // 12sp light and, until a moment ago, plain black at
+                                // six tenths, which is 36 levels darker.
+                                style = appleMetrics.sectionFooterStyle,
+                                color = MaterialTheme.colorScheme.secondaryLabel,
                                 modifier = Modifier
                                     .padding(top = appleMetrics.cardFooterGap)
                                     .padding(horizontal = appleMetrics.cardHorizontalInset)

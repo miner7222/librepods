@@ -87,6 +87,7 @@ import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScro
 import me.kavishdevar.librepods.presentation.components.HeadGestureFace
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledToggle
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
@@ -250,8 +251,12 @@ fun HeadTrackingScreen(
             backdrop = backdrop,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = LocalSectionMetrics.current.actionRowGap)
                 .padding(horizontal = 16.dp),
-            maxScale = 0.05f
+            // The same plain action row Disconnect and Reset are: no press scale, no
+            // shadow, just the card. It was the only one of the three still taking
+            // the interactive path.
+            isInteractive = false
         ) {
             Text(
                 stringResource(R.string.test_head_gestures),

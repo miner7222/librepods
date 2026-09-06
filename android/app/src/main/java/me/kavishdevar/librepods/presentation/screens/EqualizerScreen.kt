@@ -108,6 +108,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 
 @Composable
 fun EqualizerRoute(
@@ -226,7 +227,9 @@ fun EqualizerScreen(
                     // bounds, and this animated container ends flush with it, so the
                     // blur came out cut off along a straight edge. Give it room.
                     .padding(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(
+                    LocalSectionMetrics.current.actionRowGap
+                )
             ) {
 
                 EqualizerCard(
@@ -250,7 +253,11 @@ fun EqualizerScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.reset),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        // The same accent Disconnect carries; Apple labels both of
+                        // these action rows in it, and this one was left at the
+                        // default content colour.
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }

@@ -296,8 +296,7 @@ fun AccessibilitySettingsScreen(
             },
             valueRange = 0f..100f,
             snapPoints = listOf(75f),
-            startIcon = R.drawable.sf_speaker_fill,
-            endIcon = R.drawable.sf_speaker_wave_3_fill,
+            showPercentage = true,
             independent = true,
             enabled = state.isPremium
         )
