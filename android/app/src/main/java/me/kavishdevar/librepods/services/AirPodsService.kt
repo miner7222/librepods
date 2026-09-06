@@ -3185,8 +3185,17 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private fun reopenSocketAfterRefusedHandshake() {
         val device = this.device ?: return
         CoroutineScope(Dispatchers.IO).launch {
+            val refused = BluetoothConnectionManager.aacpSocket
+            // Let go of it before closing it. The reader announces a disconnection
+            // for whichever socket the app still holds as current, and this one is
+            // being replaced rather than lost - the AirPods have not gone anywhere,
+            // so nothing downstream should hear that they have. Without this the
+            // connect sheet was retracting itself a second after it appeared.
+            if (BluetoothConnectionManager.aacpSocket === refused) {
+                BluetoothConnectionManager.aacpSocket = null
+            }
             try {
-                BluetoothConnectionManager.aacpSocket?.close()
+                refused?.close()
             } catch (e: Exception) {
                 Log.w(TAG, "Error closing the refused socket", e)
             }
