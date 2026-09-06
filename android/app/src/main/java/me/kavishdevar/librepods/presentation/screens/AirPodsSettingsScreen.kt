@@ -32,10 +32,6 @@ import android.media.AudioManager
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -696,6 +692,13 @@ fun AirPodsSettingsScreen(
 
                     val morphProgress = remember { Animatable(0f) }
 
+                    // Shape is a spatial property, so both the idle cycle and the
+                    // press take spatial springs from the theme's motion scheme -
+                    // which the theme has been declaring expressive all along
+                    // without anything reading it.
+                    val morphSpec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
+                    val pressSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+
                     LaunchedEffect(reconnecting) {
                         if (!reconnecting) {
                             currentMorphIndex = 0
@@ -708,10 +711,7 @@ fun AirPodsSettingsScreen(
 
                             morphProgress.animateTo(
                                 targetValue = 1f,
-                                animationSpec = tween(
-                                    durationMillis = 650,
-                                    easing = FastOutSlowInEasing
-                                )
+                                animationSpec = morphSpec
                             )
 
                             currentMorphIndex = (currentMorphIndex + 1) % morphs.size
@@ -792,18 +792,12 @@ fun AirPodsSettingsScreen(
                                                     if (!reconnecting) {
                                                         morphProgress.animateTo(
                                                             targetValue = 1f,
-                                                            animationSpec = spring(
-                                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                                stiffness = Spring.StiffnessLow
-                                                            )
+                                                            animationSpec = pressSpec
                                                         )
                                                         tryAwaitRelease()
                                                         morphProgress.animateTo(
                                                             targetValue = 0f,
-                                                            animationSpec = spring(
-                                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                                stiffness = Spring.StiffnessLow
-                                                            )
+                                                            animationSpec = pressSpec
                                                         )
                                                     }
                                                 }
