@@ -105,7 +105,35 @@ val AppleTypography = Typography().run {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         ),
-        labelSmallEmphasized = labelSmallEmphasized.merge(AppleDesignMetrics.sectionHeaderStyle)
+        labelSmallEmphasized = labelSmallEmphasized.merge(AppleDesignMetrics.sectionHeaderStyle),
+
+        /*
+         * Thirteen of the thirty roles were not named here, so anything reaching for
+         * one of them - the price on the purchase screen, the frequencies on the
+         * hearing test - was drawn in the default face rather than this theme's.
+         * Where a role already carries a size of its own above, its emphasized twin
+         * takes the same one.
+         */
+        labelSmall = labelSmall.copy(fontFamily = pretendardFamily),
+        labelLargeEmphasized = labelLargeEmphasized.copy(fontFamily = pretendardFamily),
+
+        bodyLargeEmphasized = bodyLargeEmphasized.copy(fontFamily = pretendardFamily),
+        bodyMediumEmphasized = bodyMediumEmphasized.copy(
+            fontFamily = pretendardFamily,
+            fontSize = 17.sp
+        ),
+
+        titleLargeEmphasized = titleLargeEmphasized.copy(fontFamily = pretendardFamily),
+        titleMediumEmphasized = titleMediumEmphasized.copy(fontFamily = pretendardFamily),
+        titleSmallEmphasized = titleSmallEmphasized.copy(fontFamily = pretendardFamily),
+
+        headlineLargeEmphasized = headlineLargeEmphasized.copy(fontFamily = pretendardFamily),
+        headlineMediumEmphasized = headlineMediumEmphasized.copy(fontFamily = pretendardFamily),
+        headlineSmallEmphasized = headlineSmallEmphasized.copy(fontFamily = pretendardFamily),
+
+        displayLargeEmphasized = displayLargeEmphasized.copy(fontFamily = pretendardFamily),
+        displayMediumEmphasized = displayMediumEmphasized.copy(fontFamily = pretendardFamily),
+        displaySmallEmphasized = displaySmallEmphasized.copy(fontFamily = pretendardFamily)
     )
 }
 

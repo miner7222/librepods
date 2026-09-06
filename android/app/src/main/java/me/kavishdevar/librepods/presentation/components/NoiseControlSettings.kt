@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -423,6 +424,14 @@ fun NoiseControlSettings(
                         }
                     }
 
+                    // These four were a bare TextStyle, so they took neither the
+                    // typeface nor the weight the rest of the theme carries: default
+                    // Roboto at regular, where iOS sets them in its own face at
+                    // semibold - 33% more ink for the same 13pt and the same width.
+                    val modeLabelStyle = appleMetrics.sectionFooterStyle.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = textColor
+                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -431,26 +440,26 @@ fun NoiseControlSettings(
                         if (showOffListeningMode) {
                             Text(
                                 text = stringResource(R.string.off),
-                                style = TextStyle(fontSize = 13.sp, color = textColor),
+                                style = modeLabelStyle,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.weight(1f)
                             )
                         }
                         Text(
                             text = stringResource(R.string.transparency),
-                            style = TextStyle(fontSize = 13.sp, color = textColor),
+                            style = modeLabelStyle,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = stringResource(R.string.adaptive),
-                            style = TextStyle(fontSize = 13.sp, color = textColor),
+                            style = modeLabelStyle,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = stringResource(R.string.noise_cancellation),
-                            style = TextStyle(fontSize = 13.sp, color = textColor),
+                            style = modeLabelStyle,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
