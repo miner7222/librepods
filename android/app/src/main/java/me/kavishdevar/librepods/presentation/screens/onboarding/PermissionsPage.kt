@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -293,6 +294,15 @@ fun PermissionsPage(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            // The row takes its height from the icon buttons at either end, and M3
+            // scales a button's label, padding and shape from its height rather than
+            // fixing them: at 56 that is title medium, not the label size a 40dp
+            // button would carry.
+            val buttonHeight =
+                IconButtonDefaults.mediumContainerSize(
+                    IconButtonDefaults.IconButtonWidthOption.Narrow
+                ).height
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -320,13 +330,13 @@ fun PermissionsPage(
                             Settings.canDrawOverlays(context)
                     },
                     modifier = Modifier
-                        .height(IconButtonDefaults.mediumContainerSize(IconButtonDefaults.IconButtonWidthOption.Narrow).height)
+                        .height(buttonHeight)
                         .weight(1f),
                     enabled = !bluetoothPermissionsState.allPermissionsGranted || !notificationPermissionState.status.isGranted || !phonePermissionState.allPermissionsGranted || !canDrawOverlays.value
                 ) {
                     Text(
                         text = stringResource(R.string.permissions_grant_all),
-                        style = MaterialTheme.typography.labelMedium
+                        style = ButtonDefaults.textStyleFor(buttonHeight)
                     )
                 }
                 FilledIconButton(
