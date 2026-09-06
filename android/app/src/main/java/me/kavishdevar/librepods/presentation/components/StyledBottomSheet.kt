@@ -84,7 +84,12 @@ fun StyledBottomSheet(
                     effects = {
                         vibrancy()
                         blur(24f.dp.toPx())
-                        lens(12f.dp.toPx(), 48f.dp.toPx(), true)
+                        lens(
+                            refractionHeight = 12f.dp.toPx(),
+                            refractionAmount = 48f.dp.toPx(),
+                            depthEffect = true,
+                            chromaticAberration = true
+                        )
                     },
                     onDrawSurface = {
                         drawRect(

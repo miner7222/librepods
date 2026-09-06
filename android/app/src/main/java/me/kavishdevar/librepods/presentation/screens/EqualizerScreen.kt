@@ -66,6 +66,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
@@ -444,12 +446,29 @@ fun EqualizerCard(
                         }
 
                         val backgroundColor = MaterialTheme.colorScheme.surface
+                        // Apple marks the flat setting with a dotted line the curve
+                        // then covers wherever the two coincide. On the captures the
+                        // marks are round - six pixels across, seven tall - in
+                        // #4DABF8, which is the accent at about seven tenths, spaced
+                        // every nine and a third against the same nine pixel curve we
+                        // draw. A round cap adds its own width to each dash, so the
+                        // dash itself is nothing and the gap carries the whole period.
+                        val baselineColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
 
                         Canvas(
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
                             val canvasWidth = size.width
+
+                            drawLine(
+                                color = baselineColor,
+                                start = Offset(x = 0f, y = maxOffset),
+                                end = Offset(x = canvasWidth, y = maxOffset),
+                                strokeWidth = 6.5f,
+                                cap = StrokeCap.Round,
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(0.1f, 9.2f))
+                            )
 
                             drawLine(
                                 color = backgroundColor,
@@ -613,7 +632,10 @@ fun EqualizerCard(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    // The labels already carry 16dp of their own below them, and
+                    // Apple leaves 21.5pt in total between their ink and the foot of
+                    // the card. This spacer had been taking it to 40.
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
                 Row(
                     modifier = Modifier
@@ -651,9 +673,10 @@ fun EqualizerCard(
                                                     Modifier.drawBackdrop(
                                                         backdrop = backdrop,
                                                         shape = { CircleShape },
-                                                        highlight = {
-                                                            Highlight.Ambient
-                                                        },
+                                                        // No rim on this one: Apple's glow meets the
+                                                        // card in the colour wash alone, with none of
+                                                        // the dark ambient ring the buttons carry.
+                                                        highlight = { Highlight.Ambient.copy(alpha = 0f) },
                                                         onDrawSurface = {
                                                             drawCircle(
                                                                 color = Color.White.copy(
@@ -661,20 +684,33 @@ fun EqualizerCard(
                                                                 ),
                                                                 radius = size.height
                                                             )
+                                                            // Apple ends the glow in a soft wash of
+                                                            // the band's colour - four pixels of
+                                                            // #FFFE9F fading into white on the
+                                                            // captures - rather than the hard
+                                                            // saturated ring this was drawing, which
+                                                            // read as an outlined circle instead of
+                                                            // a light.
+                                                            val bandColor = colorFromY(
+                                                                when (i) {
+                                                                    0 -> lowOffset.value; 1 -> midOffset.value; 2 -> highOffset.value
+                                                                    else -> 0f
+                                                                }
+                                                            )
                                                             drawCircle(
-                                                                color = colorFromY(
-                                                                    when (i) {
-                                                                        0 -> lowOffset.value; 1 -> midOffset.value; 2 -> highOffset.value
-                                                                        else -> 0f
-                                                                    }
+                                                                brush = Brush.radialGradient(
+                                                                    0.955f to Color.Transparent,
+                                                                    0.98f to bandColor.copy(alpha = 0.45f),
+                                                                    1f to Color.Transparent,
+                                                                    center = center,
+                                                                    radius = size.height / 2
                                                                 ),
-                                                                style = Stroke(2.dp.value),
                                                                 radius = size.height / 2
                                                             )
                                                         },
                                                         effects = {
                                                             lens(
-                                                                refractionHeight = 32f.dp.value,
+                                                                refractionHeight = 32f.dp.toPx(),
                                                                 refractionAmount = size.height
                                                             )
                                                         }

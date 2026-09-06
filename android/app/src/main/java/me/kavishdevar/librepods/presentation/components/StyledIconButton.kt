@@ -210,7 +210,11 @@ half4 main(float2 coord) {
                     .drawBackdrop(
                         backdrop = backdrop,
                         shape = { RoundedCornerShape(56.dp) },
-                        highlight = { Highlight.Ambient.copy(alpha = if (isDarkTheme) 1f else 0f) },
+                        // Apple rims this one in both themes. On the light captures
+                        // the ring runs about 60 levels dark at the sides and a few
+                        // bright along the top and bottom - an ambient rim, not a
+                        // stroke - and it was being switched off here for light.
+                        highlight = { Highlight.Ambient },
                         innerShadow = {
                             if (isDarkTheme) {
                                 InnerShadow(
