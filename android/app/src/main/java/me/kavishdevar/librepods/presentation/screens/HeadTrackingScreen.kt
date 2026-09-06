@@ -115,8 +115,7 @@ fun HeadTrackingScreen(
         }
     }
     val isDarkTheme = LocalIsDarkTheme.current
-    if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
-    val textColor = if (isDarkTheme) Color.White else Color.Black
+    val textColor = MaterialTheme.colorScheme.onSurface
 
     val backdrop = rememberLayerBackdrop()
 

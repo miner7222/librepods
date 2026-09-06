@@ -174,7 +174,7 @@ private fun StyledToggleContent(
     val currentChecked by rememberUpdatedState(checked)
 
     val isDarkTheme = LocalIsDarkTheme.current
-    val textColor = if (isDarkTheme) Color.White else Color.Black
+    val textColor = MaterialTheme.colorScheme.onSurface
 
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()

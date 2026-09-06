@@ -505,9 +505,7 @@ fun AppSettingsScreen(
                             capitalization = KeyboardCapitalization.None
                         ),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isDarkTheme) Color(0xFF007AFF) else Color(
-                                0xFF3C6DF5
-                            ),
+                            focusedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer,
                             unfocusedBorderColor = if (isDarkTheme) Color.Gray else Color.LightGray
                         ),
                         supportingText = {
@@ -578,20 +576,20 @@ fun AppSettingsScreen(
                    // role nearest it.
                    style = if (m3eEnabled) MaterialTheme.typography.titleMedium.copy(
                        textAlign = TextAlign.Center,
-                       color = if (LocalIsDarkTheme.current) Color.White else Color.Black
+                       color = MaterialTheme.colorScheme.onSurface
                    ) else TextStyle(
                        fontSize = 18.sp,
                        fontFamily = FontFamily(Font(R.font.pretendard)),
                        fontWeight = FontWeight.Bold,
                        textAlign = TextAlign.Center,
-                       color = if (LocalIsDarkTheme.current) Color.White else Color.Black
+                       color = MaterialTheme.colorScheme.onSurface
                    )
                )
                StyledIconButton(
                    icon = R.drawable.sf_paperplane,
                    contentDescription = stringResource(R.string.send),
                    backdrop = innerBackdrop,
-                   surfaceColor = if (LocalIsDarkTheme.current) Color(0xFF0091FF) else Color(0xFF0088FF),
+                   surfaceColor = MaterialTheme.colorScheme.primary,
                    iconTint = if (subjectState.text.isNotEmpty() && descriptionState.text.isNotEmpty()) Color.White else Color.Gray,
                    enabled = subjectState.text.isNotEmpty() && descriptionState.text.isNotEmpty(),
                    onClick = {

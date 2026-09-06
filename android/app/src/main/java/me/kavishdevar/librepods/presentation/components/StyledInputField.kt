@@ -78,8 +78,8 @@ fun StyledInputField(
     else {
         val appleMetrics = LocalAppleDesignMetrics.current
         val isDarkTheme = LocalIsDarkTheme.current
-        val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
-        val textColor = if (isDarkTheme) Color.White else Color.Black
+        val backgroundColor = MaterialTheme.colorScheme.surface
+        val textColor = MaterialTheme.colorScheme.onSurface
         val minHeight = if (singleLine) appleMetrics.listRowMinHeight else 120.dp
         val verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
         val hasText = inputState.text.isNotEmpty()

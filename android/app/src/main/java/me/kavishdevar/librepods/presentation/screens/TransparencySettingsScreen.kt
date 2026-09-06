@@ -87,13 +87,14 @@ fun TransparencySettingsScreen(
     onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val isDarkTheme = LocalIsDarkTheme.current
-    val textColor = if (isDarkTheme) Color.White else Color.Black
+    val textColor = MaterialTheme.colorScheme.onSurface
     val verticalScrollState = rememberScrollState()
     ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)
 
     val trackColor = if (isDarkTheme) Color(0xFFB3B3B3) else Color(0xFF929491)
-    val activeTrackColor = if (isDarkTheme) Color(0xFF007AFF) else Color(0xFF3C6DF5)
-    val thumbColor = if (isDarkTheme) Color(0xFFFFFFFF) else Color(0xFFFFFFFF)
+    val activeTrackColor = MaterialTheme.colorScheme.onSecondaryContainer
+    // Both arms of this were white.
+    val thumbColor = Color.White
 
     val state by viewModel.uiState.collectAsState()
 
@@ -110,7 +111,7 @@ fun TransparencySettingsScreen(
         verticalArrangement = Arrangement.spacedBy(if (m3eEnabled) 16.dp else 0.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
-        val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+        val backgroundColor = MaterialTheme.colorScheme.surface
 
         val enabled = rememberSaveable { mutableStateOf(false) }
         val amplificationSliderValue = rememberSaveable { mutableFloatStateOf(0.5f) }

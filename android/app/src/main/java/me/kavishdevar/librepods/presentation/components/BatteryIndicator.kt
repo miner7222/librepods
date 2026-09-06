@@ -71,6 +71,8 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
+import me.kavishdevar.librepods.presentation.theme.appleGreen
+import me.kavishdevar.librepods.presentation.theme.appleRed
 import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 
@@ -82,10 +84,10 @@ fun BatteryIndicator(
     previousCharging: Boolean = false,
 ) {
     val isDarkTheme = LocalIsDarkTheme.current
-    val batteryTextColor = if (isDarkTheme) Color.White else Color.Black
+    val batteryTextColor = MaterialTheme.colorScheme.onSurface
     val batteryFillColor =
-        if (batteryPercentage > 25) if (isDarkTheme) Color(0xFF2ED158) else Color(0xFF35C759)
-        else if (isDarkTheme) Color(0xFFFC4244) else Color(0xFFfe373C)
+        if (batteryPercentage > 25) MaterialTheme.colorScheme.appleGreen
+        else MaterialTheme.colorScheme.appleRed
 
     val initialScale = if (previousCharging) 1f else 0f
     val scaleAnim = remember { Animatable(initialScale) }

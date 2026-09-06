@@ -629,7 +629,7 @@ fun EqualizerCard(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
                                     fontWeight = FontWeight.Bold,
-                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
+                                    color = (MaterialTheme.colorScheme.onSurface).copy(
                                         0.2f
                                     ),
                                     textAlign = TextAlign.Center
@@ -646,7 +646,7 @@ fun EqualizerCard(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
                                     fontWeight = FontWeight.Bold,
-                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
+                                    color = (MaterialTheme.colorScheme.onSurface).copy(
                                         0.2f
                                     ),
                                     textAlign = TextAlign.Center
@@ -663,7 +663,7 @@ fun EqualizerCard(
                                     fontSize = 14.sp,
                                     fontFamily = FontFamily(Font(R.font.pretendard)),
                                     fontWeight = FontWeight.Bold,
-                                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black).copy(
+                                    color = (MaterialTheme.colorScheme.onSurface).copy(
                                         0.2f
                                     ),
                                     textAlign = TextAlign.Center

@@ -100,6 +100,7 @@ import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
+import me.kavishdevar.librepods.presentation.theme.appleControlTrack
 import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
 import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.utils.LogCollector
@@ -155,10 +156,10 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val backgroundColor = if (LocalIsDarkTheme.current) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
-    val textColor = if (LocalIsDarkTheme.current) Color.White else Color.Black
+    val backgroundColor = MaterialTheme.colorScheme.surface
+    val textColor = MaterialTheme.colorScheme.onSurface
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
-    val accentColor = if (LocalIsDarkTheme.current) Color(0xFF007AFF) else Color(0xFF3C6DF5)
+    val accentColor = MaterialTheme.colorScheme.onSecondaryContainer
     // Nine buttons on this screen shared one hard-coded grey and a 10dp corner in
     // both themes, which is neither theme'''s idea of a button. These are secondary
     // actions, so M3 gives them the tonal button: secondary container behind an on
@@ -821,7 +822,7 @@ fun TroubleshootingScreen(onScrollStateChanged: (Boolean) -> Unit = {}) {
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false },
                 sheetState = sheetState,
-                containerColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFF2F2F7),
+                containerColor = MaterialTheme.colorScheme.appleControlTrack,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
                 tonalElevation = 8.dp
             ) {
