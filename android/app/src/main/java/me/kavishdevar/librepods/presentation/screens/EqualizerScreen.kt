@@ -92,6 +92,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
+import me.kavishdevar.librepods.presentation.components.MaterialEqualizerCard
 import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
@@ -234,11 +235,21 @@ fun EqualizerScreen(
                 )
             ) {
 
-                EqualizerCard(
-                    lowOffset = offsets[0],
-                    midOffset = offsets[1],
-                    highOffset = offsets[2]
-                )
+                // Apple draws a response curve; M3 has no such component, and
+                // says the same thing with three centered sliders on end.
+                if (m3eEnabled) {
+                    MaterialEqualizerCard(
+                        lowOffset = offsets[0],
+                        midOffset = offsets[1],
+                        highOffset = offsets[2]
+                    )
+                } else {
+                    EqualizerCard(
+                        lowOffset = offsets[0],
+                        midOffset = offsets[1],
+                        highOffset = offsets[2]
+                    )
+                }
 
                 val resetButtonEnabled = remember { derivedStateOf { !offsets.all { it.floatValue == 0f } } }
 
@@ -271,6 +282,22 @@ fun EqualizerScreen(
     }
 }
 
+
+/*
+ * The curve was measured off screen captures in pixels and then drawn in pixels,
+ * which is only right on the phone it was measured on: anywhere else the line
+ * comes out a different weight against the card and the bends land in the wrong
+ * place along it. The shoulder is the plainest of them - it was written 108.dp
+ * and then handed over as .value, which is the number 108 and not the 378 pixels
+ * that dp is worth here. These are the same sizes the 3.5x capture showed, said
+ * in dp so every screen gets them.
+ */
+private val CurveStroke = 2.29.dp
+private val CurveUnderStroke = 2.86.dp
+private val BaselineStroke = 1.86.dp
+private val BaselineDash = 0.03.dp
+private val BaselineGap = 2.63.dp
+private val CurveShoulder = 30.9.dp
 
 @Composable
 fun EqualizerCard(
@@ -476,9 +503,11 @@ fun EqualizerCard(
                                 color = baselineColor,
                                 start = Offset(x = 0f, y = maxOffset),
                                 end = Offset(x = canvasWidth, y = maxOffset),
-                                strokeWidth = 6.5f,
+                                strokeWidth = BaselineStroke.toPx(),
                                 cap = StrokeCap.Round,
-                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(0.1f, 9.2f))
+                                pathEffect = PathEffect.dashPathEffect(
+                                    floatArrayOf(BaselineDash.toPx(), BaselineGap.toPx())
+                                )
                             )
 
                             drawLine(
@@ -491,7 +520,7 @@ fun EqualizerCard(
                                     x = 1 / 6f * canvasWidth,
                                     y = lowOffset.value + maxOffset
                                 ),
-                                strokeWidth = 10f
+                                strokeWidth = CurveUnderStroke.toPx()
                             )
                             drawLine(
                                 color = colorFromY(lowOffset.value),
@@ -503,7 +532,7 @@ fun EqualizerCard(
                                     x = 1 / 6f * canvasWidth,
                                     y = lowOffset.value + maxOffset
                                 ),
-                                strokeWidth = 8f
+                                strokeWidth = CurveStroke.toPx()
                             )
 
                             val lowToMidPath = Path()
@@ -512,9 +541,9 @@ fun EqualizerCard(
                                 y = lowOffset.value + maxOffset
                             )
                             lowToMidPath.cubicTo(
-                                x1 = canvasWidth * 1 / 6f + 108.dp.value,
+                                x1 = canvasWidth * 1 / 6f + CurveShoulder.toPx(),
                                 y1 = lowOffset.value + maxOffset,
-                                x2 = canvasWidth * 0.5f - 108.dp.value,
+                                x2 = canvasWidth * 0.5f - CurveShoulder.toPx(),
                                 y2 = midOffset.value + maxOffset,
                                 x3 = canvasWidth * 0.5f,
                                 y3 = midOffset.value + maxOffset
@@ -539,9 +568,9 @@ fun EqualizerCard(
                                 y = midOffset.value + maxOffset
                             )
                             midToHighPath.cubicTo(
-                                x1 = canvasWidth * 0.5f + 108.dp.value,
+                                x1 = canvasWidth * 0.5f + CurveShoulder.toPx(),
                                 y1 = midOffset.value + maxOffset,
-                                x2 = canvasWidth * 5 / 6f - 108.dp.value,
+                                x2 = canvasWidth * 5 / 6f - CurveShoulder.toPx(),
                                 y2 = highOffset.value + maxOffset,
                                 x3 = canvasWidth * 5 / 6f,
                                 y3 = highOffset.value + maxOffset
@@ -569,7 +598,7 @@ fun EqualizerCard(
                                     x = 1f * canvasWidth,
                                     y = highOffset.value + maxOffset
                                 ),
-                                strokeWidth = 10f
+                                strokeWidth = CurveUnderStroke.toPx()
                             )
                             drawLine(
                                 color = colorFromY(highOffset.value),
@@ -581,7 +610,7 @@ fun EqualizerCard(
                                     x = 1f * canvasWidth,
                                     y = highOffset.value + maxOffset
                                 ),
-                                strokeWidth = 8f
+                                strokeWidth = CurveStroke.toPx()
                             )
                         }
                     }
