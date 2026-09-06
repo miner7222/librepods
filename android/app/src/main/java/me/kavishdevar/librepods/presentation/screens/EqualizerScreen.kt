@@ -195,7 +195,9 @@ fun EqualizerScreen(
         val enabled = customEq.isEnabled()
 
         StyledList(
-            description = stringResource(R.string.equalizer_description),
+            // iOS explains the presets in a paragraph above them; M3 lets the
+            // list speak for itself.
+            description = if (m3eEnabled) null else stringResource(R.string.equalizer_description),
             firstInColumn = true
         ) {
             StyledListItem(

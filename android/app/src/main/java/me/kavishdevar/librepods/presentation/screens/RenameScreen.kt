@@ -48,6 +48,7 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -65,7 +66,10 @@ fun RenameScreen(viewModel: AirPodsViewModel) {
         keyboardController?.show()
     }
 
-    val topPadding = screenTopPadding(columnInset = true)
+    val topPadding = screenTopPadding(
+        columnInset = true,
+        materialInset = LocalSectionMetrics.current.cardColumnTopInset
+    )
     val bottomPadding = screenBottomPadding()
 
     Column(

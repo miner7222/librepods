@@ -167,6 +167,11 @@ fun StyledScaffold(
     when (LocalDesignSystem.current) {
         DesignSystem.Material -> {
             Scaffold(
+                // A screen that is all list has to sit on a container tone:
+                // M3's segmented list item is itself surface, so the 2dp gaps and
+                // the rounded ends only show against something darker. The plain
+                // "body is surface" rule is for screens whose content is not the
+                // list itself.
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 topBar = {
@@ -203,7 +208,7 @@ fun StyledScaffold(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier.padding(start = if (showBackButton) 8.dp else 12.dp, end = 12.dp),
-                                        style = MaterialTheme.typography.titleSmall
+                                        style = MaterialTheme.typography.titleLarge
                                     )
                                 }
                             },
@@ -213,7 +218,16 @@ fun StyledScaffold(
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                             },
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                            // M3 lifts the bar a tone once content passes
+                            // under it. It names surface container for that,
+                            // measured from a body on surface; ours already
+                            // starts there, so the pair moves up one step and
+                            // keeps the same one-tone gap.
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (isContentScrolled) MaterialTheme.colorScheme.surfaceContainerHigh
+                                    else MaterialTheme.colorScheme.surfaceContainer
+                            )
                         )
                     }
                 },
