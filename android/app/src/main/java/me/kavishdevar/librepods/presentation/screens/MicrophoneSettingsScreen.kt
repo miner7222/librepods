@@ -40,7 +40,7 @@ fun MicrophoneSettingsRoute(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    val topPadding = screenTopPadding()
+    val topPadding = screenTopPadding(materialInset = 8.dp)
     val bottomPadding = screenBottomPadding()
 
     val id = AACPManager.Companion.ControlCommandIdentifiers.MIC_MODE
@@ -79,7 +79,6 @@ fun MicrophoneSettingsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
-            .padding(top = if (m3eEnabled) 8.dp else 0.dp)
             .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))

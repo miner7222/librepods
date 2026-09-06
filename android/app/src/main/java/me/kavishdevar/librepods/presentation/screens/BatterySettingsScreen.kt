@@ -46,6 +46,7 @@ import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScro
 import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
 import me.kavishdevar.librepods.presentation.theme.secondaryLabel
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.screenTopPadding
@@ -64,8 +65,7 @@ fun BatterySettingsScreen(
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val appleMetrics = LocalAppleDesignMetrics.current
     val topPadding = screenTopPadding(columnInset = true)
-    val bottomPadding =
-        if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val bottomPadding = screenBottomPadding()
 
     Column(
         modifier = Modifier
@@ -83,7 +83,11 @@ fun BatterySettingsScreen(
             Text(
                 text = stringResource(R.string.battery_intro),
                 style = appleMetrics.sectionFooterStyle,
-                color = MaterialTheme.colorScheme.secondaryLabel
+                color = MaterialTheme.colorScheme.secondaryLabel,
+                // Apple lines a preamble up with the row labels inside the cards
+                // below it, not with the cards' own edge: 64px against a 32px card
+                // on the capture, so one more card inset in.
+                modifier = Modifier.padding(horizontal = appleMetrics.cardHorizontalInset)
             )
         }
 

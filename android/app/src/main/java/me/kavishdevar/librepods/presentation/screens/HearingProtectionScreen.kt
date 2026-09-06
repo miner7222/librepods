@@ -58,7 +58,11 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel, navigateToPurchase: () 
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val opensWithPremiumBanner = !state.isPremium
-    val topPadding = screenTopPadding(columnInset = true)
+    // A titled section opens the column and brings the inset with it, so
+    // asking for it here as well opens the screen a whole inset lower than
+    // every other one that starts with a subheading. The premium banner is a
+    // plain button and does still need it.
+    val topPadding = screenTopPadding(columnInset = opensWithPremiumBanner)
     val bottomPadding = screenBottomPadding()
 
     Column(

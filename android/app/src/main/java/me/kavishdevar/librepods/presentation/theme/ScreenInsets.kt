@@ -52,8 +52,21 @@ fun screenTopPadding(
         if (columnInset) metrics.cardColumnTopInset else 0.dp
 }
 
-/** The room a screen leaves under its last card, above the navigation bar. */
+/**
+ * The room a screen leaves under its last card: the navigation bar, and 24dp of
+ * page beneath it so a scroll does not end flush with the edge.
+ *
+ * The two themes reach that same gap by different arithmetic. Material's scaffold
+ * has already inset its content by the navigation bar, so only the 24 is left to
+ * add; Apple's bar floats over the content it scrolls behind, so the bar has to be
+ * cleared here. Four screens used to work this out for themselves and each landed
+ * somewhere different.
+ *
+ * @param scaffolded false for a screen that lays out its own insets instead of
+ *   sitting in the scaffold - the home screen and the release notes - where the
+ *   navigation bar is this function's to clear in either theme.
+ */
 @Composable
-fun screenBottomPadding(): Dp =
-    if (LocalDesignSystem.current == DesignSystem.Material) 0.dp
-    else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+fun screenBottomPadding(scaffolded: Boolean = true): Dp =
+    if (scaffolded && LocalDesignSystem.current == DesignSystem.Material) 24.dp
+    else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp

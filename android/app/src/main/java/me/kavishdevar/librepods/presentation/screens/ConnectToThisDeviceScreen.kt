@@ -57,7 +57,7 @@ fun ConnectToThisDeviceRoute(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    val topPadding = screenTopPadding()
+    val topPadding = screenTopPadding(materialInset = 8.dp)
     val bottomPadding = screenBottomPadding()
 
     Box(
@@ -94,7 +94,6 @@ fun ConnectToThisDeviceScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
-            .padding(top = if (m3eEnabled) 8.dp else 0.dp)
             .padding(horizontal = LocalAppleDesignMetrics.current.cardHorizontalInset)
     ) {
         Spacer(modifier = Modifier.height(topPadding))

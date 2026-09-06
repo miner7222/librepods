@@ -130,6 +130,7 @@ import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
+import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsUiState
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
@@ -169,7 +170,7 @@ fun AirPodsSettingsRoute(
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
         if (m3eEnabled) 0.dp else LocalAppleDesignMetrics.current.navigationBarHeight +
             LocalAppleDesignMetrics.current.cardColumnTopInset
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val bottomPadding = screenBottomPadding(scaffolded = false)
 
     Box (
         modifier = Modifier
