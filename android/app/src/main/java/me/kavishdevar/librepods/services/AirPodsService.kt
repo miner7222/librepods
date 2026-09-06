@@ -3440,6 +3440,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                             true, config.deviceName, batteryNotification.getBattery()
                         )
                         Log.d(TAG, "<LogCollector:Complete:Success> Socket connected")
+                        bleManager.forgetLidState()
                         sharedPreferences.edit { putBoolean("connection_successful", true) }
                         if (!sharedPreferences.contains("first_connection_successful_time")) {
                             sharedPreferences.edit {

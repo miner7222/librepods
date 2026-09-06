@@ -131,6 +131,19 @@ class BLEManager(private val context: Context) {
         }
     }
 
+    /**
+     * Stops holding on to the lid state, because it is about to become a guess.
+     *
+     * Called when the link comes up: the AirPods stop advertising then, so whatever
+     * the lid does is out of sight until they start again, and the reading kept
+     * across that gap is no longer something the next advertisement can be compared
+     * with. The periodic check does this too, but only every ten seconds, and a link
+     * can come and go inside one of those.
+     */
+    fun forgetLidState() {
+        currentGlobalLidState = null
+    }
+
     fun setAirPodsStatusListener(listener: AirPodsStatusListener) {
         airPodsStatusListener = listener
     }
@@ -494,15 +507,52 @@ class BLEManager(private val context: Context) {
         val previousState = currentGlobalLidState
         if (previousState == status.lidOpen) return
         currentGlobalLidState = status.lidOpen
+        // Reading the state for the first time is not the same as watching it
+        // change. The sheet answers the case being opened, and a service that has
+        // only just started - or that has been connected, with the broadcast
+        // suppressed, and is hearing one again - has no such moment to announce. It
+        // was putting the sheet up on the strength of the first packet it parsed,
+        // which arrived seconds after the case had been closed.
+        if (previousState == null && status.lidOpen) {
+            Log.d(TAG, "Lid read as open on the first broadcast; not announcing it")
+            return
+        }
         listener.onLidStateChanged(status.lidOpen)
         Log.d(TAG, "Lid state ${if (status.lidOpen) "opened" else "closed"} (was $previousState)")
     }
 
     private fun checkLidStateTimeout() {
+        // Silence on the proximity broadcast means the AirPods have gone away, and
+        // a closed lid is the usual reason - but it is not the only one. They also
+        // stop advertising once they are connected, so a link that comes up while
+        // the case is open dries the broadcast out and this would decide, fifteen
+        // seconds later, that the lid had shut. It had not, and the connect sheet
+        // was being retracted on the strength of it. While the link is up the lid
+        // is not this timer's to guess at: closing it drops the link, and that is
+        // heard as a disconnection instead.
+        if (BluetoothConnectionManager.aacpSocket?.isConnected == true) {
+            // And while it is up the lid is not ours to remember either. The AirPods
+            // stop advertising once they are connected, so whatever the lid does in
+            // the meantime happens out of sight; holding the last reading through
+            // that leaves the first advertisement after the link drops to be
+            // compared against a state from before it came up. A case opened while
+            // connected - which is how the link came up at all - then reads as a lid
+            // opening now, seconds after the AirPods have gone, and the sheet comes
+            // up for it. Forget it instead, and let that advertisement be a reading.
+            currentGlobalLidState = null
+            return
+        }
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastBroadcastTime > LID_CLOSE_TIMEOUT_MS && currentGlobalLidState == true) {
             Log.d(TAG, "No broadcasts for ${LID_CLOSE_TIMEOUT_MS}ms, treating the lid state as stale")
-            currentGlobalLidState = false
+            // Silence is a guess, not a reading, and it must not be filed as one.
+            // Announce the close so anything watching the lid gets its retraction,
+            // but leave the state unknown: the AirPods coming back into range look
+            // exactly like this - a stretch of nothing, then advertisements again -
+            // and an open lid in that first packet is the state they were already
+            // in, not a lid being opened. Recorded as fact, the guess turned that
+            // reading into a change and put the sheet up on its own.
+            currentGlobalLidState = null
             airPodsStatusListener?.onLidStateChanged(false)
         }
     }
