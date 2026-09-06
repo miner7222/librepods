@@ -33,7 +33,7 @@
                 android:id="@+id/widget_off_icon"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:src="@drawable/noise_control_off"
+                android:src="@drawable/noise_control_off_dimmed_arc"
                 android:tint="@color/black" />
 
             <TextView

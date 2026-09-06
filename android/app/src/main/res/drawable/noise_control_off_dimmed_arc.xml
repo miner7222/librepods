@@ -1,0 +1,15 @@
+<!--
+    Apple's Off glyph is the noise cancelling one with its arc dimmed, not a person
+    on their own. The app draws it as two layers on one canvas; the widgets were
+    showing only the top one, so their Off button lost the arc entirely.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap
+            android:src="@drawable/noise_cancellation"
+            android:alpha="0.5" />
+    </item>
+    <item>
+        <bitmap android:src="@drawable/noise_control_off" />
+    </item>
+</layer-list>
