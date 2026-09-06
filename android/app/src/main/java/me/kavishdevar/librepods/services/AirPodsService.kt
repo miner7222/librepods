@@ -2453,8 +2453,17 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         return RemoteViews(packageName, layoutId).also { it ->
             // With nothing connected there is no mode in effect, so leave every
             // button unselected rather than showing a stale highlight.
+            //
+            // Which mode is in effect comes from the control command, the same place
+            // the app's own control reads it: sending one records the value there, so
+            // a tap moves the highlight straight away. The notification only arrives
+            // when the AirPods say something back, and a tap on the widget used to
+            // wait on that - on a connection that never answers, forever.
             val ancStatus = if (BluetoothConnectionManager.aacpSocket?.isConnected == true) {
-                ancNotification.status
+                aacpManager.controlCommandStatusList
+                    .find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE }
+                    ?.value?.takeIf { it.isNotEmpty() }?.get(0)?.toInt()
+                    ?: ancNotification.status
             } else {
                 NO_LISTENING_MODE
             }
