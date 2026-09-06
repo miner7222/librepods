@@ -170,6 +170,17 @@ fun AudioAndRoutingScreen(
             )
         }
 
+        // iOS keeps this at the foot of Audio & Routing rather than on the AirPods
+        // screen itself.
+        if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
+            StyledToggle(
+                label = stringResource(R.string.off_listening_mode),
+                description = stringResource(R.string.off_listening_mode_description),
+                checked = state.offListeningMode,
+                onCheckedChange = viewModel::setOffListeningMode
+            )
+        }
+
         Spacer(modifier = Modifier.height(bottomPadding))
     }
 }

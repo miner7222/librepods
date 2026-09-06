@@ -124,7 +124,6 @@ import me.kavishdevar.librepods.presentation.components.StyledButton
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
 import me.kavishdevar.librepods.presentation.components.StyledSlider
-import me.kavishdevar.librepods.presentation.components.StyledToggle
 import me.kavishdevar.librepods.presentation.theme.AppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
@@ -191,7 +190,6 @@ fun AirPodsSettingsRoute(
             onAutomaticEarDetectionChanged = viewModel::setAutomaticEarDetectionEnabled,
             onAutomaticConnectionChanged = viewModel::setAutomaticConnectionEnabled,
             setDynamicEndOfCharge = viewModel::setDynamicEndOfCharge,
-            setOffListeningMode = viewModel::setOffListeningMode,
             disconnect = viewModel::disconnect,
 
             navigateToRename = navigateToRename,
@@ -321,7 +319,6 @@ fun AirPodsSettingsScreen(
         onAutomaticEarDetectionChanged: (Boolean) -> Unit,
         onAutomaticConnectionChanged: (Boolean) -> Unit,
         setDynamicEndOfCharge: (Boolean) -> Unit,
-        setOffListeningMode: (Boolean) -> Unit,
         disconnect: () -> Unit,
 
         navigateToRename: () -> Unit,
@@ -489,18 +486,6 @@ fun AirPodsSettingsScreen(
             item(key = "media_volume") {
                 MediaVolumeSettings()
             }
-
-            if (capabilities.contains(Capability.OFF_LISTENING_MODE)) {
-                item(key = "off_listening") {
-                    StyledToggle(
-                        label = stringResource(R.string.off_listening_mode),
-                        description = stringResource(R.string.off_listening_mode_description),
-                        checked = state.offListeningMode,
-                        onCheckedChange = setOffListeningMode
-                    )
-                }
-            }
-
 
 //                if (capabilities.contains(Capability.STEM_CONFIG) && !BuildConfig.PLAY_BUILD) {
 //                    item(key = "spacer_camera") { Spacer(modifier = Modifier.height(16.dp)) }
@@ -941,7 +926,6 @@ fun AirPodsSettingsScreenPreviewApple() {
                 onAutomaticEarDetectionChanged = {},
                 onAutomaticConnectionChanged = {},
                 setDynamicEndOfCharge = {},
-                setOffListeningMode = {},
                 disconnect = {},
 
                 navigateToRename = {},
@@ -991,7 +975,6 @@ fun AirPodsSettingsScreenPreviewMaterial() {
                 onAutomaticEarDetectionChanged = {},
                 onAutomaticConnectionChanged = {},
                 setDynamicEndOfCharge = {},
-                setOffListeningMode = {},
                 disconnect = {},
 
                 navigateToRename = {},
