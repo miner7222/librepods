@@ -270,7 +270,7 @@ fun StyledSlider(
                     Text(
                         text = it,
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelSmallEmphasized,
+                        style = MaterialTheme.typography.labelLargeEmphasized,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .padding(top = 4.dp, bottom = 12.dp)
@@ -279,7 +279,7 @@ fun StyledSlider(
                 description?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(0.8f),
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
@@ -349,7 +349,7 @@ fun StyledSlider(
                                 startLabel?.let {
                                     Text(
                                         text = it,
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelMedium
                                     )
                                 }
 
@@ -358,7 +358,7 @@ fun StyledSlider(
                                 endLabel?.let {
                                     Text(
                                         text = it,
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelMedium
                                     )
                                 }
                             }

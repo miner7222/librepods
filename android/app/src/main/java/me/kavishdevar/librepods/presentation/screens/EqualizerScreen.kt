@@ -253,7 +253,9 @@ fun EqualizerScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.reset),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style =
+                            if (m3eEnabled) MaterialTheme.typography.labelLarge
+                            else MaterialTheme.typography.bodyMedium,
                         // The same accent Disconnect carries; Apple labels both of
                         // these action rows in it, and this one was left at the
                         // default content colour.

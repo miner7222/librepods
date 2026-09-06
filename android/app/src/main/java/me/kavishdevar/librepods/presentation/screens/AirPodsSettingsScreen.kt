@@ -129,6 +129,7 @@ import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalSectionMetrics
 import me.kavishdevar.librepods.presentation.theme.sectionHeader
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsUiState
 import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
@@ -592,7 +593,13 @@ fun AirPodsSettingsScreen(
                 )
             }
 
-            item(key = "spacer_disconnect") { Spacer(modifier = Modifier.height(28.dp)) }
+            item(key = "spacer_disconnect") {
+                Spacer(
+                    modifier = Modifier.height(
+                        if (m3eEnabled) LocalSectionMetrics.current.actionRowGap else 28.dp
+                    )
+                )
+            }
             item(key = "disconnect_button") {
                 StyledButton(
                     onClick = disconnect,
@@ -600,13 +607,17 @@ fun AirPodsSettingsScreen(
                     isInteractive = false,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 56.dp)
+                        // Apple's Disconnect is a card-height action row; M3's is a
+                        // button, and takes its height from the size it is.
+                        .then(if (m3eEnabled) Modifier else Modifier.heightIn(min = 56.dp))
                 ) {
                     Text(
                         text = stringResource(R.string.disconnect),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style =
+                            if (m3eEnabled) MaterialTheme.typography.labelLarge
+                            else MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        textAlign = TextAlign.Start,
+                        textAlign = if (m3eEnabled) TextAlign.Center else TextAlign.Start,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -832,7 +843,12 @@ fun AirPodsSettingsScreen(
 
                                 Text(
                                     text = if (reconnecting) stringResource(R.string.reconnecting) else stringResource(R.string.tap_to_reconnect),
-                                    style = MaterialTheme.typography.labelSmallEmphasized,
+                                    // Not a label: this is the sentence telling you
+                                    // what the 84dp target above it does, and M3
+                                    // publishes no role for an empty state's caption.
+                                    // Emphasised body is the size the hero asks for
+                                    // and the weight M3E marks an exception with.
+                                    style = MaterialTheme.typography.bodyLargeEmphasized,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             } else {
@@ -864,7 +880,7 @@ fun AirPodsSettingsScreen(
                                     stringResource(
                                         R.string.troubleshooting
                                     ),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.labelLarge,
                                 )
                             }
                         }

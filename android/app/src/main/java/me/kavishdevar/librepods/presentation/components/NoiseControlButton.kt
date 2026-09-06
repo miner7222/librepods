@@ -26,7 +26,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,8 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.theme.DesignSystem
+import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
 
 @Composable
 fun NoiseControlButton(
@@ -87,11 +92,19 @@ fun NoiseControlButton(
 }
 
 /**
- * Measured off the iOS 27 captures: the glyphs sat 17% over this. Every listening
- * mode glyph draws at it - the Material control and the press-and-hold list were
- * each picking their own size, and the same icon came out three sizes.
+ * Apple draws every listening mode glyph at 34dp, measured off the iOS 27
+ * captures where they sat 17% over what we had. M3 gives an icon no size of its
+ * own; it takes the size of whatever holds it, and the two things holding these
+ * agree: the 20dp icon of a small button, which ToggleButtonDefaults carries, is
+ * also the expressive list's leading icon size.
  */
-val NoiseControlIconSize = 34.dp
+val NoiseControlIconSize: Dp
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable get() =
+        if (LocalDesignSystem.current == DesignSystem.Material) ToggleButtonDefaults.IconSize
+        else AppleNoiseControlIconSize
+
+private val AppleNoiseControlIconSize = 34.dp
 
 /** What Apple leaves of the Off glyph's arc; measured at half strength. */
 const val NoiseControlOffArcAlpha = 0.5f

@@ -260,12 +260,17 @@ fun HeadTrackingScreen(
         ) {
             Text(
                 stringResource(R.string.test_head_gestures),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily(Font(R.font.pretendard)),
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                ),
+                // This was pinned to Pretendard at 16sp in both themes, so the
+                // one button on the screen kept iOS's typeface after everything
+                // around it had moved to Roboto Flex.
+                style =
+                    if (m3eEnabled) MaterialTheme.typography.labelLarge
+                    else TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = FontFamily(Font(R.font.pretendard))
+                    ),
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
         }
         Box(
