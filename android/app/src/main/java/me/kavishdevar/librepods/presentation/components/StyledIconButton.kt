@@ -30,6 +30,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -70,6 +71,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastCoerceAtMost
@@ -81,6 +83,7 @@ import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
+import com.kyant.backdrop.shadow.Shadow
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
@@ -103,6 +106,13 @@ fun StyledIconButton(
     backdrop: LayerBackdrop = rememberLayerBackdrop(),
     onClick: () -> Unit,
     enabled: Boolean = true,
+    /**
+     * How far to shift the glyph off the button's centre. A shape that leans one way
+     * - a chevron does - looks pushed the other when it is centred by its bounds, and
+     * Apple sets its back arrow three percent of the diameter to the left. A symbol
+     * with weight on both sides, a gear say, wants none of this.
+     */
+    opticalOffsetX: Dp = 0.dp,
     materialButtonStyle: MaterialButtonStyle = MaterialButtonStyle.Normal
 ) {
     when (LocalDesignSystem.current) {
@@ -215,6 +225,19 @@ half4 main(float2 coord) {
                         // bright along the top and bottom - an ambient rim, not a
                         // stroke - and it was being switched off here for light.
                         highlight = { Highlight.Ambient },
+                        // Without one of its own the backdrop draws its default
+                        // shadow, which darkens the page eleven levels over forty
+                        // pixels around the button. Its own container then clips that
+                        // halo square, and the straight edge is what shows whenever
+                        // the content behind starts moving. Apple's is a hairline:
+                        // #DFE1E5 for two pixels under the button and nothing beyond.
+                        shadow = {
+                            Shadow(
+                                radius = 2f.dp,
+                                offset = DpOffset(0.dp, 1.dp),
+                                color = Color.Black.copy(0.08f)
+                            )
+                        },
                         innerShadow = {
                             if (isDarkTheme) {
                                 InnerShadow(
@@ -408,7 +431,9 @@ half4 main(float2 coord) {
                     painter = painterResource(icon),
                     contentDescription = contentDescription,
                     tint = if (iconTint.isSpecified) iconTint else if (darkMode) Color.White else Color.Black,
-                    modifier = Modifier.size(27.dp)
+                    modifier = Modifier
+                        .offset(x = opticalOffsetX)
+                        .size(27.dp)
                 )
             }
         }
