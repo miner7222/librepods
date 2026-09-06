@@ -246,14 +246,15 @@ fun StyledScaffold(
                     val backdrop = rememberLayerBackdrop()
                     AnimatedVisibility(
                         visible = showBackButton,
-                        enter = fadeIn() + scaleIn(
-                            initialScale = 0f,
-                            animationSpec = tween()
-                        ),
-                        exit = fadeOut() + scaleOut(
-                            targetScale = 0.5f,
-                            animationSpec = tween(100)
-                        ),
+                        // Apple's back button has no entrance of its own: it holds its size
+                        // and fades with the screen, over about 150ms in and 100ms out,
+                        // measured off a 60fps capture of the bar. It also has no layer to
+                        // scale, which is what left an edge behind on the last frames.
+                        enter = fadeIn(animationSpec = tween(150)),
+                        // No scale on the way out. Shrinking the layer that samples the
+                        // backdrop leaves a clipped edge on the last frames, and at 100ms
+                        // it lands right as the button vanishes.
+                        exit = fadeOut(animationSpec = tween(100)),
                         modifier = Modifier
                             .zIndex(3f)
                             .padding(top = topPadding, start = 8.dp)
@@ -263,6 +264,9 @@ fun StyledScaffold(
                             onClick = onNavigateBack,
                             icon = R.drawable.sf_chevron_backward,
                             contentDescription = stringResource(R.string.back),
+                            // Measured off Apple's bar: the chevron sits 3% of the
+                            // diameter left of centre, which on a 45dp button is 1.4.
+                            opticalOffsetX = (-1.4).dp,
                             backdrop = backdrop
                         )
                     }
