@@ -75,7 +75,9 @@ fun NavigationRoot(
         Screen.HeadTracking -> stringResource(R.string.head_gestures)
         Screen.HearingAid -> stringResource(R.string.hearing_aid)
         Screen.HearingAidAdjustments -> stringResource(R.string.adjustments)
-        Screen.HearingProtection -> stringResource(R.string.hearing_protection)
+        // The screen the reference opens from its hearing health row: the
+        // protection settings are all it holds, so it carries that name.
+        Screen.HearingProtection -> stringResource(R.string.hearing_health)
         is Screen.LongPress -> stringResource(
             if (currentScreen.bud.equals("left", ignoreCase = true)) R.string.left else R.string.right
         )

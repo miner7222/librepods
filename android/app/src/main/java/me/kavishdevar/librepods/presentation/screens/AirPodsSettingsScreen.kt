@@ -117,7 +117,6 @@ import me.kavishdevar.librepods.presentation.components.AudioSettings
 import me.kavishdevar.librepods.presentation.components.BatteryView
 import me.kavishdevar.librepods.presentation.components.CallControlSettings
 import me.kavishdevar.librepods.presentation.components.ConnectionSettings
-import me.kavishdevar.librepods.presentation.components.HearingHealthSettings
 import me.kavishdevar.librepods.presentation.components.MaterialButtonStyle
 import me.kavishdevar.librepods.presentation.components.NoiseControlSettings
 import me.kavishdevar.librepods.presentation.components.PressAndHoldSettings
@@ -463,28 +462,6 @@ fun AirPodsSettingsScreen(
                 )
             }
 
-            val hasHearingAidCapability =
-                state.instance?.model?.capabilities?.contains(Capability.HEARING_AID) == true
-            val hasPPECapability =
-                state.instance?.model?.capabilities?.contains(Capability.PPE) == true
-
-            if (hasHearingAidCapability || hasPPECapability) {
-                if (hasPPECapability || state.vendorIdHook) {
-                    item(key = "spacer_hearing_health") {
-                        Spacer(modifier = Modifier.height(if (m3eEnabled) 24.dp else 0.dp))
-                    }
-                }
-                item(key = "hearing_health") {
-                    HearingHealthSettings(
-                        hasPPECapability = hasPPECapability,
-                        hasHearingAidCapability = hasHearingAidCapability,
-                        vendorIdHook = state.vendorIdHook,
-                        navigateToHearingProtection = navigateToHearingProtection,
-                        navigateToHearingAid = navigateToHearingAid
-                    )
-                }
-            }
-
             if (capabilities.contains(Capability.LISTENING_MODE)) {
                 item(key = "noise_control") {
                     NoiseControlSettings(
@@ -552,6 +529,28 @@ fun AirPodsSettingsScreen(
                             )
                         }
                     )
+                    // The reference used to head the page with a hearing health
+                    // section of its own; it now keeps it here, directly under audio
+                    // and routing.
+                    val hasHearingAid =
+                        state.instance?.model?.capabilities?.contains(Capability.HEARING_AID) == true &&
+                            state.vendorIdHook
+                    val hasPPE =
+                        state.instance?.model?.capabilities?.contains(Capability.PPE) == true
+                    if (hasHearingAid || hasPPE) {
+                        StyledListItem(
+                            name = stringResource(R.string.hearing_health),
+                            onClick = if (hasPPE) navigateToHearingProtection else navigateToHearingAid,
+                            leadingContent = {
+                                SettingsHubIcon(
+                                    appleRes = R.drawable.sf_ear_fill,
+                                    appleContainerBrush = AppleDesignMetrics.hearingHealthIconTile,
+                                    materialRes = R.drawable.ic_hearing,
+                                    accent = SettingsHubAccent.Secondary
+                                )
+                            }
+                        )
+                    }
                     StyledListItem(
                         name = stringResource(R.string.controls_and_gestures),
                         onClick = navigateToControlsAndGestures,

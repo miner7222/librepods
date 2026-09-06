@@ -278,7 +278,8 @@ fun AppNavGraph(
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             HearingProtectionScreen(
                                 viewModel = airPodsViewModel,
-                                navigateToPurchase = ::navigateToPurchase
+                                navigateToPurchase = ::navigateToPurchase,
+                                navigateToHearingAid = { navigate(Screen.HearingAid) }
                             )
                         }
 
