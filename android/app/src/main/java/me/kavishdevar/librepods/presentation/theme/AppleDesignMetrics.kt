@@ -1,11 +1,15 @@
 package me.kavishdevar.librepods.presentation.theme
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+private fun verticalTile(top: Long, bottom: Long) =
+    Brush.verticalGradient(listOf(Color(top), Color(bottom)))
 
 object AppleDesignMetrics {
     val listRowMinHeight = 54.dp
@@ -42,10 +46,16 @@ object AppleDesignMetrics {
     // the remaining 3.dp of the measured 15.dp icon-to-label gap.
     val settingsHubIconLabelGapAdjustment = 3.dp
     val settingsHubIconTint = Color.White
-    val audioAndRoutingIconTileColor = Color(0xFFFF2D55)
-    val controlsAndGesturesIconTileColor = Color(0xFF9F9FA4)
-    val accessibilityIconTileColor = Color(0xFF0092FF)
-    val batteryIconTileColor = Color(0xFF41D565)
+    /**
+     * Apple's tiles are not flat: each is a shallow vertical gradient, and the value
+     * that had been standing in for it here was whatever a single sample happened to
+     * catch - the grey was its top colour exactly, the other three were nowhere near.
+     * Measured off the iOS 27 captures, which give the same pair in both themes.
+     */
+    val audioAndRoutingIconTile = verticalTile(0xFFEB4962, 0xFFEA4459)
+    val controlsAndGesturesIconTile = verticalTile(0xFF9F9FA4, 0xFF8E8E93)
+    val accessibilityIconTile = verticalTile(0xFF4090F7, 0xFF3B86F7)
+    val batteryIconTile = verticalTile(0xFF70D272, 0xFF65C566)
 
     val navigationBarHeight = 44.dp
 
