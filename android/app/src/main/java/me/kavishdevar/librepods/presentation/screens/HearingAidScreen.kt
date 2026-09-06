@@ -158,13 +158,13 @@ fun HearingAidScreen(
             text = stringResource(R.string.hearing_aid_description),
             style =
                 if (m3eEnabled) MaterialTheme.typography.bodySmall.copy(
-                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black)
+                    color = (MaterialTheme.colorScheme.onSurface)
                         .copy(alpha = 0.6f)
                 )
                 else TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Light,
-                    color = (if (LocalIsDarkTheme.current) Color.White else Color.Black)
+                    color = (MaterialTheme.colorScheme.onSurface)
                         .copy(alpha = 0.6f),
                     fontFamily = FontFamily(Font(R.font.pretendard))
                 ),

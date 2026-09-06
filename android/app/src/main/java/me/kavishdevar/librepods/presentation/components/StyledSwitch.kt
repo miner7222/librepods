@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -77,6 +78,8 @@ import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.presentation.theme.LocalAppleDesignMetrics
 import kotlin.math.abs
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
+import me.kavishdevar.librepods.presentation.theme.appleControlTrack
+import me.kavishdevar.librepods.presentation.theme.appleGreen
 
 @Composable
 fun StyledSwitch(
@@ -85,13 +88,15 @@ fun StyledSwitch(
     enabled: Boolean = true,
 ) {
     val isDarkTheme = LocalIsDarkTheme.current
+    // Read here: the draw lambda below is not composable.
+    val controlTrack = MaterialTheme.colorScheme.appleControlTrack
     val haptics = LocalHapticFeedback.current
     val appleMetrics = LocalAppleDesignMetrics.current
 
     // iOS system green, and the switch's own off-track grey, which is a good
     // deal lighter than the separator grey this used to borrow.
     val onColor = if (enabled) {
-        if (isDarkTheme) Color(0xFF30D158) else Color(0xFF34C759)
+        MaterialTheme.colorScheme.appleGreen
     } else {
         if (isDarkTheme) Color(0xFF2C2C2E) else Color(0xFFE9E9EA)
     }
@@ -245,7 +250,7 @@ fun StyledSwitch(
                                 right = size.width,
                                 bottom = size.height,
                                 paint = Paint().apply {
-                                    color = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFF2F2F7)
+                                    color = controlTrack
                                 }
                             )
                             scale(0.7f) {
@@ -301,7 +306,7 @@ fun StyledSwitch(
 @Composable
 fun StyledSwitchPreview() {
     val isDarkTheme = LocalIsDarkTheme.current
-    val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFF2F2F7)
+    val backgroundColor = MaterialTheme.colorScheme.appleControlTrack
     Box(
         modifier = Modifier
             .background(backgroundColor)

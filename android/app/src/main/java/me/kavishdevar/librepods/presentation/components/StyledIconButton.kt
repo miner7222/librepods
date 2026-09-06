@@ -38,6 +38,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.TextButton
@@ -88,6 +89,7 @@ import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LocalDesignSystem
+import me.kavishdevar.librepods.presentation.theme.appleDimmedGlyph
 import me.kavishdevar.librepods.utils.inspectDragGestures
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -175,6 +177,8 @@ fun StyledIconButton(
         DesignSystem.Apple -> {
             val haptics = LocalHapticFeedback.current
             val darkMode = LocalIsDarkTheme.current
+            // Read here: the draw lambdas below are not composable.
+            val dimmedGlyph = MaterialTheme.colorScheme.appleDimmedGlyph
             val scope = rememberCoroutineScope()
             val progressAnimationSpec = spring(0.5f, 300f, 0.001f)
             val offsetAnimationSpec = spring(1f, 300f, Offset.VisibilityThreshold)
@@ -277,7 +281,7 @@ half4 main(float2 coord) {
                         onDrawSurface = {
                             if (!enabled) {
                                 drawRect(
-                                    (if (isDarkTheme) Color(0xFFAFAFAF) else Color.White).copy(0.5f)
+                                    dimmedGlyph.copy(0.5f)
                                 )
                                 return@drawBackdrop
                             }
@@ -320,7 +324,7 @@ half4 main(float2 coord) {
                             }
 
                             drawRect(
-                                (if (isDarkTheme) Color(0xFFAFAFAF) else Color.White).copy(
+                                dimmedGlyph.copy(
                                     progress.coerceIn(
                                         0.15f,
                                         0.35f
@@ -430,7 +434,7 @@ half4 main(float2 coord) {
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = contentDescription,
-                    tint = if (iconTint.isSpecified) iconTint else if (darkMode) Color.White else Color.Black,
+                    tint = if (iconTint.isSpecified) iconTint else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .offset(x = opticalOffsetX)
                         .size(27.dp)

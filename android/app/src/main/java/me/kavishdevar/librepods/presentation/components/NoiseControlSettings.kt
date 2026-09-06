@@ -206,8 +206,8 @@ fun NoiseControlSettings(
             val appleMetrics = LocalAppleDesignMetrics.current
             val isDarkTheme = LocalIsDarkTheme.current
             val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFE2E2E7)
-            val textColor = if (isDarkTheme) Color.White else Color.Black
-            val textColorSelected = if (isDarkTheme) Color.White else Color.Black
+            val textColor = MaterialTheme.colorScheme.onSurface
+            val textColorSelected = MaterialTheme.colorScheme.onSurface
             val selectedBackground = if (isDarkTheme) Color(0xBF5C5A5F) else Color(0xFFFFFFFF)
 
             val noiseControlMode = remember { mutableStateOf(NoiseControlMode.OFF) }

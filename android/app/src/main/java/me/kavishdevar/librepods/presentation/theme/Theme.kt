@@ -61,6 +61,35 @@ val ColorScheme.sectionHeader: Color
 val ColorScheme.appleSeparator: Color
     get() = if (onBackground.luminance() > 0.5f) Color(0xFF38383A) else Color(0xFFE7E7E8)
 
+/*
+ * The rest of iOS's palette, in the one place. These were spelled out where they
+ * were used, and the same colour written twice drifts: the switch carried Apple's
+ * systemGreen exactly while the battery ring carried a copy of it a level or two
+ * off in both themes, which is what an eyedropper over a screenshot gives you
+ * rather than a typo. Naming them makes a second reading of the same colour show
+ * up as one.
+ */
+
+/** systemGreen. */
+val ColorScheme.appleGreen: Color
+    get() = if (onBackground.luminance() > 0.5f) Color(0xFF30D158) else Color(0xFF34C759)
+
+/** The red the battery ring turns at a quarter left. */
+val ColorScheme.appleRed: Color
+    get() = if (onBackground.luminance() > 0.5f) Color(0xFFFC4244) else Color(0xFFFE373C)
+
+/**
+ * What a control's track takes behind it. Neither of the surface roles on their
+ * own: it is the card's colour in the dark and the page's in the light, which is
+ * the tone that stands away from the card either way.
+ */
+val ColorScheme.appleControlTrack: Color
+    get() = if (onBackground.luminance() > 0.5f) Color(0xFF1C1C1E) else Color(0xFFF2F2F7)
+
+/** A glyph on the navigation buttons' glass, which is never fully lit. */
+val ColorScheme.appleDimmedGlyph: Color
+    get() = if (onBackground.luminance() > 0.5f) Color(0xFFAFAFAF) else Color(0xFFFFFFFF)
+
 private val AppleDarkColorScheme = darkColorScheme(
     surfaceContainer = Color(0xFF000000), // for some reason background is not used as the background in gmail and settings app, but surfacecontainer, so using that
     onBackground = Color(0xFFFFFFFF),
@@ -82,8 +111,13 @@ private val AppleLightColorScheme = lightColorScheme(
     onSurface = Color(0xFF000000),
     surfaceDim = Color(0x40D9D9D9),
     secondaryContainer = Color(0xFF6BC0FF),
-    onSecondaryContainer = Color(0xFF007AFF),
-    primary = Color(0xFF0088FF),
+    // The dark accents were read off the captures; these two were not, and no blue
+    // with a red channel that low appears anywhere in the light ones - a filter for
+    // R below 25 finds zero pixels across all 28. What the captures do carry is
+    // #3478F6 on a filled accent surface and #3A85F6 on another, which keeps the
+    // same relation the dark pair has: the tint is the greener of the two.
+    onSecondaryContainer = Color(0xFF3478F6),
+    primary = Color(0xFF3A85F6),
     onPrimary = Color(0xFFFFFFFF)
 )
 

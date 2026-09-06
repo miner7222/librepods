@@ -357,7 +357,7 @@ fun StyledScaffold(
                                     Text(
                                         text = it,
                                         style = appleMetrics.navigationBarTitleStyle,
-                                        color = if (isDarkTheme) Color.White else Color.Black,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center
                                     )

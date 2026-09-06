@@ -445,12 +445,12 @@ fun StyledSlider(
             if (prominent) {
                 val appleMetrics = LocalAppleDesignMetrics.current
                 val backgroundColor =
-                    if (LocalIsDarkTheme.current) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+                    MaterialTheme.colorScheme.surface
                 val isDarkTheme = LocalIsDarkTheme.current
                 val trackColor =
                     if (isDarkTheme) Color(0xFF1C1C1D) else Color(0xFFDEDEE2)
                 val fillColor = Color.White
-                val labelTextColor = if (isDarkTheme) Color.White else Color.Black
+                val labelTextColor = MaterialTheme.colorScheme.onSurface
                 val capsuleHeight = 56.dp
                 val capsuleShape = RoundedCornerShape(28.dp)
 
@@ -639,7 +639,7 @@ fun StyledSlider(
             } else {
                 val appleMetrics = LocalAppleDesignMetrics.current
                 val backgroundColor =
-                    if (LocalIsDarkTheme.current) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+                    MaterialTheme.colorScheme.surface
                 val isDarkTheme = LocalIsDarkTheme.current
                 val trackColor =
                     if (isDarkTheme) Color(0xFF787880).copy(0.36f)
@@ -651,7 +651,7 @@ fun StyledSlider(
                     } else {
                         trackColor
                     }
-                val labelTextColor = if (isDarkTheme) Color.White else Color.Black
+                val labelTextColor = MaterialTheme.colorScheme.onSurface
 
                 val fraction by derivedStateOf {
                     ((value - valueRange.start) / (valueRange.endInclusive - valueRange.start))
