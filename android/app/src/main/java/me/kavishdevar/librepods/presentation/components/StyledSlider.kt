@@ -276,16 +276,7 @@ fun StyledSlider(
                     )
                 )
             ) {
-                label?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLargeEmphasized,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 4.dp, bottom = 12.dp)
-                    )
-                }
+                label?.let { SectionHeader(it) }
                 description?.let {
                     Text(
                         text = it,
@@ -1060,12 +1051,12 @@ private fun sliderSectionTopGap(
     metrics: SectionMetrics,
     label: String?,
     firstInColumn: Boolean
-): Dp = when {
-    label != null && firstInColumn -> metrics.sectionHeaderColumnTopInset
-    label != null -> metrics.sectionHeaderTopGap
-    firstInColumn -> metrics.cardColumnTopInset
-    else -> 0.dp
-}
+): Dp = sectionTopGap(
+    metrics,
+    hasHeader = label != null,
+    firstInColumn = firstInColumn,
+    whenNeither = 0.dp
+)
 
 @Composable
 private fun AppleSliderLabel(label: String) {
