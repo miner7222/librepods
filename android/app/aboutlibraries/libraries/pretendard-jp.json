@@ -1,0 +1,15 @@
+{
+  "uniqueId": "orioncactus:pretendard-jp",
+  "name": "Pretendard JP",
+  "developers": [
+    {
+      "name": "Kil Hyung-jin (orioncactus)",
+      "organisationUrl": "https://github.com/orioncactus"
+    }
+  ],
+  "description": "A system-ui alternative font with multilingual glyph coverage.",
+  "website": "https://github.com/orioncactus/pretendard",
+  "licenses": [
+    "OFL-1.1"
+  ]
+}
