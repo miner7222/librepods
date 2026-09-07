@@ -49,7 +49,6 @@ import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.play.core.review.ReviewManagerFactory
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.ControlCommandRepository
 import me.kavishdevar.librepods.presentation.navigation.NavigationRoot
@@ -74,7 +73,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @ExperimentalHazeMaterialsApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -142,7 +140,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@ExperimentalHazeMaterialsApi
 @SuppressLint("MissingPermission", "InlinedApi", "UnspecifiedRegisterReceiverFlag")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
