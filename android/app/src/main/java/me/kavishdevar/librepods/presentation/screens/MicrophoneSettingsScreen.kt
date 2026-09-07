@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.presentation.components.StyledList
 import me.kavishdevar.librepods.presentation.components.StyledListItem
@@ -32,7 +33,8 @@ import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 
 @Composable
 fun MicrophoneSettingsRoute(
-    viewModel: AirPodsViewModel
+    viewModel: AirPodsViewModel,
+    onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -54,7 +56,8 @@ fun MicrophoneSettingsRoute(
             bottomPadding = bottomPadding,
             onMicrophoneSettingsChanged = {
                 viewModel.setControlCommandInt(id, it)
-            }
+            },
+            onScrollStateChanged = onScrollStateChanged
         )
     }
 }
@@ -64,10 +67,12 @@ fun MicrophoneSettingsScreen(
     selectedMode: Int,
     topPadding: Dp = 16.dp,
     bottomPadding: Dp = 16.dp,
-    onMicrophoneSettingsChanged: (Int) -> Unit
+    onMicrophoneSettingsChanged: (Int) -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val scrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(scrollState, onScrollStateChanged)
 
     Column(
         modifier = Modifier

@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Job
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.bluetooth.ATTHandles
 import me.kavishdevar.librepods.data.HearingAidSettings
 import me.kavishdevar.librepods.data.parseHearingAidSettingsResponse
@@ -79,7 +80,10 @@ import me.kavishdevar.librepods.presentation.viewmodel.demoState
 private const val TAG = "UpdateHearingTestScreen"
 
 @Composable
-fun UpdateHearingTestRoute(viewModel: AirPodsViewModel) {
+fun UpdateHearingTestRoute(
+    viewModel: AirPodsViewModel,
+    onScrollStateChanged: (Boolean) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val topPadding = if (m3eEnabled) 0.dp else WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
@@ -95,7 +99,8 @@ fun UpdateHearingTestRoute(viewModel: AirPodsViewModel) {
             state = state,
             topPadding = topPadding,
             bottomPadding = bottomPadding,
-            setATTCharacteristicValue = viewModel::setATTCharacteristicValue
+            setATTCharacteristicValue = viewModel::setATTCharacteristicValue,
+            onScrollStateChanged = onScrollStateChanged
         )
     }
 }
@@ -105,9 +110,11 @@ fun UpdateHearingTestScreen(
     state: AirPodsUiState,
     topPadding: Dp = 16.dp,
     bottomPadding: Dp = 16.dp,
-    setATTCharacteristicValue: (ATTHandles, ByteArray) -> Unit
+    setATTCharacteristicValue: (ATTHandles, ByteArray) -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val verticalScrollState = rememberScrollState()
+    ReportStyledScaffoldScrollState(verticalScrollState, onScrollStateChanged)
 
     Column(
         modifier = Modifier
@@ -331,4 +338,3 @@ fun UpdateHearingTestScreenPreviewMaterial() {
         }
     }
 }
-

@@ -14,7 +14,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.data.updates.updates
 import me.kavishdevar.librepods.presentation.screens.AccessibilitySettingsScreen
@@ -48,7 +47,6 @@ import me.kavishdevar.librepods.presentation.viewmodel.AirPodsViewModel
 import me.kavishdevar.librepods.presentation.viewmodel.AppSettingsViewModel
 import me.kavishdevar.librepods.presentation.viewmodel.PurchaseViewModel
 
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun AppNavGraph(
     showReleaseNotes: Boolean = false,
@@ -118,6 +116,7 @@ fun AppNavGraph(
                                 navigateToTroubleshooting = { navigate(Screen.Troubleshooting) },
                                 navigateToCallControlScreen = { navigate(Screen.CallControl(it)) },
                                 navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) },
                             )
                         }
 
@@ -169,19 +168,26 @@ fun AppNavGraph(
                                 navigateToPurchase = ::navigateToPurchase,
                                 navigateToTroubleshooting = { navigate(Screen.Troubleshooting) },
                                 navigateToOpenSourceLicenses = { navigate(Screen.OpenSourceLicenses) },
-                                navigateToReleaseNotesScreen = { navigate(Screen.ReleaseNotes) }
+                                navigateToReleaseNotesScreen = { navigate(Screen.ReleaseNotes) },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )
                         }
 
                     Screen.Troubleshooting ->
                         NavEntry(screen) {
-                            TroubleshootingScreen()
+                            TroubleshootingScreen(
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     Screen.HeadTracking ->
                         NavEntry(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
-                            HeadTrackingScreen(airPodsViewModel, ::navigateToPurchase)
+                            HeadTrackingScreen(
+                                airPodsViewModel,
+                                ::navigateToPurchase,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     Screen.Accessibility ->
@@ -190,14 +196,18 @@ fun AppNavGraph(
                             AccessibilitySettingsScreen(
                                 viewModel = airPodsViewModel,
                                 navigateToPurchase = ::navigateToPurchase,
-                                navigateToTransparencyCustomization = { navigate(Screen.TransparencyCustomization) }
+                                navigateToTransparencyCustomization = { navigate(Screen.TransparencyCustomization) },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )
                         }
 
                     Screen.TransparencyCustomization ->
                         NavEntry(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
-                            TransparencySettingsScreen(airPodsViewModel)
+                            TransparencySettingsScreen(
+                                airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     Screen.HearingAid ->
@@ -207,13 +217,17 @@ fun AppNavGraph(
                                 viewModel = airPodsViewModel,
                                 onNavigateHearingAidAdjustments = { navigate(Screen.HearingAidAdjustments) },
                                 onNavigateHearingTest = { navigate(Screen.UpdateHearingTest) },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) },
                             )
                         }
 
                     Screen.HearingAidAdjustments ->
                         NavEntry(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
-                            HearingAidAdjustmentsScreen(airPodsViewModel)
+                            HearingAidAdjustmentsScreen(
+                                airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     Screen.AdaptiveStrength ->
@@ -234,7 +248,10 @@ fun AppNavGraph(
 
                     Screen.UpdateHearingTest ->
                         NavEntry(screen) {
-                            UpdateHearingTestRoute(airPodsViewModel)
+                            UpdateHearingTestRoute(
+                                airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     Screen.VersionInfo ->
@@ -255,13 +272,20 @@ fun AppNavGraph(
                     Screen.Purchase ->
                         NavEntry(screen) {
                             val vm: PurchaseViewModel = viewModel()
-                            PurchaseScreen(vm, backStack)
+                            PurchaseScreen(
+                                vm,
+                                backStack,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     Screen.Equalizer ->
                         NavEntry(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
-                            EqualizerRoute(airPodsViewModel)
+                            EqualizerRoute(
+                                airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     is Screen.LongPress ->
@@ -270,7 +294,8 @@ fun AppNavGraph(
                             LongPress(
                                 viewModel = airPodsViewModel,
                                 name = screen.bud,
-                                navigateToPurchase = ::navigateToPurchase
+                                navigateToPurchase = ::navigateToPurchase,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )
                         }
 
@@ -288,14 +313,18 @@ fun AppNavGraph(
                                             0x03
                                         )
                                     )
-                                }
+                                },
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )
                         }
 
                     is Screen.MicrophoneSettings ->
                         NavEntry(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
-                            MicrophoneSettingsRoute(viewModel = airPodsViewModel)
+                            MicrophoneSettingsRoute(
+                                viewModel = airPodsViewModel,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
                         }
 
                     is Screen.ReleaseNotes ->

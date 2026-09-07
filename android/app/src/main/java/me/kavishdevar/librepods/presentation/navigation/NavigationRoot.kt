@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -47,6 +49,7 @@ fun NavigationRoot(
     }
 
     val currentScreen = backStack.last()
+    var isContentScrolled by remember(currentScreen) { mutableStateOf(false) }
 
     val state by airPodsViewModel.uiState.collectAsState()
 
@@ -166,7 +169,8 @@ fun NavigationRoot(
         title = title,
         showBackButton = backStack.size > 1,
         onNavigateBack = { backStack.removeAt(backStack.lastIndex) },
-        actionButtons = actionButtons
+        actionButtons = actionButtons,
+        isContentScrolled = isContentScrolled
     ) {
         AppNavGraph(
             showReleaseNotes = showReleaseNotes,
@@ -175,6 +179,11 @@ fun NavigationRoot(
             onboardingComplete = onboardingComplete,
             backStack = backStack,
             airPodsViewModel = airPodsViewModel,
+            onScrollStateChanged = { screen, isScrolled ->
+                if (screen == currentScreen) {
+                    isContentScrolled = isScrolled
+                }
+            },
         )
     }
 }
