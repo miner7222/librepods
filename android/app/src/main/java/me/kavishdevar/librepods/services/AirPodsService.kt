@@ -154,6 +154,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import me.kavishdevar.librepods.bluetooth.shouldConnectAtt
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
@@ -3509,6 +3510,18 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
 
+        var pendingAttSocket: BluetoothSocket? = null
+        fun closeFailedAttempt() {
+            runCatching { pendingAttSocket?.close() }
+            runCatching { socket.close() }
+            if (BluetoothConnectionManager.aacpSocket === socket) {
+                BluetoothConnectionManager.aacpSocket = null
+            }
+            if (BluetoothConnectionManager.attSocket === pendingAttSocket) {
+                BluetoothConnectionManager.attSocket = null
+            }
+        }
+
         try {
             runBlocking {
                 withTimeout(5000.milliseconds) {
@@ -3516,7 +3529,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         socket.connect()
                         this@AirPodsService.device = device
                         val xposedRemotePref = XposedRemotePrefProvider.create()
-                        val attSocket = if (xposedRemotePref.getBoolean("vendor_id_hook", false)) {
+                        val knownModel = airpodsInstance?.model
+                            ?: AirPodsModels.getModelByModelNumber(config.airpodsModelNumber)
+                        val useAtt = shouldConnectAtt(
+                            knownModel, xposedRemotePref.getBoolean("vendor_id_hook", false)
+                        )
+                        Log.d(TAG, "ATT connection required: $useAtt (model=${knownModel?.name ?: "unknown"})")
+                        val attSocket = if (useAtt) {
                             createBluetoothSocket(
                                 adapter,
                                 device,
@@ -3524,7 +3543,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                                 31
                             )
                         } else null
+                        pendingAttSocket = attSocket
                         attSocket?.connect()
+
+                        // The reader and characteristic requests obtain this socket
+                        // from the manager, so publish it before starting either.
+                        BluetoothConnectionManager.aacpSocket = socket
+                        BluetoothConnectionManager.attSocket = attSocket
 
                         if (attSocket != null) {
                             attManager.startReader()
@@ -3532,9 +3557,6 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                             attManager.readCharacteristic(ATTHandles.TRANSPARENCY)
                             attManager.readCharacteristic(ATTHandles.HEARING_AID)
                         }
-
-                        BluetoothConnectionManager.aacpSocket = socket
-                        BluetoothConnectionManager.attSocket = attSocket
 
                         // Create AirPodsInstance from stored config if available
                         if (airpodsInstance == null && config.airpodsModelNumber.isNotEmpty()) {
@@ -3572,6 +3594,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         }
                         sendBroadcast(Intent(AirPodsNotifications.AIRPODS_L2CAP_CONNECTED))
                     } catch (e: Exception) {
+                        closeFailedAttempt()
 //                        sharedPreferences.edit { putBoolean("connection_successful", false) }
                         Log.d(
                             TAG, "<LogCollector:Complete:Failed> Socket not connected, ${e.message}"
@@ -3589,6 +3612,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 }
             }
             if (!socket.isConnected) {
+                closeFailedAttempt()
                 Log.d(TAG, "<LogCollector:Complete:Failed> socket not connected")
                 if (manual) {
                     sendToast(
@@ -3707,6 +3731,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         } catch (e: Exception) {
             e.printStackTrace()
             Log.d(TAG, "Failed to connect to BluetoothConnectionManager.aacpSocket?: ${e.message}")
+            closeFailedAttempt()
             showSocketConnectionFailureNotification("Failed to establish connection: ${e.localizedMessage}")
 //                isConnectedLocally = false
             this@AirPodsService.device = device
