@@ -113,6 +113,8 @@ enum class Capability {
     ADAPTIVE_AUDIO,
     ADAPTIVE_VOLUME,
     SWIPE_FOR_VOLUME,
+    CUSTOM_EQ,
+    CUSTOM_TRANSPARENCY,
     HRM,
     PRESS_CONFIG,
     OPTIMIZED_CHARGE_LIMIT
@@ -184,6 +186,7 @@ class AirPods4: AirPodsBase(
     // The standard AirPods 4 supports Personalized Volume even though Adaptive
     // Audio remains exclusive to the noise-cancelling model.
     capabilities = setOf(
+        Capability.CUSTOM_EQ,
         Capability.HEAD_GESTURES,
         Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME,
@@ -209,6 +212,7 @@ class AirPods4ANC: AirPodsBase(
     // switch that puts it there is the Pro 2's and the Pro 3's, whose cycles leave
     // it out until it is turned on.
     capabilities = setOf(
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
@@ -220,6 +224,8 @@ class AirPods4ANC: AirPodsBase(
     )
 )
 
+// AirPods 5 capabilities follow docs/airpods-5.md; AACP controls need device validation.
+// Only earbud model numbers belong here, not charging case identifiers.
 class AirPods5: AirPodsBase(
     modelNumber = listOf("A3531", "A3532", "A3533"),
     name = "AirPods 5",
@@ -228,14 +234,17 @@ class AirPods5: AirPodsBase(
     leftBudsRes = FallbackArtwork.Standard.leftBuds,
     rightBudsRes = FallbackArtwork.Standard.rightBuds,
     caseRes = FallbackArtwork.Standard.chargingCase,
+    caseIconRes = R.drawable.airpods_4_case_icon,
     connectedVideoRes = FallbackArtwork.Standard.connected,
     islandVideoRes = FallbackArtwork.Standard.island,
+    ringLayout = OverlayRingLayout(0.2094f, 0.4105f, 0.3099f, 0.7145f),
     capabilities = setOf(
+        Capability.SLEEP_DETECTION,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
         Capability.ADAPTIVE_AUDIO,
-        Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME,
         Capability.STEM_CONFIG
     )
@@ -249,14 +258,17 @@ class AirPods5WCC: AirPodsBase(
     leftBudsRes = FallbackArtwork.Standard.leftBuds,
     rightBudsRes = FallbackArtwork.Standard.rightBuds,
     caseRes = FallbackArtwork.Standard.chargingCase,
+    caseIconRes = R.drawable.airpods_4_case_icon,
     connectedVideoRes = FallbackArtwork.Standard.connected,
     islandVideoRes = FallbackArtwork.Standard.island,
+    ringLayout = OverlayRingLayout(0.2094f, 0.4105f, 0.3099f, 0.7145f),
     capabilities = setOf(
+        Capability.SLEEP_DETECTION,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
         Capability.ADAPTIVE_AUDIO,
-        Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME,
         Capability.STEM_CONFIG,
         Capability.SWIPE_FOR_VOLUME
@@ -278,6 +290,7 @@ class AirPodsPro1: AirPodsBase(
     // Read off a reference capture of this model: 18.68, 38.32 and 69.77.
     ringLayout = OverlayRingLayout(0.1868f, 0.3832f, 0.2850f, 0.6977f),
     capabilities = setOf(
+        Capability.CUSTOM_TRANSPARENCY,
         Capability.LISTENING_MODE,
         // Press and hold picks between the noise control cycle and the assistant,
         // and both are the Pro 1's to pick from.
@@ -300,6 +313,8 @@ class AirPodsPro2Lightning: AirPodsBase(
     islandVideoRes = R.raw.airpods_pro_2_island,
     ringLayout = OverlayRingLayout(0.1714f, 0.3790f, 0.2752f, 0.7143f),
     capabilities = setOf(
+        Capability.CUSTOM_TRANSPARENCY,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.STEM_CONFIG,
@@ -330,6 +345,8 @@ class AirPodsPro2USBC: AirPodsBase(
     islandVideoRes = R.raw.airpods_pro_2_island,
     ringLayout = OverlayRingLayout(0.1714f, 0.3790f, 0.2752f, 0.7143f),
     capabilities = setOf(
+        Capability.CUSTOM_TRANSPARENCY,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.STEM_CONFIG,
@@ -363,6 +380,8 @@ class AirPodsPro3: AirPodsBase(
     // 78.7 percent of the card against the reference's 71.9.
     artworkScale = 0.913f,
     capabilities = setOf(
+        Capability.CUSTOM_TRANSPARENCY,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,

@@ -233,5 +233,6 @@
     <string name="theme_system">自動</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
+    <string name="apple_identity_model_description">將手機的藍牙身分模擬為 Apple 裝置，以使用相容的連線功能。可用設定取決於耳機型號，不會為 AirPods 5 解鎖 Pro 專屬的聽力功能。變更後需重新啟動藍牙。</string>
     <string name="play_foss_premium_banner">您的應用程式已更新為 Google Play 版本，進階功能將在 %1$d 天後停用。請從您的原始安裝來源更新以繼續使用 FOSS 版本，或等待此期限結束後直接購買升級；如果您已是支持者，請點按此處申請促銷代碼。</string>
 </resources>

@@ -400,6 +400,7 @@
     <string name="theme_system">Automatic</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="apple_identity_model_description">Identifies this phone as an Apple device for compatible connection features. Available controls depend on your AirPods model; this does not unlock Pro hearing features on AirPods 5. Restart Bluetooth after changing this setting.</string>
     <string name="not_compatible_update">Your device is not currently compatible. Please update your device to continue.</string>
     <string name="not_compatitble_description">Due to a limitation in Android, a newer version of Android is required to use LibrePods.
         \n• Google Pixel devices need Android 16 March update or later with the latest Google Play system update

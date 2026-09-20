@@ -106,7 +106,6 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.ATTHandles
 import me.kavishdevar.librepods.data.AirPodsModels
-import me.kavishdevar.librepods.data.AirPodsPro3
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.components.AboutCard
@@ -165,6 +164,10 @@ fun AirPodsSettingsRoute(
     onScrollStateChanged: (Boolean) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(viewModel, viewModel.isReady) {
+        if (viewModel.isReady) viewModel.loadCurrentStatus()
+    }
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.Material
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
