@@ -205,4 +205,5 @@
     <string name="theme_system">自动</string>
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
+    <string name="apple_identity_model_description">将手机的蓝牙身份模拟为苹果设备，以使用兼容的连接功能。可用设置取决于耳机型号，不会为 AirPods 5 解锁 Pro 专属的听力功能。更改后需重启蓝牙。</string>
 </resources>

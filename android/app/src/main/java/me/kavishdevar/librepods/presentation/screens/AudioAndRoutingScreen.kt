@@ -42,7 +42,6 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.ATTHandles
-import me.kavishdevar.librepods.data.AirPodsPro3
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.components.AudioSettings
 import me.kavishdevar.librepods.presentation.components.ConnectionSettings
@@ -86,15 +85,14 @@ fun AudioAndRoutingScreen(
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        val model = state.instance?.model ?: AirPodsPro3()
         val adaptiveVolumeCapability =
-            model.capabilities.contains(Capability.ADAPTIVE_VOLUME)
+            capabilities.contains(Capability.ADAPTIVE_VOLUME)
         val conversationalAwarenessCapability =
-            model.capabilities.contains(Capability.CONVERSATION_AWARENESS)
+            capabilities.contains(Capability.CONVERSATION_AWARENESS)
         val loudSoundReductionCapability =
-            model.capabilities.contains(Capability.LOUD_SOUND_REDUCTION)
+            capabilities.contains(Capability.LOUD_SOUND_REDUCTION)
         val adaptiveAudioCapability =
-            model.capabilities.contains(Capability.ADAPTIVE_AUDIO)
+            capabilities.contains(Capability.ADAPTIVE_AUDIO)
 
         val adaptiveVolumeChecked =
             state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.ADAPTIVE_VOLUME_CONFIG]?.getOrNull(
@@ -110,7 +108,7 @@ fun AudioAndRoutingScreen(
             conversationalAwarenessCapability = conversationalAwarenessCapability,
             loudSoundReductionCapability = loudSoundReductionCapability,
             adaptiveAudioCapability = adaptiveAudioCapability,
-            customEqCapability = true,
+            customEqCapability = capabilities.contains(Capability.CUSTOM_EQ),
             adaptiveVolumeChecked = adaptiveVolumeChecked,
             onAdaptiveVolumeCheckedChange = { checked ->
                 viewModel.setControlCommandBoolean(

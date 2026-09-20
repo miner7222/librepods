@@ -98,18 +98,6 @@ class BLEManager(private val context: Context) {
      * anything asked for it.
      */
     private var lastValidCaseBattery: Int? = null
-    private val modelNames = mapOf(
-        0x0E20 to "AirPods Pro",
-        0x1420 to "AirPods Pro 2",
-        0x2420 to "AirPods Pro 2 (USB-C)",
-        0x0220 to "AirPods 1",
-        0x0F20 to "AirPods 2",
-        0x1320 to "AirPods 3",
-        0x1920 to "AirPods 4",
-        0x1B20 to "AirPods 4 (ANC)",
-        0x0A20 to "AirPods Max",
-        0x1F20 to "AirPods Max (USB-C)"
-    )
 
     val colorNames = mapOf(
         0x00 to "White", 0x01 to "Black", 0x02 to "Red", 0x03 to "Blue",
@@ -351,7 +339,7 @@ class BLEManager(private val context: Context) {
             }
 
             val manufacturerData = scanRecord.getManufacturerSpecificData(76) ?: return null
-            if (manufacturerData.size <= 20) return null
+            if (!AirPodsProximityModels.isValid(manufacturerData)) return null
 
             if (!verifiedAddresses.contains(address)) {
                 val irk = getIrkFromPreferences()
@@ -450,8 +438,7 @@ class BLEManager(private val context: Context) {
 
     private fun parseProximityMessageWithDecryption(address: String, data: ByteArray, decrypted: ByteArray): AirPodsStatus {
         val paired = data[2].toInt() == 1
-        val modelId = ((data[3].toInt() and 0xFF) shl 8) or (data[4].toInt() and 0xFF)
-        val model = modelNames[modelId] ?: "Unknown ($modelId)"
+        val model = AirPodsProximityModels.getModelName(data)
 
         val status = data[5].toInt() and 0xFF
         val flags = (data[7].toInt() shr 4) and 0x0F
@@ -607,8 +594,7 @@ class BLEManager(private val context: Context) {
 
     private fun parseProximityMessage(address: String, data: ByteArray): AirPodsStatus {
         val paired = data[2].toInt() == 1
-        val modelId = ((data[3].toInt() and 0xFF) shl 8) or (data[4].toInt() and 0xFF)
-        val model = modelNames[modelId] ?: "Unknown ($modelId)"
+        val model = AirPodsProximityModels.getModelName(data)
 
         val status = data[5].toInt() and 0xFF
         val podsBattery = data[6].toInt() and 0xFF

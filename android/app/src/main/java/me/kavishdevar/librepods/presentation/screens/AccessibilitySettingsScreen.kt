@@ -273,9 +273,7 @@ fun AccessibilitySettingsScreen(
             )
         }
 
-        if (!hearingAidEnabled && state.vendorIdHook &&
-            state.capabilities.contains(Capability.LISTENING_MODE)
-        ) {
+        if (state.capabilities.contains(Capability.CUSTOM_TRANSPARENCY) && !hearingAidEnabled && state.vendorIdHook) {
             StyledListItem(
                 name = stringResource(R.string.customize_transparency_mode),
                 onClick = navigateToTransparencyCustomization,

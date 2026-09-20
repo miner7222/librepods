@@ -415,4 +415,5 @@
     <string name="theme_system">Automatic</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="apple_identity_model_description">Identifies this phone as an Apple device for compatible connection features. Available controls depend on your AirPods model; this does not unlock Pro hearing features on AirPods 5. Restart Bluetooth after changing this setting.</string>
 </resources>
