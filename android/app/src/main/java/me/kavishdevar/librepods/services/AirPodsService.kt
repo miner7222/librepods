@@ -3129,6 +3129,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private val bluetoothReceiver = object : BroadcastReceiver() {
+        // ACTION_UUID also fires for SDP results while the AirPods are on another host; opening AACP then pages them away.
+        private val aclConnected = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
         @SuppressLint("MissingPermission")
         override fun onReceive(context: Context?, intent: Intent) {
             val bluetoothDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -3154,6 +3157,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 val uuid = ParcelUuid.fromString("74ec2172-0bad-4d01-8f77-997b2be0722a")
 
                 if (BluetoothDevice.ACTION_ACL_CONNECTED == action) {
+                    aclConnected.add(bluetoothDevice.address)
                     if (bluetoothDevice.address == macAddress ||
                         bluetoothDevice.uuids?.contains(uuid) == true
                     ) {
@@ -3168,6 +3172,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         bluetoothDevice.fetchUuidsWithSdp()
                     }
                 } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED == action) {
+                    aclConnected.remove(bluetoothDevice.address)
                     if (bluetoothDevice.address == device?.address ||
                         bluetoothDevice.address == macAddress
                     ) {
@@ -3192,7 +3197,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         ?.getString("mac_address", "") ?: ""
                     val matchedByMac = savedMac.isNotEmpty() && bluetoothDevice.address == savedMac
                     val matchedByUuid = bluetoothDevice.uuids?.contains(uuid) == true
-                    if (matchedByUuid || matchedByMac) {
+                    if (!aclConnected.contains(bluetoothDevice.address)) {
+                        Log.d(TAG, "UUID result for ${bluetoothDevice.address} without an ACL link; not opening AACP")
+                    } else if (matchedByUuid || matchedByMac) {
                         val intent = Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED)
                         intent.putExtra("name", name)
                         intent.putExtra("device", bluetoothDevice)
