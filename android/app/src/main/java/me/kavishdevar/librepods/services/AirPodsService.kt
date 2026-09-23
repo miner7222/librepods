@@ -1588,10 +1588,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
         // An armed receiver that outlives a failed connect would start playback on some unrelated later reconnect.
         Handler(Looper.getMainLooper()).postDelayed({
-            try {
-                unregisterReceiver(a2dpConnectionStateReceiver)
+            // Only expire this arming; a newer registration owns its own timeout.
+            if (a2dpConnectionReceiver === a2dpConnectionStateReceiver) {
+                unregisterA2dpConnectionReceiver()
                 Log.d("MediaController", "A2DP play-on-connect expired without a connection")
-            } catch (_: IllegalArgumentException) {}
+                // A stuck pausedWhileTakingOver blocks every later takeover (MediaController gates on it).
+                MediaController.pausedWhileTakingOver = false
+            }
         }, 15_000)
     }
 
