@@ -271,6 +271,17 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     // or claimed; otherwise they would pull audio back from whichever device is using it.
     private var canAutoConnectAudio = false
 
+    /** The lower bud level, or whichever bud has reported one; 0 before any battery packet. */
+    private fun getDisplayBatteryLevel(): Int {
+        val batteries = batteryNotification.getBattery()
+        val left = batteries.find { it.component == BatteryComponent.LEFT }?.level
+        val right = batteries.find { it.component == BatteryComponent.RIGHT }?.level
+        return when {
+            left != null && right != null -> left.coerceAtMost(right)
+            else -> left ?: right ?: 0
+        }
+    }
+
     data class ServiceConfig(
         var deviceName: String = "AirPods",
         var earDetectionEnabled: Boolean = true,
@@ -829,14 +840,20 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         connectionReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == AirPodsNotifications.AIRPODS_CONNECTION_DETECTED) {
-                    device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        intent.getParcelableExtra("device", BluetoothDevice::class.java)!!
+                    val btDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra("device", BluetoothDevice::class.java)
                     } else {
-                        intent.getParcelableExtra("device") as BluetoothDevice?
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra("device") as? BluetoothDevice
                     }
+                    if (btDevice == null) {
+                        Log.w(TAG, "AIRPODS_CONNECTION_DETECTED received without valid device extra")
+                        return
+                    }
+                    device = btDevice
 
-                    if (config.deviceName == "AirPods" && device?.name != null) {
-                        config.deviceName = device?.name ?: "AirPods"
+                    if (config.deviceName == "AirPods" && btDevice.name != null) {
+                        config.deviceName = btDevice.name ?: "AirPods"
                         sharedPreferences.edit { putString("name", config.deviceName) }
                     }
 
@@ -844,11 +861,11 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 //                    if (!CrossDevice.isAvailable) {
                     Log.d(TAG, "${config.deviceName} connected")
                     // ACL/UUID broadcasts can result from service discovery alone.
-                    connectToSocketIfAudioConnected(device!!)
+                    connectToSocketIfAudioConnected(btDevice)
                     Log.d(TAG, "Setting metadata")
-                    setMetadatas(device!!)
+                    setMetadatas(btDevice)
 //                    isConnectedLocally = true
-                    macAddress = device!!.address
+                    macAddress = btDevice.address
                     sharedPreferences.edit {
                         putString("mac_address", macAddress)
                     }
@@ -875,11 +892,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 if (intent?.action == "me.kavishdevar.librepods.cross_device_island") {
                     showIsland(
                         this@AirPodsService,
-                        batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                                batteryNotification.getBattery()
-                                    .find { it.component == BatteryComponent.RIGHT }?.level!!
-                            )
+                        getDisplayBatteryLevel()
                     )
                 } else if (intent?.action == AirPodsNotifications.DISCONNECT_RECEIVERS) {
                     try {
@@ -1075,7 +1088,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     )
                 }
 
-                if (batteryNotification.getBattery()[0].status == BatteryStatus.CHARGING && batteryNotification.getBattery()[1].status == BatteryStatus.CHARGING) {
+                val batteries = batteryNotification.getBattery()
+                if (batteries.size >= 2 && batteries[0].status == BatteryStatus.CHARGING && batteries[1].status == BatteryStatus.CHARGING) {
                     disconnectAudio(this@AirPodsService, device)
                     canAutoConnectAudio = true
                 } else if (canAutoConnectAudio) {
@@ -3304,11 +3318,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 connectAudio(this, device)
                 showIsland(
                     this,
-                    batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                            batteryNotification.getBattery()
-                                .find { it.component == BatteryComponent.RIGHT }?.level!!
-                        ),
+                    getDisplayBatteryLevel(),
                     IslandType.CONNECTED
                 )
 
@@ -3425,11 +3435,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
         showIsland(
             this,
-            batteryNotification.getBattery()
-                .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                    batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.RIGHT }?.level!!
-                ),
+            getDisplayBatteryLevel(),
             IslandType.TAKING_OVER
         )
 
@@ -3748,11 +3754,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         Log.d(TAG, "Disconnected from AirPods, showing island.")
         showIsland(
             this,
-            batteryNotification.getBattery()
-                .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                    batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.RIGHT }?.level!!
-                ),
+            getDisplayBatteryLevel(),
             IslandType.MOVED_TO_REMOTE
         )
         val bluetoothAdapter = getSystemService(BluetoothManager::class.java).adapter
