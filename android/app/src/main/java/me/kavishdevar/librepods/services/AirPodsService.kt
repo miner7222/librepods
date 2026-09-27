@@ -3728,7 +3728,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                                     batteryNotification.getBattery()
                                 )
 
-                                aacpManager.receivePacket(data)
+                                // Only the socket failing should end the session. A packet
+                                // the parsers do not expect - a new firmware's message, or
+                                // one shorter than they assume - used to throw out of this
+                                // loop and drop the connection with it.
+                                try {
+                                    aacpManager.receivePacket(data)
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "Ignoring a packet that failed to parse: $formattedHex", e)
+                                }
 
                                 if (!isHeadTrackingData(data)) {
                                     Log.d("AirPodsData", "Data received: $formattedHex")
