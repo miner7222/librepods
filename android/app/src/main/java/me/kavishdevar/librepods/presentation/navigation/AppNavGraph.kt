@@ -107,7 +107,12 @@ fun AppNavGraph(
                         }
                     Screen.AirPodsSettings ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             AirPodsSettingsRoute(
                                 viewModel = airPodsViewModel,
                                 navigateToRename = { navigate(Screen.Rename) },
@@ -134,7 +139,12 @@ fun AppNavGraph(
 
                     Screen.AudioAndRouting ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             AudioAndRoutingScreen(
                                 viewModel = airPodsViewModel,
                                 navigateToAdaptiveStrength = { navigate(Screen.AdaptiveStrength) },
@@ -147,7 +157,12 @@ fun AppNavGraph(
 
                     Screen.ControlsAndGestures ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             ControlsAndGesturesScreen(
                                 viewModel = airPodsViewModel,
                                 navigateToLeftLongPress = ::navigateToLeftLongPress,
@@ -160,7 +175,12 @@ fun AppNavGraph(
 
                     Screen.Battery ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             BatterySettingsScreen(
                                 viewModel = airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
@@ -169,7 +189,12 @@ fun AppNavGraph(
 
                     Screen.Rename ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             RenameScreen(airPodsViewModel)
                         }
 
@@ -195,7 +220,12 @@ fun AppNavGraph(
 
                     Screen.HeadTracking ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             HeadTrackingScreen(
                                 airPodsViewModel,
                                 ::navigateToPurchase,
@@ -205,7 +235,12 @@ fun AppNavGraph(
 
                     Screen.Accessibility ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             AccessibilitySettingsScreen(
                                 viewModel = airPodsViewModel,
                                 navigateToPurchase = ::navigateToPurchase,
@@ -216,7 +251,12 @@ fun AppNavGraph(
 
                     Screen.TransparencyCustomization ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             TransparencySettingsScreen(
                                 airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
@@ -225,7 +265,12 @@ fun AppNavGraph(
 
                     Screen.HearingAid ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             HearingAidScreen(
                                 viewModel = airPodsViewModel,
                                 onNavigateHearingAidAdjustments = { navigate(Screen.HearingAidAdjustments) },
@@ -236,7 +281,12 @@ fun AppNavGraph(
 
                     Screen.HearingAidAdjustments ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             HearingAidAdjustmentsScreen(
                                 airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
@@ -245,7 +295,12 @@ fun AppNavGraph(
 
                     Screen.AdaptiveStrength ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             AdaptiveStrengthScreen(airPodsViewModel, ::navigateToPurchase)
                         }
 
@@ -269,13 +324,23 @@ fun AppNavGraph(
 
                     Screen.VersionInfo ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             VersionScreen(airPodsViewModel)
                         }
 
                     Screen.HearingProtection ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             HearingProtectionScreen(
                                 viewModel = airPodsViewModel,
                                 navigateToPurchase = ::navigateToPurchase,
@@ -295,7 +360,12 @@ fun AppNavGraph(
 
                     Screen.Equalizer ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             EqualizerRoute(
                                 airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
@@ -304,7 +374,12 @@ fun AppNavGraph(
 
                     is Screen.LongPress ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             LongPress(
                                 viewModel = airPodsViewModel,
                                 name = screen.bud,
@@ -315,7 +390,12 @@ fun AppNavGraph(
 
                     is Screen.CallControl ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             CallControlScreen(
                                 viewModel = airPodsViewModel,
                                 action = screen.action,
@@ -334,7 +414,12 @@ fun AppNavGraph(
 
                     is Screen.MicrophoneSettings ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             MicrophoneSettingsRoute(
                                 viewModel = airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
@@ -343,7 +428,12 @@ fun AppNavGraph(
 
                     is Screen.ConnectToThisDevice ->
                         NavEntry(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
                             ConnectToThisDeviceRoute(
                                 viewModel = airPodsViewModel,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
