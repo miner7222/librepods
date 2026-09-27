@@ -38,6 +38,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.BluetoothConnectionManager
 import me.kavishdevar.librepods.data.AirPodsNotifications
+import me.kavishdevar.librepods.data.ListeningModes
 import me.kavishdevar.librepods.data.NoiseControlMode
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -229,21 +230,16 @@ class AirPodsQSService : TileService() {
         }
     }
 
-    private fun isOffModeEnabled(): Boolean {
-        return sharedPreferences.getBoolean("off_listening_mode", true)
-    }
+    private fun isOffModeEnabled(): Boolean =
+        NoiseControlMode.OFF.ordinal + 1 in getAvailableModes()
 
-    private fun getAvailableModes(): List<Int> {
-        val modes = mutableListOf(
-            NoiseControlMode.TRANSPARENCY.ordinal + 1,
-            NoiseControlMode.ADAPTIVE.ordinal + 1,
-            NoiseControlMode.NOISE_CANCELLATION.ordinal + 1
-        )
-        if (isOffModeEnabled()) {
-            modes.add(0, NoiseControlMode.OFF.ordinal + 1)
-        }
-        return modes
-    }
+    // The service knows the model and what the buds reported; without it, fall back
+    // to the stored switch and every mode, as before.
+    private fun getAvailableModes(): List<Int> =
+        (ServiceManager.getService()?.availableListeningModes() ?: ListeningModes.available(
+            capabilities = null,
+            offAvailable = sharedPreferences.getBoolean("off_listening_mode", true)
+        )).map { it.ordinal + 1 }
 
     private fun getNextAncMode(): Int {
         val availableModes = getAvailableModes()

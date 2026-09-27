@@ -123,7 +123,8 @@ internal fun wideNoiseContentSize(
 internal fun RemoteViews.applyWideNoiseContentSize(
     context: Context,
     dimensions: WidgetDimensions,
-    allowOffMode: Boolean = true
+    allowOffMode: Boolean = true,
+    allowAdaptiveMode: Boolean = true
 ) {
     val metrics = context.resources.displayMetrics
     val preferredTextPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, metrics)
@@ -134,7 +135,9 @@ internal fun RemoteViews.applyWideNoiseContentSize(
         R.string.noise_cancellation
     ).map(context::getString)
     val paint = TextPaint().apply { textSize = preferredTextPx }
-    val visibleLabels = if (allowOffMode) labels else labels.drop(1)
+    val visibleLabels = labels.filterIndexed { index, _ ->
+        (index != 0 || allowOffMode) && (index != 2 || allowAdaptiveMode)
+    }
     val size = wideNoiseContentSize(
         dimensions,
         (paint.fontMetrics.bottom - paint.fontMetrics.top) / metrics.density,

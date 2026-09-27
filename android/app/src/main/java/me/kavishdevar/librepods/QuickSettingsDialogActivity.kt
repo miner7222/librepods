@@ -90,6 +90,7 @@ import me.kavishdevar.librepods.presentation.components.ControlCenterNoiseContro
 import me.kavishdevar.librepods.presentation.components.IconAreaSize
 import me.kavishdevar.librepods.presentation.components.VerticalVolumeSlider
 import me.kavishdevar.librepods.data.AirPodsNotifications
+import me.kavishdevar.librepods.data.ListeningModes
 import me.kavishdevar.librepods.data.NoiseControlMode
 import me.kavishdevar.librepods.services.AirPodsService
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
@@ -310,18 +311,13 @@ fun NewControlCenterDialogContent(
     var currentAncMode by remember { mutableStateOf(NoiseControlMode.TRANSPARENCY) }
     var isConvAwarenessEnabled by remember { mutableStateOf(false) }
 
-    val isOffModeEnabled = remember { sharedPreferences.getBoolean("off_listening_mode", true) }
-    val availableModes = remember(isOffModeEnabled) {
-        mutableListOf(
-            NoiseControlMode.TRANSPARENCY,
-            NoiseControlMode.ADAPTIVE,
-            NoiseControlMode.NOISE_CANCELLATION
-        ).apply {
-            if (isOffModeEnabled) {
-                add(0, NoiseControlMode.OFF)
-            }
-        }
+    val availableModes = remember(service) {
+        service?.availableListeningModes() ?: ListeningModes.available(
+            capabilities = null,
+            offAvailable = sharedPreferences.getBoolean("off_listening_mode", true)
+        )
     }
+    val isOffModeEnabled = NoiseControlMode.OFF in availableModes
 
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val maxVolume = remember { audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) }

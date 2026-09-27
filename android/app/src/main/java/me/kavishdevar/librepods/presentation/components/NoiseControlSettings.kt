@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.data.ListeningModes
 import me.kavishdevar.librepods.data.NoiseControlMode
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
@@ -88,45 +89,23 @@ import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
 @SuppressLint("UnspecifiedRegisterReceiverFlag", "UnusedBoxWithConstraintsScope")
 @Composable
 fun NoiseControlSettings(
-    showOffListeningMode: Boolean,
+    /** The modes these AirPods accept, in display order; see ListeningModes. */
+    modes: List<NoiseControlMode>,
     noiseControlModeValue: Int,
     onNoiseControlModeChanged: (Int) -> Unit
 ) {
     when (LocalDesignSystem.current) {
         DesignSystem.Material -> {
-            val options = buildList {
-                if (showOffListeningMode) {
-                    add(
-                        Triple(
-                            NoiseControlMode.OFF,
-                            R.string.off,
-                            R.drawable.noise_control_off
-                        )
-                    )
-                }
-
-                add(
-                    Triple(
-                        NoiseControlMode.TRANSPARENCY,
-                        R.string.transparency,
-                        R.drawable.transparency
-                    )
+            val options = listOf(
+                Triple(NoiseControlMode.OFF, R.string.off, R.drawable.noise_control_off),
+                Triple(NoiseControlMode.TRANSPARENCY, R.string.transparency, R.drawable.transparency),
+                Triple(NoiseControlMode.ADAPTIVE, R.string.adaptive, R.drawable.adaptive),
+                Triple(
+                    NoiseControlMode.NOISE_CANCELLATION,
+                    R.string.noise_cancellation,
+                    R.drawable.noise_cancellation
                 )
-                add(
-                    Triple(
-                        NoiseControlMode.ADAPTIVE,
-                        R.string.adaptive,
-                        R.drawable.adaptive
-                    )
-                )
-                add(
-                    Triple(
-                        NoiseControlMode.NOISE_CANCELLATION,
-                        R.string.noise_cancellation,
-                        R.drawable.noise_cancellation
-                    )
-                )
-            }
+            ).filter { it.first in modes }
 
             val selectedMode = NoiseControlMode.entries[(noiseControlModeValue - 1).coerceIn(0, NoiseControlMode.entries.lastIndex)]
 
@@ -215,11 +194,9 @@ fun NoiseControlSettings(
             fun onModeSelected(mode: NoiseControlMode, received: Boolean = false) {
                 val previousMode = noiseControlMode.value
 
-                val targetMode = if (!showOffListeningMode && mode == NoiseControlMode.OFF) {
-                     NoiseControlMode.TRANSPARENCY
-                } else {
-                    mode
-                }
+                // A mode these AirPods do not have shows as Transparency, which
+                // every model with listening modes has.
+                val targetMode = if (mode in modes) mode else NoiseControlMode.TRANSPARENCY
 
                 noiseControlMode.value = targetMode
 
@@ -259,20 +236,14 @@ fun NoiseControlSettings(
                     .padding(bottom = appleMetrics.cardGap)
             ) {
                 val density = LocalDensity.current
-                val buttonCount = if (showOffListeningMode) 4 else 3
+                val buttonCount = modes.size
                 val buttonWidth = maxWidth / buttonCount
+                fun slotOf(mode: NoiseControlMode): Int = modes.indexOf(mode).coerceAtLeast(0)
 
                 val isDragging = remember { mutableStateOf(false) }
                 var dragOffset by remember {
                     mutableFloatStateOf(
-                        with(density) {
-                            when(noiseControlMode.value) {
-                                NoiseControlMode.OFF -> if (showOffListeningMode) 0f else buttonWidth.toPx()
-                                NoiseControlMode.TRANSPARENCY -> if (showOffListeningMode) buttonWidth.toPx() else 0f
-                                NoiseControlMode.ADAPTIVE -> if (showOffListeningMode) (buttonWidth * 2).toPx() else buttonWidth.toPx()
-                                NoiseControlMode.NOISE_CANCELLATION -> if (showOffListeningMode) (buttonWidth * 3).toPx() else (buttonWidth * 2).toPx()
-                            }
-                        }
+                        with(density) { (buttonWidth * slotOf(noiseControlMode.value)).toPx() }
                     )
                 }
 
@@ -282,12 +253,7 @@ fun NoiseControlSettings(
                     visibilityThreshold = 0.01f
                 )
 
-                val targetOffset = buttonWidth * when(noiseControlMode.value) {
-                    NoiseControlMode.OFF -> if (showOffListeningMode) 0 else 1
-                    NoiseControlMode.TRANSPARENCY -> if (showOffListeningMode) 1 else 0
-                    NoiseControlMode.ADAPTIVE -> if (showOffListeningMode) 2 else 1
-                    NoiseControlMode.NOISE_CANCELLATION -> if (showOffListeningMode) 3 else 2
-                }
+                val targetOffset = buttonWidth * slotOf(noiseControlMode.value)
 
                 val animatedOffset by animateFloatAsState(
                     targetValue = with(density) {
@@ -309,41 +275,20 @@ fun NoiseControlSettings(
                         Row(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            if (showOffListeningMode) {
-                                // No underlay on this pass: the row above draws the
-                                // same buttons over it, and two half-strength arcs
-                                // stacked read as three quarters. Only the slot under
-                                // the selected pill is hidden here, which is why the
-                                // arc looked right there and nowhere else.
+                            // No underlay on this pass: the row above draws the
+                            // same buttons over it, and two half-strength arcs
+                            // stacked read as three quarters. Only the slot under
+                            // the selected pill is hidden here, which is why the
+                            // arc looked right there and nowhere else.
+                            modes.forEach { mode ->
                                 NoiseControlButton(
-                                    icon = ImageBitmap.imageResource(R.drawable.noise_control_off),
-                                    onClick = { onModeSelected(NoiseControlMode.OFF) },
-                                    textColor = if (noiseControlMode.value == NoiseControlMode.OFF) textColorSelected else textColor,
+                                    icon = ImageBitmap.imageResource(noiseControlIcon(mode)),
+                                    onClick = { onModeSelected(mode) },
+                                    textColor = if (noiseControlMode.value == mode) textColorSelected else textColor,
                                     modifier = Modifier.weight(1f),
                                     usePadding = false
                                 )
                             }
-                            NoiseControlButton(
-                                icon = ImageBitmap.imageResource(R.drawable.transparency),
-                                onClick = { onModeSelected(NoiseControlMode.TRANSPARENCY) },
-                                textColor = if (noiseControlMode.value == NoiseControlMode.TRANSPARENCY) textColorSelected else textColor,
-                                modifier = Modifier.weight(1f),
-                                usePadding = false
-                            )
-                            NoiseControlButton(
-                                icon = ImageBitmap.imageResource(R.drawable.adaptive),
-                                onClick = { onModeSelected(NoiseControlMode.ADAPTIVE) },
-                                textColor = if (noiseControlMode.value == NoiseControlMode.ADAPTIVE) textColorSelected else textColor,
-                                modifier = Modifier.weight(1f),
-                                usePadding = false
-                            )
-                            NoiseControlButton(
-                                icon = ImageBitmap.imageResource(R.drawable.noise_cancellation),
-                                onClick = { onModeSelected(NoiseControlMode.NOISE_CANCELLATION) },
-                                textColor = if (noiseControlMode.value == NoiseControlMode.NOISE_CANCELLATION) textColorSelected else textColor,
-                                modifier = Modifier.weight(1f),
-                                usePadding = false
-                            )
                         }
 
                         Box(
@@ -366,12 +311,8 @@ fun NoiseControlSettings(
                                         val position =
                                             dragOffset / with(density) { buttonWidth.toPx() }
                                         val newIndex = position.roundToInt()
-                                        val newMode = when (newIndex) {
-                                            0 -> if (showOffListeningMode) NoiseControlMode.OFF else NoiseControlMode.TRANSPARENCY
-                                            1 -> if (showOffListeningMode) NoiseControlMode.TRANSPARENCY else NoiseControlMode.ADAPTIVE
-                                            2 -> if (showOffListeningMode) NoiseControlMode.ADAPTIVE else NoiseControlMode.NOISE_CANCELLATION
-                                            3 -> NoiseControlMode.NOISE_CANCELLATION
-                                            else -> noiseControlMode.value // Keep current if index is invalid
+                                        val newMode = modes.getOrElse(newIndex) {
+                                            noiseControlMode.value
                                         }
                                         onModeSelected(newMode)
                                     }
@@ -390,37 +331,18 @@ fun NoiseControlSettings(
                                 .fillMaxWidth()
                                 .zIndex(1f)
                         ) {
-                            if (showOffListeningMode) {
+                            modes.forEach { mode ->
                                 NoiseControlButton(
-                                    icon = ImageBitmap.imageResource(R.drawable.noise_control_off),
-                                    underlay = ImageBitmap.imageResource(R.drawable.noise_cancellation),
-                                    onClick = { onModeSelected(NoiseControlMode.OFF) },
-                                    textColor = if (noiseControlMode.value == NoiseControlMode.OFF) textColorSelected else textColor,
+                                    icon = ImageBitmap.imageResource(noiseControlIcon(mode)),
+                                    underlay = if (mode == NoiseControlMode.OFF) {
+                                        ImageBitmap.imageResource(R.drawable.noise_cancellation)
+                                    } else null,
+                                    onClick = { onModeSelected(mode) },
+                                    textColor = if (noiseControlMode.value == mode) textColorSelected else textColor,
                                     modifier = Modifier.weight(1f),
                                     usePadding = false
                                 )
                             }
-                            NoiseControlButton(
-                                icon = ImageBitmap.imageResource(R.drawable.transparency),
-                                onClick = { onModeSelected(NoiseControlMode.TRANSPARENCY) },
-                                textColor = if (noiseControlMode.value == NoiseControlMode.TRANSPARENCY) textColorSelected else textColor,
-                                modifier = Modifier.weight(1f),
-                                usePadding = false
-                            )
-                            NoiseControlButton(
-                                icon = ImageBitmap.imageResource(R.drawable.adaptive),
-                                onClick = { onModeSelected(NoiseControlMode.ADAPTIVE) },
-                                textColor = if (noiseControlMode.value == NoiseControlMode.ADAPTIVE) textColorSelected else textColor,
-                                modifier = Modifier.weight(1f),
-                                usePadding = false
-                            )
-                            NoiseControlButton(
-                                icon = ImageBitmap.imageResource(R.drawable.noise_cancellation),
-                                onClick = { onModeSelected(NoiseControlMode.NOISE_CANCELLATION) },
-                                textColor = if (noiseControlMode.value == NoiseControlMode.NOISE_CANCELLATION) textColorSelected else textColor,
-                                modifier = Modifier.weight(1f),
-                                usePadding = false
-                            )
                         }
                     }
 
@@ -437,32 +359,14 @@ fun NoiseControlSettings(
                             .fillMaxWidth()
                             .padding(top = 4.dp)
                     ) {
-                        if (showOffListeningMode) {
+                        modes.forEach { mode ->
                             Text(
-                                text = stringResource(R.string.off),
+                                text = stringResource(noiseControlLabel(mode)),
                                 style = modeLabelStyle,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                        Text(
-                            text = stringResource(R.string.transparency),
-                            style = modeLabelStyle,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = stringResource(R.string.adaptive),
-                            style = modeLabelStyle,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = stringResource(R.string.noise_cancellation),
-                            style = modeLabelStyle,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
                     }
                 }
             }
@@ -470,6 +374,19 @@ fun NoiseControlSettings(
     }
 }
 
+private fun noiseControlIcon(mode: NoiseControlMode): Int = when (mode) {
+    NoiseControlMode.OFF -> R.drawable.noise_control_off
+    NoiseControlMode.TRANSPARENCY -> R.drawable.transparency
+    NoiseControlMode.ADAPTIVE -> R.drawable.adaptive
+    NoiseControlMode.NOISE_CANCELLATION -> R.drawable.noise_cancellation
+}
+
+private fun noiseControlLabel(mode: NoiseControlMode): Int = when (mode) {
+    NoiseControlMode.OFF -> R.string.off
+    NoiseControlMode.TRANSPARENCY -> R.string.transparency
+    NoiseControlMode.ADAPTIVE -> R.string.adaptive
+    NoiseControlMode.NOISE_CANCELLATION -> R.string.noise_cancellation
+}
 
 @Preview
 @Composable
@@ -481,7 +398,7 @@ fun NoiseControlSettingsPreview() {
             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             NoiseControlSettings(
-                showOffListeningMode = false,
+                modes = ListeningModes.available(capabilities = null, offAvailable = false),
                 noiseControlModeValue = 2,
                 onNoiseControlModeChanged = { }
             )
