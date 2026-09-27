@@ -35,7 +35,9 @@ This packet is necessary to receive notifications from the AirPods like ear dete
 04 00 04 00 0F 00 FF FF FE FF
 ```
 
-This packet also works.
+This packet also works, and is the one to use: on some models the one above
+never subscribes to battery notifications (AirPods Pro 2, A2698, firmware
+81.2675000075000000.6877 sends none), while this one does.
 
 ```plaintext
 04 00 04 00 0F 00 FF FF FF FF
@@ -77,12 +79,12 @@ Example packet from AirPods Pro 2
 | Byte      | Interpretation                     |
 |-----------|------------------------------------|
 | 7th byte  | Battery Count - 3                  |
-| 8th byte  | Battery type - Left                |
+| 8th byte  | Battery type - Right               |
 | 9th byte  | Spacer, value = 0x01               |
 | 10th byte | Battery level 100%                 |
 | 11th byte | Battery status - Discharging       |
 | 12th byte | Battery component end value = 0x01 |
-| 13th byte | Battery type - Right               |
+| 13th byte | Battery type - Left                |
 | 14th byte | Spacer, value = 0x01               |
 | 15th byte | Battery level 99%                  |
 | 16th byte | Battery status - Charging          |
