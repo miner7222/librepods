@@ -709,7 +709,9 @@ class AirPodsViewModel(
         }
     }
 
-    fun loadATT() {
+    // init() runs on the main thread, and each uncached read waits up to two
+    // seconds for the buds to answer.
+    fun loadATT() = viewModelScope.launch(Dispatchers.IO) {
         val loudSoundReduction = service.attManager.getCharacteristic(ATTHandles.LOUD_SOUND_REDUCTION) ?: byteArrayOf()
         val loudSoundReductionEnabled = if (loudSoundReduction.isNotEmpty()) {
             loudSoundReduction[0].toInt() == 1
