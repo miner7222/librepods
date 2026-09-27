@@ -280,6 +280,7 @@ class AirPodsViewModel(
             controlRepo.remove(id, listener)
         }
         service.aacpManager.customEqCallback = null
+        preferenceListener?.let(sharedPreferences::unregisterOnSharedPreferenceChangeListener)
         if (::broadcastReceiver.isInitialized) {
             try {
                 appContext.unregisterReceiver(broadcastReceiver)
@@ -318,7 +319,13 @@ class AirPodsViewModel(
         }
     }
 
+    // SharedPreferences holds its listeners weakly, so this one has to be kept here;
+    // as a local it was collected and the view model stopped hearing about changes
+    // the service made (the name, the Off switch, head gestures, stem actions).
+    private var preferenceListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
+
     private fun observeSharedPreferences() {
+        preferenceListener?.let(sharedPreferences::unregisterOnSharedPreferenceChangeListener)
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
                 "name" -> loadName()
@@ -327,6 +334,7 @@ class AirPodsViewModel(
                 "dynamic_end_of_charge", "foss_upgraded", "premium_expiry_time" -> loadSharedPreferences()
             }
         }
+        preferenceListener = listener
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
     }
 
