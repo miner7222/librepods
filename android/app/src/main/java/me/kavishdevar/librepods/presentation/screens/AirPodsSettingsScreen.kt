@@ -107,6 +107,7 @@ import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.bluetooth.ATTHandles
 import me.kavishdevar.librepods.data.AirPodsModels
 import me.kavishdevar.librepods.data.Capability
+import me.kavishdevar.librepods.data.ListeningModes
 import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.components.AboutCard
 import me.kavishdevar.librepods.presentation.components.AppleDisconnectedContent
@@ -468,7 +469,14 @@ fun AirPodsSettingsScreen(
             if (capabilities.contains(Capability.LISTENING_MODE)) {
                 item(key = "noise_control") {
                     NoiseControlSettings(
-                        showOffListeningMode = state.offListeningMode,
+                        modes = ListeningModes.available(
+                            state.instance?.model?.capabilities,
+                            ListeningModes.offAvailable(
+                                state.instance?.model?.capabilities,
+                                reported = null,
+                                stored = state.offListeningMode
+                            )
+                        ),
                         noiseControlModeValue = state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE]?.getOrNull(
                             0
                         )?.toInt() ?: 3,

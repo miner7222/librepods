@@ -94,6 +94,8 @@ import me.kavishdevar.librepods.bluetooth.BluetoothConnectionManager
 import me.kavishdevar.librepods.bluetooth.createBluetoothSocket
 import me.kavishdevar.librepods.data.AirPodsInstance
 import me.kavishdevar.librepods.data.AirPodsModels
+import me.kavishdevar.librepods.data.NoiseControlMode
+import me.kavishdevar.librepods.data.ListeningModes
 import me.kavishdevar.librepods.data.AirPodsNotifications
 import me.kavishdevar.librepods.data.Battery
 import me.kavishdevar.librepods.data.BatteryComponent
@@ -270,6 +272,22 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     // Background paths may only restore audio LibrePods itself released (case, not wearing)
     // or claimed; otherwise they would pull audio back from whichever device is using it.
     private var canAutoConnectAudio = false
+
+    /** The connected model's capabilities, or null while the model is not known. */
+    fun listeningModeCapabilities(): Set<Capability>? = airpodsInstance?.model?.capabilities
+
+    /** Whether Off can be selected right now; see [ListeningModes.offAvailable]. */
+    fun isOffListeningModeAvailable(): Boolean = ListeningModes.offAvailable(
+        listeningModeCapabilities(),
+        aacpManager.controlCommandStatusList
+            .find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION }
+            ?.value?.firstOrNull(),
+        sharedPreferences.getBoolean("off_listening_mode", true)
+    )
+
+    /** Every listening mode the connected AirPods accept, in display order. */
+    fun availableListeningModes(): List<NoiseControlMode> =
+        ListeningModes.available(listeningModeCapabilities(), isOffListeningModeAvailable())
 
     /** The lower bud level, or whichever bud has reported one; 0 before any battery packet. */
     private fun getDisplayBatteryLevel(): Int {
@@ -722,11 +740,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     } else {
                         val currentMode = ancNotification.status
                         val configByte = sharedPreferences.getInt("long_press_byte", 0b0111)
-                        val allowOffModeValue =
-                            aacpManager.controlCommandStatusList.find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION }
-                        val allowOffMode =
-                            allowOffModeValue?.value?.takeIf { it.isNotEmpty() }?.get(0) == 0x01.toByte() || sharedPreferences.getBoolean("off_listening_mode", true)
-                        val nextMode = getNextMode(currentMode = currentMode, configByte = configByte, allowOffMode)
+                        val nextMode = getNextMode(
+                            currentMode = currentMode,
+                            configByte = configByte,
+                            offmodeEnabled = isOffListeningModeAvailable(),
+                            adaptiveEnabled = ListeningModes.adaptiveAvailable(listeningModeCapabilities())
+                        )
 
                         aacpManager.sendControlCommand(
                             AACPManager.Companion.ControlCommandIdentifiers.LISTENING_MODE.value,
@@ -1150,6 +1169,14 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     ancNotification.setStatus(byteArrayOf(command.value.takeIf { it.isNotEmpty() }
                         ?.get(0) ?: 0x00.toByte()))
                     sendANCBroadcast()
+                    updateNoiseControlWidget()
+                    updateNoiseControlGridWidget()
+                } else if (command.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION.value) {
+                    // The buds own this switch. Keep the stored copy in step even when
+                    // the app is closed, so nothing falls back to a stale answer.
+                    sharedPreferences.edit {
+                        putBoolean("off_listening_mode", command.value.firstOrNull() == 0x01.toByte())
+                    }
                     updateNoiseControlWidget()
                     updateNoiseControlGridWidget()
                 }
@@ -2639,14 +2666,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             } else {
                 NO_LISTENING_MODE
             }
-            val allowOffModeValue =
-                aacpManager.controlCommandStatusList.find { it.identifier == AACPManager.Companion.ControlCommandIdentifiers.ALLOW_OFF_OPTION }
-            val allowOffMode =
-                allowOffModeValue?.value?.takeIf { it.isNotEmpty() }?.get(0) == 0x01.toByte() || sharedPreferences.getBoolean("off_listening_mode", true)
+            val allowOffMode = isOffListeningModeAvailable()
+            val allowAdaptiveMode = ListeningModes.adaptiveAvailable(listeningModeCapabilities())
             if (layoutId == R.layout.noise_control_widget_grid) {
                 it.applyNoiseGridItemSize(gridItemSize(dimensions))
             } else {
-                it.applyWideNoiseContentSize(this, dimensions, allowOffMode)
+                it.applyWideNoiseContentSize(this, dimensions, allowOffMode, allowAdaptiveMode)
             }
             it.applyNoiseControlWidgetTheme(
                 this,
@@ -2711,6 +2736,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
             it.setViewVisibility(
                 R.id.widget_off_button, if (allowOffMode) View.VISIBLE else View.GONE
+            )
+            it.setViewVisibility(
+                R.id.widget_adaptive_button, if (allowAdaptiveMode) View.VISIBLE else View.GONE
             )
         }
     }
@@ -4144,11 +4172,16 @@ private fun Int.dpToPx(): Int {
     return (this * density).toInt()
 }
 
-fun getNextMode(currentMode: Int, configByte: Int, offmodeEnabled: Boolean): Int {
+fun getNextMode(
+    currentMode: Int,
+    configByte: Int,
+    offmodeEnabled: Boolean,
+    adaptiveEnabled: Boolean = true
+): Int {
     val enabledModes = buildList {
         if ((configByte and 0x01) != 0 && offmodeEnabled) add(1)
         if ((configByte and 0x04) != 0) add(3)
-        if ((configByte and 0x08) != 0) add(4)
+        if ((configByte and 0x08) != 0 && adaptiveEnabled) add(4)
         if ((configByte and 0x02) != 0) add(2)
     }
     Log.d(TAG, "currentMode: $currentMode, config: ${configByte.toString(2)}")
