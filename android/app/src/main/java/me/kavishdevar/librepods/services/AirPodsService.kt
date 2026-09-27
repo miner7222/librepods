@@ -422,7 +422,11 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     ) ?: ""
                 )
                 canAutoConnectAudio = true
-                connectToSocket(bluetoothAdapter, bluetoothDevice)
+                // Scan results arrive on the main thread, and connecting blocks for up
+                // to five seconds waiting on the socket.
+                CoroutineScope(Dispatchers.IO).launch {
+                    connectToSocket(bluetoothAdapter, bluetoothDevice)
+                }
             }
             Log.d(TAG, "Device status changed")
             if (aacpBatteryReported.get()) return
@@ -3465,8 +3469,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 // Set a temporary connecting state
 //                isConnectedLocally = false // Keep as false since we're not actually connecting to L2CAP
             } else {
-                connectToSocket(bluetoothAdapter, device!!)
-                connectAudio(this, device)
+                // takeOver runs on the main thread (playback and call callbacks), and
+                // the socket connect below blocks for up to five seconds.
+                val target = device!!
+                CoroutineScope(Dispatchers.IO).launch {
+                    connectToSocket(bluetoothAdapter, target)
+                    connectAudio(this@AirPodsService, target)
+                }
 //                isConnectedLocally = true
             }
         }
