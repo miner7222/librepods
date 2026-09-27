@@ -772,6 +772,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
         }
 
+        // The one receiver other apps are meant to reach (automation tools setting
+        // the listening mode or conversation awareness); every other receiver here
+        // carries the app's own broadcasts or the system's and is not exported.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(externalBroadcastReceiver, externalBroadcastFilter, RECEIVER_EXPORTED)
         } else {
@@ -838,7 +841,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             batteryChangedIntentFilter.addAction(AirPodsNotifications.DISCONNECT_RECEIVERS)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(
-                    BatteryChangedIntentReceiver, batteryChangedIntentFilter, RECEIVER_EXPORTED
+                    BatteryChangedIntentReceiver, batteryChangedIntentFilter, RECEIVER_NOT_EXPORTED
                 )
             } else {
                 @Suppress("UnspecifiedRegisterReceiverFlag") registerReceiver(
@@ -933,7 +936,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(showIslandReceiver!!, showIslandIntentFilter, RECEIVER_EXPORTED)
+            registerReceiver(showIslandReceiver!!, showIslandIntentFilter, RECEIVER_NOT_EXPORTED)
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag") registerReceiver(
                 showIslandReceiver!!, showIslandIntentFilter
@@ -946,8 +949,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(connectionReceiver, deviceIntentFilter, RECEIVER_EXPORTED)
-            registerReceiver(bluetoothReceiver, serviceIntentFilter, RECEIVER_EXPORTED)
+            registerReceiver(connectionReceiver, deviceIntentFilter, RECEIVER_NOT_EXPORTED)
+            registerReceiver(bluetoothReceiver, serviceIntentFilter, RECEIVER_NOT_EXPORTED)
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag") registerReceiver(
                 connectionReceiver, deviceIntentFilter
@@ -1635,7 +1638,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             IntentFilter("android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
         a2dpConnectionReceiver = a2dpConnectionStateReceiver
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter, RECEIVER_EXPORTED)
+            registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter, RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter)
         }
@@ -3231,7 +3234,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         showPopupOnce(name ?: config.deviceName)
                     }
                     if (bluetoothDevice.uuids?.contains(uuid) == true) {
-                        val intent = Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED)
+                        val intent = Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED).apply { setPackage(context?.packageName) }
                         intent.putExtra("name", name)
                         intent.putExtra("device", bluetoothDevice)
                         context?.sendBroadcast(intent)
@@ -3255,6 +3258,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         ?.getString("mac_address", "") ?: ""
                     if (bluetoothDevice.uuids?.contains(uuid) == true || bluetoothDevice.address == savedMac) {
                         context?.sendBroadcast(Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED).apply {
+                            setPackage(context?.packageName)
                             putExtra("name", name)
                             putExtra("device", bluetoothDevice)
                         })
@@ -3267,7 +3271,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     if (!aclConnected.contains(bluetoothDevice.address)) {
                         Log.d(TAG, "UUID result for ${bluetoothDevice.address} without an ACL link; not opening AACP")
                     } else if (matchedByUuid || matchedByMac) {
-                        val intent = Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED)
+                        val intent = Intent(AirPodsNotifications.AIRPODS_CONNECTION_DETECTED).apply { setPackage(context?.packageName) }
                         intent.putExtra("name", name)
                         intent.putExtra("device", bluetoothDevice)
                         context?.sendBroadcast(intent)
