@@ -368,10 +368,37 @@ static bool hookLibrary(const char *libname) {
     LOGI("hookLibrary: opened file, size: %lld", (long long) st.st_size);
 
     std::vector<uint8_t> file(st.st_size);
-    read(fd, file.data(), st.st_size);
+    size_t total = 0;
+    while (total < file.size()) {
+        ssize_t n = read(fd, file.data() + total, file.size() - total);
+        if (n <= 0) break;
+        total += static_cast<size_t>(n);
+    }
     close(fd);
+    if (total != file.size()) {
+        LOGE("hookLibrary: short read (%zu of %zu bytes)", total, file.size());
+        return false;
+    }
+
+    /*
+     * Everything below reads the library through the 64-bit ELF structures. A
+     * 32-bit Bluetooth stack (armeabi-v7a devices) has a different layout, so the
+     * offsets it would produce are garbage and hooking them crashes the Bluetooth
+     * process. Hooking nothing is the safe answer there.
+     */
+    if (file.size() < sizeof(Elf64_Ehdr) ||
+        memcmp(file.data(), ELFMAG, SELFMAG) != 0 ||
+        file[EI_CLASS] != ELFCLASS64) {
+        LOGE("hookLibrary: %s is not a 64-bit ELF, not hooking", libname);
+        return false;
+    }
 
     auto *eh = reinterpret_cast<Elf64_Ehdr *>(file.data());
+    if (eh->e_shoff == 0 || eh->e_shoff + (uint64_t) eh->e_shnum * sizeof(Elf64_Shdr) > file.size() ||
+        eh->e_shstrndx >= eh->e_shnum) {
+        LOGE("hookLibrary: section headers out of range, not hooking");
+        return false;
+    }
     auto *shdr = reinterpret_cast<Elf64_Shdr *>(
             file.data() + eh->e_shoff);
 
