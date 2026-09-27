@@ -347,11 +347,8 @@ class AirPodsViewModel(
             override fun onReceive(context: Context?, intent: Intent?) {
                 val action = intent?.action ?: return
                 if (!isDemoMode) when (action) {
-                    AirPodsNotifications.AIRPODS_L2CAP_CONNECTED -> {
-                        _uiState.update {
-                            it.copy(isLocallyConnected = true)
-                        }
-                    }
+                    AirPodsNotifications.AIRPODS_L2CAP_CONNECTED,
+                    AirPodsNotifications.AIRPODS_CONNECTED -> loadCurrentStatus()
 
                     AirPodsNotifications.AIRPODS_DISCONNECTED -> {
                         _uiState.update {
@@ -381,6 +378,9 @@ class AirPodsViewModel(
         }
 
         val filter = IntentFilter().apply {
+            // The receiver above acts on the L2CAP one; AIRPODS_CONNECTED alone never
+            // reached it, so a connection made with the app open went unnoticed.
+            addAction(AirPodsNotifications.AIRPODS_L2CAP_CONNECTED)
             addAction(AirPodsNotifications.AIRPODS_CONNECTED)
             addAction(AirPodsNotifications.AIRPODS_DISCONNECTED)
             addAction(AirPodsNotifications.BATTERY_DATA)
