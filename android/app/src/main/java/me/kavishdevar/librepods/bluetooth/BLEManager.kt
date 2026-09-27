@@ -323,11 +323,6 @@ class BLEManager(private val context: Context) {
         }
     }
 
-    private fun formatBattery(byteVal: Int): Pair<Boolean, Int> {
-        val charging = (byteVal and 0x80) != 0
-        val level = byteVal and 0x7F
-        return Pair(charging, level)
-    }
 
     private fun processScanResult(result: ScanResult): AirPodsStatus? {
         try {
@@ -657,5 +652,16 @@ class BLEManager(private val context: Context) {
         private const val LID_CLOSE_TIMEOUT_MS = 15000L
         private const val SCAN_RETRY_BACKOFF_MS = 5000L
         private const val MAX_SCAN_RETRY_BACKOFF_MS = 30000L
+
+        /**
+         * A bud's encrypted battery byte: the top bit is the charger, the rest the level.
+         * A bud that cannot report sends 0x7F or 0xFF, which reads as 127 percent, so
+         * anything above 100 is no reading at all.
+         */
+        internal fun formatBattery(byteVal: Int): Pair<Boolean, Int?> {
+            val charging = (byteVal and 0x80) != 0
+            val level = (byteVal and 0x7F).takeIf { it <= 100 }
+            return Pair(charging && level != null, level)
+        }
     }
 }

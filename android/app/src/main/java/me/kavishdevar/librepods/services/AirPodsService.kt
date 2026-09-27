@@ -408,8 +408,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
             Log.d(TAG, "Device status changed")
             if (aacpBatteryReported.get()) return
-            val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: 0
-            val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: 0
+            val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: -1
+            val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: -1
             val caseLevel = bleManager.getMostRecentStatus()?.caseBattery ?: 0
             val leftCharging = bleManager.getMostRecentStatus()?.isLeftCharging
             val rightCharging = bleManager.getMostRecentStatus()?.isRightCharging
@@ -445,8 +445,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     getSharedPreferences("settings", MODE_PRIVATE).getString("name", "AirPods Pro")
                         ?: "AirPods"
                 )
-                val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: 0
-                val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: 0
+                val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: -1
+                val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: -1
                 val caseLevel = bleManager.getMostRecentStatus()?.caseBattery ?: 0
                 val leftCharging = bleManager.getMostRecentStatus()?.isLeftCharging
                 val rightCharging = bleManager.getMostRecentStatus()?.isRightCharging
@@ -491,8 +491,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 updateBattery()
                 return
             }
-            val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: 0
-            val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: 0
+            val leftLevel = bleManager.getMostRecentStatus()?.leftBattery ?: -1
+            val rightLevel = bleManager.getMostRecentStatus()?.rightBattery ?: -1
             val caseLevel = bleManager.getMostRecentStatus()?.caseBattery ?: 0
             val leftCharging = bleManager.getMostRecentStatus()?.isLeftCharging
             val rightCharging = bleManager.getMostRecentStatus()?.isRightCharging
