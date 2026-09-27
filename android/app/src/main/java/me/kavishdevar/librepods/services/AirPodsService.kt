@@ -1153,7 +1153,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         Log.d("AirPodsParser", "CA startSpeaking() called (budsInEar=$budsInEar, bothPodsOnly=${config.conversationalAwarenessBothPodsOnly})")
                         MediaController.startSpeaking()
                     }
-                } else if (conversationAwarenessNotification.status == 6.toByte() || conversationAwarenessNotification.status == 8.toByte() || conversationAwarenessNotification.status == 9.toByte()) {
+                } else if (conversationAwarenessNotification.status.toInt() in 3..9) {
+                    // 03 is "stopped speaking" and the values above it are the steps
+                    // back to full volume; which of them arrives last depends on the
+                    // mode the conversation started in. Waiting for 6 left the volume
+                    // ducked whenever it began in Transparency, where no mode switch
+                    // follows (kavishdevar/librepods#739). The Linux client restores
+                    // on the same range.
                     MediaController.stopSpeaking() // Never gated — volume must always be restored.
                 }
 
