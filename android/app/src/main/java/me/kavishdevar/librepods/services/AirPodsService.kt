@@ -1089,7 +1089,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 }
 
                 val batteries = batteryNotification.getBattery()
-                if (batteries.size >= 2 && batteries[0].status == BatteryStatus.CHARGING && batteries[1].status == BatteryStatus.CHARGING) {
+                if (batteries.size >= 2 && BatteryStatus.isCharging(batteries[0].status) && BatteryStatus.isCharging(batteries[1].status)) {
                     disconnectAudio(this@AirPodsService, device)
                     canAutoConnectAudio = true
                 } else if (canAutoConnectAudio) {
@@ -2341,8 +2341,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 SystemApisUtils.setMetadata(
                     it,
                     it.METADATA_UNTETHERED_CASE_CHARGING,
-                    (if (batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.CASE }?.status == BatteryStatus.CHARGING
+                    (if (BatteryStatus.isCharging(
+                            batteryNotification.getBattery().find { it.component == BatteryComponent.CASE }?.status
+                        )
                     ) "1".toByteArray() else "0".toByteArray())
                 )
                 SystemApisUtils.setMetadata(
@@ -2355,8 +2356,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 SystemApisUtils.setMetadata(
                     it,
                     it.METADATA_UNTETHERED_LEFT_CHARGING,
-                    (if (batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.LEFT }?.status == BatteryStatus.CHARGING
+                    (if (BatteryStatus.isCharging(
+                            batteryNotification.getBattery().find { it.component == BatteryComponent.LEFT }?.status
+                        )
                     ) "1".toByteArray() else "0".toByteArray())
                 )
                 SystemApisUtils.setMetadata(
@@ -2369,8 +2371,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 SystemApisUtils.setMetadata(
                     it,
                     it.METADATA_UNTETHERED_RIGHT_CHARGING,
-                    (if (batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.RIGHT }?.status == BatteryStatus.CHARGING
+                    (if (BatteryStatus.isCharging(
+                            batteryNotification.getBattery().find { it.component == BatteryComponent.RIGHT }?.status
+                        )
                     ) "1".toByteArray() else "0".toByteArray())
                 )
             }
@@ -2748,7 +2751,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         val icon = batteryWidgetIcons(overlayModel()).buds
 
         val lowest = buds.minOf { it.level }
-        val anyCharging = buds.any { it.status == BatteryStatus.CHARGING }
+        val anyCharging = buds.any { BatteryStatus.isCharging(it.status) }
 
         if (!anyCharging && lowest <= LOW_BATTERY_THRESHOLD) {
             if (!lowBatteryNotified) {
@@ -2830,7 +2833,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         """${
                         batteryList?.find { it.component == BatteryComponent.LEFT }?.let {
                             if (it.status != BatteryStatus.DISCONNECTED) {
-                                "L: ${if (it.status == BatteryStatus.CHARGING) "⚡" else ""} ${it.level}%"
+                                "L: ${if (BatteryStatus.isCharging(it.status)) "⚡" else ""} ${it.level}%"
                             } else {
                                 ""
                             }
@@ -2838,7 +2841,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     } ${
                         batteryList?.find { it.component == BatteryComponent.RIGHT }?.let {
                             if (it.status != BatteryStatus.DISCONNECTED) {
-                                "R: ${if (it.status == BatteryStatus.CHARGING) "⚡" else ""} ${it.level}%"
+                                "R: ${if (BatteryStatus.isCharging(it.status)) "⚡" else ""} ${it.level}%"
                             } else {
                                 ""
                             }
@@ -2846,7 +2849,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     } ${
                         batteryList?.find { it.component == BatteryComponent.CASE }?.let {
                             if (it.status != BatteryStatus.DISCONNECTED) {
-                                "Case: ${if (it.status == BatteryStatus.CHARGING) "⚡" else ""} ${it.level}%"
+                                "Case: ${if (BatteryStatus.isCharging(it.status)) "⚡" else ""} ${it.level}%"
                             } else {
                                 ""
                             }
@@ -3023,8 +3026,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         )
 
         // Check charging status
-        val isLeftCharging = leftBattery?.status == BatteryStatus.CHARGING
-        val isRightCharging = rightBattery?.status == BatteryStatus.CHARGING
+        val isLeftCharging = BatteryStatus.isCharging(leftBattery?.status)
+        val isRightCharging = BatteryStatus.isCharging(rightBattery?.status)
         isLeftCharging && isRightCharging
 
         // Create arguments for vendor-specific event

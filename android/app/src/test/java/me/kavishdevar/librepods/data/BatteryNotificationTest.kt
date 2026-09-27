@@ -1,6 +1,8 @@
 package me.kavishdevar.librepods.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BatteryNotificationTest {
@@ -277,5 +279,14 @@ class BatteryNotificationTest {
             ),
             notification.getBattery()
         )
+    }
+
+    @Test
+    fun `a bud charging in its case counts as charging`() {
+        assertTrue(BatteryStatus.isCharging(BatteryStatus.CHARGING))
+        assertTrue(BatteryStatus.isCharging(BatteryStatus.OPTIMIZED_CHARGING))
+        assertFalse(BatteryStatus.isCharging(BatteryStatus.NOT_CHARGING))
+        assertFalse(BatteryStatus.isCharging(BatteryStatus.DISCONNECTED))
+        assertFalse(BatteryStatus.isCharging(null))
     }
 }

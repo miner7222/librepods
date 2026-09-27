@@ -89,7 +89,7 @@ fun BatteryIndicator(
         if (batteryPercentage > 25) MaterialTheme.colorScheme.appleGreen
         else MaterialTheme.colorScheme.appleRed
 
-    val charging = status == BatteryStatus.CHARGING || status == BatteryStatus.OPTIMIZED_CHARGING
+    val charging = BatteryStatus.isCharging(status)
     val prefixContentDescription = when (prefix) {
         R.drawable.sf_l_circle_fill -> stringResource(R.string.left)
         R.drawable.sf_r_circle_fill -> stringResource(R.string.right)

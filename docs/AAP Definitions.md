@@ -63,6 +63,9 @@ AirPods occasionally send battery status packets. The packet format is as follow
 | Charging     | 01         |
 | Discharging  | 02         |
 | Disconnected | 04         |
+| Charging in case | 05     |
+
+A bud charging inside its case reports `0x05` rather than `0x01`; treat both as charging.
 
 
 Example packet from AirPods Pro 2
