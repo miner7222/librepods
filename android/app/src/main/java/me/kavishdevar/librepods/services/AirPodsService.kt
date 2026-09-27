@@ -2844,6 +2844,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         getSystemService(NotificationManager::class.java).notify(id, notification)
     }
 
+    /** What the connected notification last showed, so an unchanged repost is skipped. */
+    private var lastConnectedNotification: Triple<String, List<Battery>?, Boolean>? = null
+
     @OptIn(ExperimentalMaterial3Api::class)
     fun updateNotificationContent(
         connected: Boolean, airpodsName: String? = null, batteryList: List<Battery>? = null
@@ -2851,6 +2854,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         val notificationManager = getSystemService(NotificationManager::class.java)
 
         if (!connected) {
+            lastConnectedNotification = null
             notificationManager.cancel(2)
             return
         }
@@ -2867,6 +2871,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
         if (BluetoothConnectionManager.aacpSocket?.isConnected == true) {
+            // The socket reader calls this for every packet, head tracking's dozens a
+            // second included; post only when what the notification shows changed.
+            val shown = Triple(airpodsName ?: config.deviceName, batteryList, disconnectedBecauseReversed)
+            if (shown == lastConnectedNotification) return
+            lastConnectedNotification = shown
+
             val updatedNotificationBuilder =
                 NotificationCompat.Builder(this, "airpods_connection_status")
                     .setSmallIcon(R.drawable.ic_notification_airpods)
