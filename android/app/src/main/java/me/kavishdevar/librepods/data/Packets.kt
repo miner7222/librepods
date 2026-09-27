@@ -43,6 +43,12 @@ object BatteryStatus {
     const val NOT_CHARGING = 2
     const val DISCONNECTED = 4
     const val OPTIMIZED_CHARGING = 5
+
+    /**
+     * Whether [status] means the component is on power. A bud charging in its case
+     * reports 0x05 rather than 0x01, so both count.
+     */
+    fun isCharging(status: Int?): Boolean = status == CHARGING || status == OPTIMIZED_CHARGING
 }
 
 fun batteryStatusForDisconnectedRestore(status: Int): Int {

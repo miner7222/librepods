@@ -578,7 +578,7 @@ class PopupWindow(
         cell.visibility = View.VISIBLE
         percentage.text = "$level%"
         val chargingVisible =
-            status == BatteryStatus.CHARGING || status == BatteryStatus.OPTIMIZED_CHARGING
+            BatteryStatus.isCharging(status)
         mView.findViewById<ImageView>(ringId).setImageBitmap(
             BatteryRing.bitmap(
                 context,

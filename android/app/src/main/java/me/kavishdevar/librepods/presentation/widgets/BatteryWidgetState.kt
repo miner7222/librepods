@@ -41,7 +41,7 @@ internal data class BatteryWidgetSlot(
         get() = device != BatteryWidgetDevice.EMPTY && level != null
 
     val isCharging: Boolean
-        get() = status == BatteryStatus.CHARGING || status == BatteryStatus.OPTIMIZED_CHARGING
+        get() = BatteryStatus.isCharging(status)
 }
 
 internal fun batteryWidgetSlots(
