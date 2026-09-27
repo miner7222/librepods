@@ -354,20 +354,30 @@ object MediaController {
         }
     }
 
+    /** The transition in flight, if any; a new one replaces it. */
+    @Volatile
+    private var volumeTransition: Runnable? = null
+
     private fun smoothVolumeTransition(fromVolume: Int, toVolume: Int) {
         Log.d("MediaController", "Smooth volume transition from $fromVolume to $toVolume")
         val step = if (fromVolume < toVolume) 1 else -1
         val delay = 50L
         var currentVolume = fromVolume
 
-        handler.post(object : Runnable {
+        // Ducking takes 50ms a step. If speech ends while it is still stepping down,
+        // the restore used to run alongside it, finish first, and leave the duck to
+        // set the last value - so the volume stayed low.
+        volumeTransition?.let(handler::removeCallbacks)
+        volumeTransition = object : Runnable {
             override fun run() {
                 if (currentVolume != toVolume) {
                     currentVolume += step
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0)
                     handler.postDelayed(this, delay)
+                } else if (volumeTransition === this) {
+                    volumeTransition = null
                 }
             }
-        })
+        }.also(handler::post)
     }
 }
