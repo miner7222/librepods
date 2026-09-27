@@ -20,6 +20,9 @@
 
 package me.kavishdevar.librepods.presentation.components
 
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.runtime.CompositionLocalProvider
 import android.annotation.SuppressLint
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -438,7 +441,14 @@ fun StyledSlider(
             }
         }
 
-        DesignSystem.Apple -> {
+        // Both Apple sliders place the fill and the thumb in pixels from the left,
+        // while the layout around them mirrors under a right-to-left locale: the
+        // thumb was pushed off the track and could not be dragged
+        // (kavishdevar/librepods#613). Keep them left-to-right, as the Material
+        // slider's own track is laid out for them.
+        DesignSystem.Apple -> CompositionLocalProvider(
+            LocalLayoutDirection provides LayoutDirection.Ltr
+        ) {
             // iOS keeps two slider shapes: the tall filled capsule it uses for
             // the AirPods volume control, and a thin track with a thumb for the
             // sliders inside settings. Only the volume one is prominent.
