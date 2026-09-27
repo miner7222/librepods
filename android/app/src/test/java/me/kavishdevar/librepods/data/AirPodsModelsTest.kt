@@ -17,7 +17,8 @@ class AirPodsModelsTest {
         Capability.HEAD_GESTURES,
         Capability.ADAPTIVE_AUDIO,
         Capability.ADAPTIVE_VOLUME,
-        Capability.STEM_CONFIG
+        Capability.STEM_CONFIG,
+        Capability.PRESS_CONFIG
     )
 
     @Test

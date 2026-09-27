@@ -246,7 +246,9 @@ class AirPods5: AirPodsBase(
         Capability.HEAD_GESTURES,
         Capability.ADAPTIVE_AUDIO,
         Capability.ADAPTIVE_VOLUME,
-        Capability.STEM_CONFIG
+        Capability.STEM_CONFIG,
+        // Press speed and hold duration, as on AirPods 4.
+        Capability.PRESS_CONFIG
     )
 )
 
@@ -271,6 +273,7 @@ class AirPods5Wireless: AirPodsBase(
         Capability.ADAPTIVE_AUDIO,
         Capability.ADAPTIVE_VOLUME,
         Capability.STEM_CONFIG,
+        Capability.PRESS_CONFIG,
         Capability.SWIPE_FOR_VOLUME
     )
 )

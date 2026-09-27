@@ -178,6 +178,7 @@
     <string name="use_alternate_head_tracking_packets_description">머리 추적이 작동하지 않으면 활성화하십시오. 머리 추적 데이터를 요청하거나 중지하는 데 사용되는 다른 데이터를 AirPods으로 전송합니다.</string>
     <string name="act_as_an_apple_device">Apple 기기로 동작</string>
     <string name="act_as_an_apple_device_description">다중 기기 연결과 주변음 허용 모드 사용자화 등의 손쉬운 사용 기능을 활성화합니다. 여기에는 증폭, 톤, 주변 소음 감소, 대화 부스트 및 EQ가 포함됩니다.</string>
+    <string name="apple_identity_model_description">이 휴대폰을 Apple 기기로 식별하게 하여 호환되는 연결 기능을 사용합니다. 사용할 수 있는 설정은 AirPods 모델에 따라 다르며, AirPods 5에서 Pro 전용 청각 기능이 열리지는 않습니다. 변경 후 블루투스를 다시 시작하세요.</string>
     <string name="act_as_an_apple_device_warning">불안정할 수 있습니다. AirPods에는 최대 두 대의 기기를 연결할 수 있습니다. iPad나 Mac 같은 Apple 기기와 함께 사용하는 경우 해당 기기를 먼저 연결한 다음 Android 기기를 연결하십시오.</string>
     <string name="reset_hook_offset">후크 오프셋 재설정</string>
     <string name="reset_hook_offset_description">현재 후크 오프셋이 지워지고 설정 절차를 다시 진행해야 합니다. 계속하시겠습니까?</string>

@@ -2,7 +2,10 @@ package me.kavishdevar.librepods.presentation.widgets
 
 import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.data.AirPods3
+import me.kavishdevar.librepods.data.AirPods4
 import me.kavishdevar.librepods.data.AirPods4ANC
+import me.kavishdevar.librepods.data.AirPods5
+import me.kavishdevar.librepods.data.AirPods5Wireless
 import me.kavishdevar.librepods.data.AirPodsPro1
 import me.kavishdevar.librepods.data.AirPodsPro2USBC
 import me.kavishdevar.librepods.data.AirPodsPro3
@@ -20,6 +23,13 @@ class BatteryWidgetIconsTest {
             R.drawable.sf_airpods_gen4_right,
             batteryWidgetIcons(AirPods4ANC()).rightBud
         )
+    }
+
+    @Test
+    fun `airpods 5 uses the standard shape instead of the pro fallback`() {
+        val expected = batteryWidgetIcons(AirPods4())
+        assertEquals(expected, batteryWidgetIcons(AirPods5()))
+        assertEquals(expected, batteryWidgetIcons(AirPods5Wireless()))
     }
 
     @Test

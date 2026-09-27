@@ -25,6 +25,8 @@ import me.kavishdevar.librepods.data.AirPods2
 import me.kavishdevar.librepods.data.AirPods3
 import me.kavishdevar.librepods.data.AirPods4
 import me.kavishdevar.librepods.data.AirPods4ANC
+import me.kavishdevar.librepods.data.AirPods5
+import me.kavishdevar.librepods.data.AirPods5Wireless
 import me.kavishdevar.librepods.data.AirPodsBase
 import me.kavishdevar.librepods.data.AirPodsPro1
 import me.kavishdevar.librepods.data.AirPodsPro2Lightning
@@ -61,7 +63,8 @@ internal fun batteryWidgetIcons(model: AirPodsBase?): BatteryWidgetIcons = when 
         R.drawable.sf_airpod_gen3_right,
         R.drawable.sf_airpods_gen3_chargingcase_wireless_fill
     )
-    is AirPods4, is AirPods4ANC -> BatteryWidgetIcons(
+    // AirPods 5 keeps the AirPods 4 shape; there are no generation-5 symbols.
+    is AirPods4, is AirPods4ANC, is AirPods5, is AirPods5Wireless -> BatteryWidgetIcons(
         R.drawable.sf_airpods_gen4,
         R.drawable.sf_airpods_gen4_left,
         R.drawable.sf_airpods_gen4_right,
