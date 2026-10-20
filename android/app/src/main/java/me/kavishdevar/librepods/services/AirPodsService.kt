@@ -132,6 +132,7 @@ import me.kavishdevar.librepods.presentation.widgets.sizedRemoteViewsFor
 import me.kavishdevar.librepods.presentation.widgets.gridItemSize
 import me.kavishdevar.librepods.presentation.widgets.wideBatteryRingSize
 import me.kavishdevar.librepods.utils.GestureDetector
+import me.kavishdevar.librepods.utils.BluetoothCryptography
 import me.kavishdevar.librepods.utils.HeadTracking
 import me.kavishdevar.librepods.utils.MediaController
 import me.kavishdevar.librepods.utils.SystemApisUtils
@@ -3556,7 +3557,21 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             "Call" -> config.takeoverWhenCall
             "Ringing" -> config.takeoverWhenCall
             "Hanging Up" -> config.takeoverWhenCall
-            else -> false
+            else -> config.takeoverWhenMusic && UnknownStateTakeoverPolicy.allows(
+                recentStatus.lastSeen, System.currentTimeMillis(),
+                recentStatus.isLeftInEar, recentStatus.isRightInEar
+            ) {
+                val encodedIrk = sharedPreferences.getString(
+                    AACPManager.Companion.ProximityKeyType.IRK.name, null
+                ) ?: return@allows false
+                try {
+                    // Revalidate against the current key, even if BLEManager cached this address earlier.
+                    BluetoothCryptography.verifyRPA(recentStatus.address, Base64.decode(encodedIrk))
+                } catch (e: Exception) {
+                    Log.w(TAG, "Cannot verify AirPods advertisement for takeover", e)
+                    false
+                }
+            }
         }
 
         if (!shouldTakeOver) {
@@ -4406,6 +4421,20 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 )
             }
         }
+    }
+}
+
+internal object UnknownStateTakeoverPolicy {
+    // Matches BLEManager's stale-device timeout; its periodic cleanup can leave older entries behind.
+    private const val MAX_ADVERTISEMENT_AGE_MS = 15_000L
+
+    fun allows(
+        lastSeen: Long?, now: Long, leftInEar: Boolean, rightInEar: Boolean,
+        matchesCurrentAirPods: () -> Boolean
+    ): Boolean {
+        if (lastSeen == null || (!leftInEar && !rightInEar)) return false
+        val age = now - lastSeen
+        return age in 0L..MAX_ADVERTISEMENT_AGE_MS && matchesCurrentAirPods()
     }
 }
 

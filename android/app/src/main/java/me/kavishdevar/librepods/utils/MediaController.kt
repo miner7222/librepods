@@ -21,6 +21,7 @@
 package me.kavishdevar.librepods.utils
 
 import android.content.SharedPreferences
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.AudioPlaybackConfiguration
 import android.os.Build
@@ -32,6 +33,11 @@ import android.view.KeyEvent
 import androidx.annotation.RequiresApi
 import me.kavishdevar.librepods.services.ServiceManager
 import kotlin.io.encoding.ExperimentalEncodingApi
+
+internal fun isMediaPlayback(contentType: Int, usage: Int): Boolean =
+    contentType == AudioAttributes.CONTENT_TYPE_MUSIC ||
+        contentType == AudioAttributes.CONTENT_TYPE_MOVIE ||
+        (usage == AudioAttributes.USAGE_MEDIA && contentType == AudioAttributes.CONTENT_TYPE_UNKNOWN)
 
 object MediaController {
     private var initialVolume: Int? = null
@@ -150,10 +156,12 @@ object MediaController {
 
             Log.d("MediaController", "Current active content types: $currentActiveContentTypes")
 
-            val hasNewMusicOrMovie = currentActiveContentTypes.any { contentType ->
-                contentType == android.media.AudioAttributes.CONTENT_TYPE_MUSIC ||
-                contentType == android.media.AudioAttributes.CONTENT_TYPE_MOVIE
-            }
+            // Some players leave the content type unknown while correctly declaring media usage.
+            val hasNewMusicOrMovie = configs?.any { config ->
+                config.audioAttributes?.let { attrs ->
+                    isMediaPlayback(attrs.contentType, attrs.usage)
+                } ?: false
+            } ?: false
 
             Log.d("MediaController", "Has new music or movie: $hasNewMusicOrMovie")
 
