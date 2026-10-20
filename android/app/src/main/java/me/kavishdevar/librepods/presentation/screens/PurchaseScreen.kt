@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.billing.PRICE_UNKNOWN
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.presentation.components.ListItemOrientation
 import me.kavishdevar.librepods.presentation.components.MaterialButtonStyle
@@ -197,7 +198,10 @@ fun PurchaseScreen(
                 materialButtonStyle = MaterialButtonStyle.Filled
             ) {
                 Text(
-                    stringResource(R.string.buy_price, state.price),
+                    stringResource(
+                        R.string.buy_price,
+                        if (state.price == PRICE_UNKNOWN) stringResource(R.string.price_unknown) else state.price
+                    ),
                     style = MaterialTheme.typography.bodyMediumEmphasized,
                     color = MaterialTheme.colorScheme.onPrimary
                 )

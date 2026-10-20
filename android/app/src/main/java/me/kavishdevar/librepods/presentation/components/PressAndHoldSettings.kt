@@ -33,14 +33,14 @@ fun PressAndHoldSettings(
 ) {
     val leftActionText = when (leftAction) {
         StemAction.CYCLE_NOISE_CONTROL_MODES -> stringResource(R.string.listening_mode)
-        StemAction.DIGITAL_ASSISTANT -> "Digital Assistant"
-        else -> "INVALID!!"
+        StemAction.DIGITAL_ASSISTANT -> stringResource(R.string.digital_assistant)
+        else -> stringResource(R.string.invalid_stem_action)
     }
 
     val rightActionText = when (rightAction) {
         StemAction.CYCLE_NOISE_CONTROL_MODES -> stringResource(R.string.listening_mode)
-        StemAction.DIGITAL_ASSISTANT -> "Digital Assistant"
-        else -> "INVALID!!"
+        StemAction.DIGITAL_ASSISTANT -> stringResource(R.string.digital_assistant)
+        else -> stringResource(R.string.invalid_stem_action)
     }
 
     StyledList(

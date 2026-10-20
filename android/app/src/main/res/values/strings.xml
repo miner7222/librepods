@@ -294,7 +294,12 @@
     <string name="battery_charged_text">\"%1$s\" is fully charged.</string>
     <string name="battery_intro">AirPods batteries, like all rechargeable batteries, are consumable components that become less effective as they age.</string>
     <string name="enable_app_in_xposed_or_update_device">Update your device or enable LibrePods in Xposed and reopen the app to proceed.</string>
+    <!-- Keep the string default while existing locales migrate to the quantity resource below. -->
     <string name="play_foss_premium_banner">Your app was updated to the Google Play version; advanced features will be disabled in %1$d days. Update from your original source to stay on the FOSS version, wait for this period to end to purchase the upgrade directly, or tap here to request a promo code if you are already a supporter.</string>
+    <plurals name="play_foss_premium_banner">
+        <item quantity="one">Your app was updated to the Google Play version; advanced features will be disabled in %1$d day. Update from your original source to stay on the FOSS version, wait for this period to end to purchase the upgrade directly, or tap here to request a promo code if you are already a supporter.</item>
+        <item quantity="other">Your app was updated to the Google Play version; advanced features will be disabled in %1$d days. Update from your original source to stay on the FOSS version, wait for this period to end to purchase the upgrade directly, or tap here to request a promo code if you are already a supporter.</item>
+    </plurals>
     <string name="custom">Custom</string>
     <string name="recommended">Recommended</string>
     <string name="appearance">Appearance</string>
@@ -432,4 +437,36 @@
     <string name="stem_action_volume_up">Volume Up</string>
     <string name="stem_action_volume_down">Volume Down</string>
     <string name="stem_press_listening_mode_description">Listening Mode switches between the modes chosen under Press and Hold AirPod.</string>
+    <string name="device_icon">Device Icon</string>
+    <string name="conversation_awareness_multiline">Conversation\nAwareness</string>
+    <string name="loading">Loading...</string>
+    <string name="noise_cancel">Noise Cancel</string>
+    <string name="invalid_stem_action">INVALID!!</string>
+    <string name="app_disconnected_open_android_settings">App has disconnected, disconnect from Android Settings.</string>
+    <string name="billing_error_email_subject">LibrePods Play billing error</string>
+    <string name="billing_error_email_body">"Please enter your GitHub username to restore your premium access:\n\nGitHub username: "</string>
+    <string name="contact_phone_details">Phone details:</string>
+    <string name="contact_app_details">App details:</string>
+    <string name="contact_xposed_status">Xposed enabled/active: %1$s/%2$s</string>
+    <string name="price_unknown">unknown</string>
+    <string name="privacy_last_updated_date">20 June 2026</string>
+    <string name="other_device">Other device</string>
+    <string name="airpods_connection_issue">AirPods Connection Issue</string>
+    <string name="airpods_l2cap_connection_failed">Unable to connect to AirPods over L2CAP</string>
+    <string name="airpods_l2cap_connection_failure_detail">Your AirPods are connected via Bluetooth, but LibrePods couldn\'t connect to AirPods using L2CAP. Error: %1$s</string>
+    <string name="battery_component_status">%1$s: %2$s %3$d%%</string>
+    <string name="battery_left_short">L</string>
+    <string name="battery_right_short">R</string>
+    <string name="call_answered_by_head_gesture">Call answered via head gesture</string>
+    <string name="call_answer_failed">Failed to answer call: %1$s</string>
+    <string name="call_rejected_by_head_gesture">Call rejected via head gesture</string>
+    <string name="call_reject_failed">Failed to reject call: %1$s</string>
+    <string name="socket_connection_failed">Couldn\'t connect to socket: %1$s</string>
+    <string name="socket_connection_timeout">Couldn\'t connect to socket: timeout.</string>
+    <string name="socket_connection_timeout_reason">Couldn\'t connect to socket: Timeout</string>
+    <string name="socket_created_not_connected">Socket created, but not connected. Check logs</string>
+    <string name="bluetooth_socket_creation_failed">Failed to create Bluetooth socket: %1$s</string>
+    <string name="connection_establishment_failed">Failed to establish connection: %1$s</string>
+    <string name="frequency_hz">%1$dHz</string>
+    <string name="frequency_khz">%1$dkHz</string>
 </resources>

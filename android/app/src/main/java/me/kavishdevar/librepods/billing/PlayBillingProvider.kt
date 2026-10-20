@@ -55,7 +55,7 @@ class PlayBillingProvider(
     private val _isPremium = MutableStateFlow(false)
     override val isPremium: StateFlow<Boolean> = _isPremium
 
-    private val _price = MutableStateFlow("unknown")
+    private val _price = MutableStateFlow(PRICE_UNKNOWN)
     override val price: StateFlow<String> = _price
 
 

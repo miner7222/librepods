@@ -83,6 +83,7 @@ import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -397,6 +398,7 @@ fun AirPodsSettingsScreen(
             item(key = "play_update_banner") {
                 if (state.timeUntilFOSSPremiumExpiry > 0L) {
                     val context = LocalContext.current
+                    val remainingDays = maxOf(1, TimeUnit.MILLISECONDS.toDays(state.timeUntilFOSSPremiumExpiry).toInt())
                     Box(
                         modifier = Modifier
                             .background(Color(0xFF32829B), RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
@@ -405,22 +407,17 @@ fun AirPodsSettingsScreen(
                                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                                     data = "mailto:".toUri()
                                     putExtra(Intent.EXTRA_EMAIL, arrayOf("billing@kavish.xyz"))
-                                    putExtra(Intent.EXTRA_SUBJECT, "LibrePods Play billing error")
+                                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.billing_error_email_subject))
                                     putExtra(
                                         Intent.EXTRA_TEXT,
-                                        "Please enter your GitHub username to restore your premium access:\n\nGitHub username: "
+                                        context.getString(R.string.billing_error_email_body)
                                     )
                                 }
                                 context.startActivity(emailIntent)
                             }) {
                         Text(
-                            text = stringResource(
-                                R.string.play_foss_premium_banner,
-                                maxOf(
-                                    1,
-                                    TimeUnit.MILLISECONDS.toDays(state.timeUntilFOSSPremiumExpiry)
-                                        .toInt()
-                                )
+                            text = pluralStringResource(
+                                R.plurals.play_foss_premium_banner, remainingDays, remainingDays
                             ), modifier = Modifier.padding(16.dp), style =
                                 if (m3eEnabled) MaterialTheme.typography.bodyLargeEmphasized.copy(
                                     color = Color.White

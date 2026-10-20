@@ -860,7 +860,7 @@ class AirPodsViewModel(
             service.disconnectAirPods()
             if (appContext.checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(
-                    appContext, "App has disconnected, disconnect from Android Settings.",
+                    appContext, appContext.getString(R.string.app_disconnected_open_android_settings),
                     Toast.LENGTH_LONG
                 ).show()
             }

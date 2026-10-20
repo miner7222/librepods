@@ -21,6 +21,9 @@ package me.kavishdevar.librepods.billing
 import android.app.Activity
 import kotlinx.coroutines.flow.StateFlow
 
+/** Internal unknown-price state; the UI resolves it in the current locale. */
+const val PRICE_UNKNOWN = "__price_unknown__"
+
 interface BillingProvider {
     val isPremium: StateFlow<Boolean>
     val price: StateFlow<String>

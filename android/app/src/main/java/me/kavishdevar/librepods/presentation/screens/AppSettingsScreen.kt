@@ -64,6 +64,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -169,6 +170,7 @@ fun AppSettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
         if (state.timeUntilFOSSPremiumExpiry > 0L) {
+            val remainingDays = maxOf(1, TimeUnit.MILLISECONDS.toDays(state.timeUntilFOSSPremiumExpiry).toInt())
             Box(
                 modifier = Modifier
                     .background(Color(0xFF32829B), RoundedCornerShape(LocalAppleDesignMetrics.current.cardCornerRadius))
@@ -177,18 +179,18 @@ fun AppSettingsScreen(
                         val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                             data = "mailto:".toUri()
                             putExtra(Intent.EXTRA_EMAIL, arrayOf("billing@kavish.xyz"))
-                            putExtra(Intent.EXTRA_SUBJECT, "LibrePods Play billing error")
+                            putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.billing_error_email_subject))
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "Please enter your GitHub username to restore your premium access:\n\nGitHub username: "
+                                context.getString(R.string.billing_error_email_body)
                             )
                         }
                         context.startActivity(emailIntent)
                     }
             ) {
                 Text(
-                    text = stringResource(
-                        R.string.play_foss_premium_banner, maxOf(1, TimeUnit.MILLISECONDS.toDays(state.timeUntilFOSSPremiumExpiry).toInt())
+                    text = pluralStringResource(
+                        R.plurals.play_foss_premium_banner, remainingDays, remainingDays
                     ),
                     modifier = Modifier
                         .padding(16.dp),
@@ -655,13 +657,13 @@ fun AppSettingsScreen(
                                Intent.EXTRA_TEXT,
                                "${descriptionState.text}" +
                                    "\n\n----------" +
-                                   "\nPhone details:" +
+                                   "\n" + context.getString(R.string.contact_phone_details) +
                                    "\nMANUFACTURER: ${Build.MANUFACTURER}" +
                                    "\nMODEL: ${Build.MODEL} (${Build.PRODUCT})" +
                                    "\nDISPLAY_VERSION: ${Build.DISPLAY}" +
                                    "\nID: ${Build.ID} (SDK ${Build.VERSION.SDK_INT_FULL})" +
-                                   "\nXposed enabled/active: ${XposedState.isAvailable}/${XposedState.bluetoothScopeEnabled}" +
-                                   "\n\nApp details:" +
+                                   "\n" + context.getString(R.string.contact_xposed_status, XposedState.isAvailable.toString(), XposedState.bluetoothScopeEnabled.toString()) +
+                                   "\n\n" + context.getString(R.string.contact_app_details) +
                                    "\nVERSION: ${BuildConfig.VERSION_NAME}" +
                                    "\nVERSION_CODE: ${BuildConfig.VERSION_CODE}" +
                                    "\nFLAVOR: ${BuildConfig.FLAVOR}" +

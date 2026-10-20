@@ -226,8 +226,16 @@ fun UpdateHearingTestScreen(
             sendHearingAidSettings(state.hearingAidData, hearingAidSettings.value, debounceJob, setATTCharacteristicValue)
         }
 
-        val frequencies =
-            listOf("250Hz", "500Hz", "1kHz", "2kHz", "3kHz", "4kHz", "6kHz", "8kHz")
+        val frequencies = listOf(
+            stringResource(R.string.frequency_hz, 250),
+            stringResource(R.string.frequency_hz, 500),
+            stringResource(R.string.frequency_khz, 1),
+            stringResource(R.string.frequency_khz, 2),
+            stringResource(R.string.frequency_khz, 3),
+            stringResource(R.string.frequency_khz, 4),
+            stringResource(R.string.frequency_khz, 6),
+            stringResource(R.string.frequency_khz, 8)
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),

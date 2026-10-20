@@ -45,7 +45,7 @@ fun PrivacyPolicyPage(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = stringResource(R.string.privacy_last_updated, "20 June 2026"),
+                text = stringResource(R.string.privacy_last_updated, stringResource(R.string.privacy_last_updated_date)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
