@@ -18,6 +18,7 @@
 
 package me.kavishdevar.librepods.data
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,6 +28,8 @@ import me.kavishdevar.librepods.bluetooth.ATTHandles
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+
+private const val TAG = "TransparencyUtils"
 
 data class TransparencySettings(
     val enabled: Boolean,
@@ -84,7 +87,8 @@ data class TransparencySettings(
 }
 
 fun parseTransparencySettingsResponse(data: ByteArray): TransparencySettings? {
-    if (data.size < 50) return null // 50 is arbitrary, too lazy to count
+    // Enabled flag, eight EQ floats and four controls per ear.
+    if (data.size < 100) return null
     val buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
 
     val enabled = buffer.float
@@ -139,6 +143,31 @@ fun parseTransparencySettingsResponse(data: ByteArray): TransparencySettings? {
     )
 }
 
+internal fun buildTransparencySettingsPayload(transparencySettings: TransparencySettings): ByteArray? {
+    if (transparencySettings.leftEQ.size != EQ_BAND_COUNT ||
+        transparencySettings.rightEQ.size != EQ_BAND_COUNT
+    ) return null
+    val buffer = ByteBuffer.allocate(
+        if (transparencySettings.ownVoiceAmplification != null) 104 else 100
+    ).order(ByteOrder.LITTLE_ENDIAN)
+
+    buffer.putFloat(if (transparencySettings.enabled) 1.0f else 0.0f)
+    for (eq in transparencySettings.leftEQ) buffer.putFloat(eq)
+    buffer.putFloat(transparencySettings.leftAmplification)
+    buffer.putFloat(transparencySettings.leftTone)
+    buffer.putFloat(if (transparencySettings.leftConversationBoost) 1.0f else 0.0f)
+    buffer.putFloat(transparencySettings.leftAmbientNoiseReduction)
+    for (eq in transparencySettings.rightEQ) buffer.putFloat(eq)
+    buffer.putFloat(transparencySettings.rightAmplification)
+    buffer.putFloat(transparencySettings.rightTone)
+    buffer.putFloat(if (transparencySettings.rightConversationBoost) 1.0f else 0.0f)
+    buffer.putFloat(transparencySettings.rightAmbientNoiseReduction)
+    if (transparencySettings.ownVoiceAmplification != null) {
+        buffer.putFloat(transparencySettings.ownVoiceAmplification)
+    }
+    return buffer.array()
+}
+
 private var debounceJob: Job? = null
 
 fun sendTransparencySettings(writer: (ATTHandles, ByteArray) -> Unit, transparencySettings: TransparencySettings) {
@@ -146,33 +175,11 @@ fun sendTransparencySettings(writer: (ATTHandles, ByteArray) -> Unit, transparen
     debounceJob = CoroutineScope(Dispatchers.IO).launch {
         delay(100)
         try {
-            val buffer = ByteBuffer.allocate(
-                if (transparencySettings.ownVoiceAmplification != null) 104 else 100
-            ).order(ByteOrder.LITTLE_ENDIAN)
-
-            buffer.putFloat(if (transparencySettings.enabled) 1.0f else 0.0f)
-
-            for (eq in transparencySettings.leftEQ) {
-                buffer.putFloat(eq)
+            val data = buildTransparencySettingsPayload(transparencySettings)
+            if (data == null) {
+                Log.w(TAG, "Expected eight EQ bands per ear")
+                return@launch
             }
-            buffer.putFloat(transparencySettings.leftAmplification)
-            buffer.putFloat(transparencySettings.leftTone)
-            buffer.putFloat(if (transparencySettings.leftConversationBoost) 1.0f else 0.0f)
-            buffer.putFloat(transparencySettings.leftAmbientNoiseReduction)
-
-            for (eq in transparencySettings.rightEQ) {
-                buffer.putFloat(eq)
-            }
-            buffer.putFloat(transparencySettings.rightAmplification)
-            buffer.putFloat(transparencySettings.rightTone)
-            buffer.putFloat(if (transparencySettings.rightConversationBoost) 1.0f else 0.0f)
-            buffer.putFloat(transparencySettings.rightAmbientNoiseReduction)
-
-            if (transparencySettings.ownVoiceAmplification != null) {
-                buffer.putFloat(transparencySettings.ownVoiceAmplification)
-            }
-
-            val data = buffer.array()
             writer(ATTHandles.TRANSPARENCY, data)
         } catch (e: IOException) {
             e.printStackTrace()

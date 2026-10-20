@@ -68,6 +68,7 @@ import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScro
 import me.kavishdevar.librepods.bluetooth.ATTHandles
 import me.kavishdevar.librepods.data.HearingAidSettings
 import me.kavishdevar.librepods.data.parseHearingAidSettingsResponse
+import me.kavishdevar.librepods.data.restoreEqBands
 import me.kavishdevar.librepods.data.sendHearingAidSettings
 import me.kavishdevar.librepods.presentation.theme.DesignSystem
 import me.kavishdevar.librepods.presentation.theme.LibrePodsTheme
@@ -140,7 +141,7 @@ fun UpdateHearingTestScreen(
         val leftEQ = rememberSaveable(
             saver = Saver(
                 save = { it.value.toList() },
-                restore = { mutableStateOf(it.toFloatArray()) }
+                restore = { restoreEqBands(it)?.let { bands -> mutableStateOf(bands) } }
             )
         ) {
             mutableStateOf(FloatArray(8))
@@ -148,7 +149,7 @@ fun UpdateHearingTestScreen(
         val rightEQ = rememberSaveable(
             saver = Saver(
                 save = { it.value.toList() },
-                restore = { mutableStateOf(it.toFloatArray()) }
+                restore = { restoreEqBands(it)?.let { bands -> mutableStateOf(bands) } }
             )
         ) {
             mutableStateOf(FloatArray(8))

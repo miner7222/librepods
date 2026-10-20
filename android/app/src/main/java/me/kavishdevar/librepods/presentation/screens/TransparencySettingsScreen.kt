@@ -65,6 +65,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.data.TransparencySettings
 import me.kavishdevar.librepods.data.parseTransparencySettingsResponse
+import me.kavishdevar.librepods.data.restoreEqBands
 import me.kavishdevar.librepods.data.sendTransparencySettings
 import me.kavishdevar.librepods.presentation.components.StyledSlider
 import me.kavishdevar.librepods.presentation.components.StyledToggle
@@ -122,13 +123,13 @@ fun TransparencySettingsScreen(
         val eq = rememberSaveable(
             saver = Saver(
                 save = { it.value.toList() },
-                restore = { mutableStateOf(it.toFloatArray()) }
+                restore = { restoreEqBands(it)?.let { bands -> mutableStateOf(bands) } }
             )
         ) { mutableStateOf(FloatArray(8)) }
         val phoneMediaEQ = rememberSaveable(
             saver = Saver(
                 save = { it.value.toList() },
-                restore = { mutableStateOf(it.toFloatArray()) }
+                restore = { restoreEqBands(it)?.let { bands -> mutableStateOf(bands) } }
             )
         ) { mutableStateOf(FloatArray(8) { 0.5f }) }
 

@@ -137,6 +137,35 @@ fun parseHearingAidSettingsResponse(data: ByteArray): HearingAidSettings? {
     )
 }
 
+/** Builds an independent write payload; ATT cache and UI snapshots remain read-only. */
+internal fun buildHearingAidSettingsPayload(
+    currentData: ByteArray, hearingAidSettings: HearingAidSettings
+): ByteArray? {
+    if (currentData.size < 104 || hearingAidSettings.leftEQ.size != EQ_BAND_COUNT ||
+        hearingAidSettings.rightEQ.size != EQ_BAND_COUNT
+    ) return null
+    val payload = currentData.copyOf()
+    val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+
+    // for some reason
+    buffer.put(2, 0x64)
+
+    for (i in 0..7) {
+        buffer.putFloat(4 + i * 4, hearingAidSettings.leftEQ[i])
+        buffer.putFloat(52 + i * 4, hearingAidSettings.rightEQ[i])
+    }
+    buffer.putFloat(36, hearingAidSettings.leftAmplification)
+    buffer.putFloat(40, hearingAidSettings.leftTone)
+    buffer.putFloat(44, if (hearingAidSettings.leftConversationBoost) 1.0f else 0.0f)
+    buffer.putFloat(48, hearingAidSettings.leftAmbientNoiseReduction)
+    buffer.putFloat(84, hearingAidSettings.rightAmplification)
+    buffer.putFloat(88, hearingAidSettings.rightTone)
+    buffer.putFloat(92, if (hearingAidSettings.rightConversationBoost) 1.0f else 0.0f)
+    buffer.putFloat(96, hearingAidSettings.rightAmbientNoiseReduction)
+    buffer.putFloat(100, hearingAidSettings.ownVoiceAmplification)
+    return payload
+}
+
 fun sendHearingAidSettings(
     currentData: ByteArray,
     hearingAidSettings: HearingAidSettings,
@@ -144,47 +173,22 @@ fun sendHearingAidSettings(
     sender: (ATTHandles, ByteArray) -> Unit
 ) {
     debounceJob.value?.cancel()
+    Log.d(TAG, "Current data before update: ${currentData.joinToString(" ") { String.format("%02X", it) }}")
+    // Snapshot before the debounce: callers can keep sharing or updating the cached data.
+    val payload = buildHearingAidSettingsPayload(currentData, hearingAidSettings)
+    if (payload == null) {
+        if (currentData.size < 104) {
+            Log.w(TAG, "Current data size ${currentData.size} too small, cannot send settings")
+        } else {
+            Log.w(TAG, "Expected eight EQ bands per ear")
+        }
+        return
+    }
     debounceJob.value = CoroutineScope(Dispatchers.IO).launch {
         delay(100.milliseconds)
         try {
-            Log.d(TAG, "Current data before update: ${currentData.joinToString(" ") { String.format("%02X", it) }}")
-            if (currentData.size < 104) {
-                Log.w(TAG, "Current data size ${currentData.size} too small, cannot send settings")
-                return@launch
-            }
-            val buffer = ByteBuffer.wrap(currentData).order(ByteOrder.LITTLE_ENDIAN)
-
-            // for some reason
-            buffer.put(2, 0x64)
-
-            // Left EQ
-            for (i in 0..7) {
-                buffer.putFloat(4 + i * 4, hearingAidSettings.leftEQ[i])
-            }
-
-            // Left ear adjustments
-            buffer.putFloat(36, hearingAidSettings.leftAmplification)
-            buffer.putFloat(40, hearingAidSettings.leftTone)
-            buffer.putFloat(44, if (hearingAidSettings.leftConversationBoost) 1.0f else 0.0f)
-            buffer.putFloat(48, hearingAidSettings.leftAmbientNoiseReduction)
-
-            // Right EQ
-            for (i in 0..7) {
-                buffer.putFloat(52 + i * 4, hearingAidSettings.rightEQ[i])
-            }
-
-            // Right ear adjustments
-            buffer.putFloat(84, hearingAidSettings.rightAmplification)
-            buffer.putFloat(88, hearingAidSettings.rightTone)
-            buffer.putFloat(92, if (hearingAidSettings.rightConversationBoost) 1.0f else 0.0f)
-            buffer.putFloat(96, hearingAidSettings.rightAmbientNoiseReduction)
-
-            // Own voice amplification
-            buffer.putFloat(100, hearingAidSettings.ownVoiceAmplification)
-
-            Log.d(TAG, "Sending updated settings: ${currentData.joinToString(" ") { String.format("%02X", it) }}")
-
-            sender(ATTHandles.HEARING_AID, currentData)
+            Log.d(TAG, "Sending updated settings: ${payload.joinToString(" ") { String.format("%02X", it) }}")
+            sender(ATTHandles.HEARING_AID, payload)
         } catch (e: IOException) {
             e.printStackTrace()
         }

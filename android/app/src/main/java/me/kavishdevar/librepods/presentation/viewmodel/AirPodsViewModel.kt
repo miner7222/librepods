@@ -53,6 +53,7 @@ import me.kavishdevar.librepods.data.BatteryStatus
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.data.ControlCommandRepository
 import me.kavishdevar.librepods.data.CustomEq
+import me.kavishdevar.librepods.data.EQ_BAND_COUNT
 import me.kavishdevar.librepods.data.StemAction
 import me.kavishdevar.librepods.data.XposedRemotePrefProvider
 import me.kavishdevar.librepods.services.AirPodsService
@@ -371,7 +372,8 @@ class AirPodsViewModel(
                     }
 
                     AirPodsNotifications.EQ_DATA -> {
-                        val data = intent.getFloatArrayExtra("eqData") ?: floatArrayOf()
+                        val data = intent.getFloatArrayExtra("eqData") ?: return
+                        if (data.size != EQ_BAND_COUNT) return
 
                         _uiState.update {
                             it.copy(eqData = data)
