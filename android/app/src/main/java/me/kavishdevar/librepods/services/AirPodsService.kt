@@ -74,8 +74,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -169,6 +172,8 @@ private const val EXTRA_AUDIO_CONNECTION_EPOCH = "audio_connection_epoch"
 
 /** Only ever spent on requests that actually arrived while an attempt was failing. */
 private const val MAX_SOCKET_CONNECT_ATTEMPTS = 3
+private const val MAX_ATT_REOPEN_ATTEMPTS = 3
+private const val ATT_REOPEN_BACKOFF_MS = 300L
 
 /** How many refused handshakes are worth another socket before giving up. */
 private const val MAX_HANDSHAKE_RETRIES = 3
@@ -396,6 +401,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private val handshakeAnswered = AtomicBoolean(false)
     private val handshakeRetries = AtomicInteger(0)
 
+    private class AttControlSession(val control: BluetoothSocket, val device: BluetoothDevice) {
+        var attempts = 0
+        var recoveryToken: Any? = null
+        var recoveryJob: Job? = null
+        var openingSocket: BluetoothSocket? = null
+    }
+    private val attSessionLock = Any()
+    private var attControlSession: AttControlSession? = null
+
     lateinit var bleManager: BLEManager
 
     companion object {
@@ -583,6 +597,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         initializeAACPManagerCallback()
 
         attManager = ATTManagerv2()
+        attManager.setOnSocketRetired(::onAttSocketRetired)
 
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
@@ -921,8 +936,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     islandShownForSession = false
                     updateNotificationContent(false)
                     aacpManager.disconnected()
+                    disconnectAtt()
                     BluetoothConnectionManager.aacpSocket = null
-                    BluetoothConnectionManager.attSocket = null
                     // Widgets read the socket to decide whether any listening
                     // mode is in effect, so refresh only once it is gone.
                     onBatteryDisconnected()
@@ -3753,6 +3768,139 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
+    /** Shared by initial AACP setup and ATT-only recovery; policy and PSM stay in one place. */
+    @SuppressLint("MissingPermission")
+    private fun openAttSocket(
+        adapter: BluetoothAdapter, target: BluetoothDevice, onCreated: (BluetoothSocket) -> Unit
+    ): BluetoothSocket? {
+        val knownModel = airpodsInstance?.model
+            ?: AirPodsModels.getModelByModelNumber(config.airpodsModelNumber)
+        val useAtt = shouldConnectAtt(
+            knownModel, XposedRemotePrefProvider.create().getBoolean("vendor_id_hook", false)
+        )
+        Log.d(TAG, "ATT connection required: $useAtt (model=${knownModel?.name ?: "unknown"})")
+        if (!useAtt) return null
+        val socket = createBluetoothSocket(
+            adapter, target, ParcelUuid.fromString("00000000-0000-0000-0000-000000000000"), 31
+        )
+        try {
+            onCreated(socket)
+            socket.connect()
+            return socket
+        } catch (e: Exception) {
+            runCatching { socket.close() }
+            throw e
+        }
+    }
+
+    /** Called under attSessionLock: publish before the manager captures the reader's socket. */
+    private fun publishAttSocket(socket: BluetoothSocket?) {
+        BluetoothConnectionManager.attSocket = socket
+        if (socket != null) attManager.startReader()
+    }
+
+    private fun disconnectAtt() {
+        synchronized(attSessionLock) {
+            val previous = attControlSession
+            attControlSession = null
+            previous?.recoveryJob?.cancel()
+            previous?.recoveryToken = null
+            runCatching { previous?.openingSocket?.close() }
+            previous?.openingSocket = null
+            attManager.disconnected()
+            BluetoothConnectionManager.attSocket = null
+        }
+    }
+
+    /** Only the same still-connected AACP bearer and device may receive a replacement ATT socket. */
+    private fun isCurrentAttControl(session: AttControlSession): Boolean =
+        attControlSession === session && BluetoothConnectionManager.aacpSocket === session.control &&
+            session.control.isConnected && device?.address == session.device.address
+
+    private fun onAttSocketRetired(socketIdentity: Any) {
+        val job = synchronized(attSessionLock) {
+            val session = attControlSession ?: return
+            if (!isCurrentAttControl(session) || BluetoothConnectionManager.attSocket !== socketIdentity) return
+            BluetoothConnectionManager.attSocket = null
+            if (session.recoveryToken != null) return
+            if (session.attempts >= MAX_ATT_REOPEN_ATTEMPTS) {
+                Log.w(TAG, "ATT recovery limit reached for this AACP session")
+                return
+            }
+            val token = Any()
+            session.recoveryToken = token
+            CoroutineScope(Dispatchers.IO).launch(start = CoroutineStart.LAZY) {
+                reopenAttSocket(session, token)
+            }.also { session.recoveryJob = it }
+        }
+        job.start()
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun reopenAttSocket(session: AttControlSession, token: Any) {
+        try {
+            while (true) {
+                val attempt = synchronized(attSessionLock) {
+                    if (!isCurrentAttControl(session) || session.recoveryToken !== token ||
+                        session.attempts >= MAX_ATT_REOPEN_ATTEMPTS
+                    ) return
+                    ++session.attempts
+                }
+                delay(ATT_REOPEN_BACKOFF_MS * attempt)
+                var candidate: BluetoothSocket? = null
+                try {
+                    val adapter = getSystemService(BluetoothManager::class.java).adapter ?: return
+                    synchronized(attSessionLock) {
+                        if (!isCurrentAttControl(session) || session.recoveryToken !== token) return
+                    }
+                    val opened = openAttSocket(adapter, session.device) { created ->
+                        candidate = created
+                        synchronized(attSessionLock) {
+                            if (!isCurrentAttControl(session) || session.recoveryToken !== token) {
+                                throw CancellationException("ATT control session ended")
+                            }
+                            session.openingSocket = created
+                        }
+                    } ?: return
+                    val installed = synchronized(attSessionLock) {
+                        if (!isCurrentAttControl(session) || session.recoveryToken !== token ||
+                            BluetoothConnectionManager.attSocket != null
+                        ) false else {
+                            publishAttSocket(opened)
+                            session.openingSocket = null
+                            session.recoveryToken = null
+                            session.recoveryJob = null
+                            true
+                        }
+                    }
+                    if (installed) {
+                        candidate = null // The manager now owns this socket.
+                        // Do not replay the failed read; restore only subscriptions callers requested.
+                        CoroutineScope(Dispatchers.IO).launch { attManager.restoreNotifications(opened) }
+                    }
+                    return
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "ATT-only reconnect attempt $attempt failed", e)
+                } finally {
+                    synchronized(attSessionLock) {
+                        if (session.openingSocket === candidate) session.openingSocket = null
+                    }
+                    runCatching { candidate?.close() }
+                }
+            }
+        } finally {
+            synchronized(attSessionLock) {
+                // A newly retired replacement may already have started a different recovery job.
+                if (session.recoveryToken === token) {
+                    session.recoveryToken = null
+                    session.recoveryJob = null
+                }
+            }
+        }
+    }
+
     @Synchronized
     @SuppressLint("MissingPermission", "UnspecifiedRegisterReceiverFlag")
     fun connectToSocket(
@@ -3811,7 +3959,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 BluetoothConnectionManager.aacpSocket = null
             }
             if (BluetoothConnectionManager.attSocket === pendingAttSocket) {
-                BluetoothConnectionManager.attSocket = null
+                disconnectAtt()
             }
         }
 
@@ -3821,32 +3969,19 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     try {
                         socket.connect()
                         this@AirPodsService.device = device
-                        val xposedRemotePref = XposedRemotePrefProvider.create()
-                        val knownModel = airpodsInstance?.model
-                            ?: AirPodsModels.getModelByModelNumber(config.airpodsModelNumber)
-                        val useAtt = shouldConnectAtt(
-                            knownModel, xposedRemotePref.getBoolean("vendor_id_hook", false)
-                        )
-                        Log.d(TAG, "ATT connection required: $useAtt (model=${knownModel?.name ?: "unknown"})")
-                        val attSocket = if (useAtt) {
-                            createBluetoothSocket(
-                                adapter,
-                                device,
-                                ParcelUuid.fromString("00000000-0000-0000-0000-000000000000"),
-                                31
-                            )
-                        } else null
-                        pendingAttSocket = attSocket
-                        attSocket?.connect()
+                        val attSocket = openAttSocket(adapter, device) { pendingAttSocket = it }
 
                         // The reader and characteristic requests obtain this socket
                         // from the manager, so publish it before starting either.
                         socketAudioTransitions.reset()
-                        BluetoothConnectionManager.aacpSocket = socket
-                        BluetoothConnectionManager.attSocket = attSocket
+                        disconnectAtt()
+                        synchronized(attSessionLock) {
+                            BluetoothConnectionManager.aacpSocket = socket
+                            attControlSession = AttControlSession(socket, device)
+                            publishAttSocket(attSocket)
+                        }
 
                         if (attSocket != null) {
-                            attManager.startReader()
                             attManager.readCharacteristic(ATTHandles.LOUD_SOUND_REDUCTION)
                             attManager.readCharacteristic(ATTHandles.TRANSPARENCY)
                             attManager.readCharacteristic(ATTHandles.HEARING_AID)
@@ -4021,8 +4156,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                             socketAudioTransitions.reset()
                             aacpBatteryReported.set(false)
                             aacpManager.disconnected()
+                            disconnectAtt()
                             BluetoothConnectionManager.aacpSocket = null
-                            BluetoothConnectionManager.attSocket = null
                             updateNotificationContent(false)
                             // Same order as the broadcast handler: the widgets read the
                             // socket, so it has to be gone before they are repainted.
@@ -4090,8 +4225,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         aacpBatteryReported.set(false)
         aacpManager.disconnected()
 
+        disconnectAtt()
         BluetoothConnectionManager.aacpSocket = null
-        BluetoothConnectionManager.attSocket = null
 
         updateNotificationContent(false)
         onBatteryDisconnected()
@@ -4168,6 +4303,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             // connect sheet was retracting itself a second after it appeared.
             if (BluetoothConnectionManager.aacpSocket === refused) {
                 socketAudioTransitions.reset()
+                disconnectAtt()
                 BluetoothConnectionManager.aacpSocket = null
             }
             try {
@@ -4413,6 +4549,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     @SuppressLint("MissingPermission")
     override fun onDestroy() {
         forgetRestorableAudio(ownershipLost = true)
+        if (::attManager.isInitialized) {
+            attManager.setOnSocketRetired(null)
+            disconnectAtt()
+        }
         clearPacketLogs()
         Log.d(TAG, "Service stopped is being destroyed for some reason!")
         dismissPopup()
