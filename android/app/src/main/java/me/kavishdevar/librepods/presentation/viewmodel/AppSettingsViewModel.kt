@@ -1,8 +1,12 @@
 package me.kavishdevar.librepods.presentation.viewmodel
 
 import android.app.Application
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,8 +15,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.kavishdevar.librepods.BuildConfig
+import me.kavishdevar.librepods.ListeningModeShortcut
 import me.kavishdevar.librepods.billing.BillingManager
+import me.kavishdevar.librepods.data.AirPodsNotifications
+import me.kavishdevar.librepods.data.NoiseControlMode
 import me.kavishdevar.librepods.data.XposedRemotePrefProvider
+import me.kavishdevar.librepods.services.ServiceManager
 import kotlin.math.roundToInt
 import me.kavishdevar.librepods.presentation.theme.AppTheme
 
@@ -41,7 +49,9 @@ data class AppSettingsUiState(
     val showIslandPopup: Boolean = true,
     val timeUntilFOSSPremiumExpiry: Long = 0L,
     val m3eEnabled: Boolean = false,
-    val appTheme: AppTheme = AppTheme.System
+    val appTheme: AppTheme = AppTheme.System,
+    val availableShortcutModes: List<NoiseControlMode> = emptyList(),
+    val toggleListeningModes: List<Int> = emptyList()
 )
 
 class AppSettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -56,17 +66,61 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
         if (key == "connection_successful") {
             _uiState.update { it.copy(connectionSuccessful = sharedPref.getBoolean(key, false)) }
         }
+        if (key == "connection_successful" || key == "off_listening_mode" ||
+            key == ListeningModeShortcut.PREF_KEY
+        ) refreshShortcutModes()
     }
 
+    private val shortcutModesReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            refreshShortcutModes()
+        }
+    }
 
     init {
         loadSettings()
         observeBilling()
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPrefListener)
+        ContextCompat.registerReceiver(
+            application,
+            shortcutModesReceiver,
+            IntentFilter().apply {
+                addAction(AirPodsNotifications.AIRPODS_CONNECTED)
+                addAction(AirPodsNotifications.AIRPODS_DISCONNECTED)
+                addAction(AirPodsNotifications.AIRPODS_INFORMATION_UPDATED)
+            },
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        refreshShortcutModes()
     }
 
     override fun onCleared() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPrefListener)
+        getApplication<Application>().unregisterReceiver(shortcutModesReceiver)
+    }
+
+    private fun refreshShortcutModes() {
+        val supported = ListeningModeShortcut.availableModes(ServiceManager.getService())
+        val modes = ListeningModeShortcut.resolveModes(
+            sharedPreferences.getString(ListeningModeShortcut.PREF_KEY, null), supported
+        )
+        _uiState.update {
+            it.copy(availableShortcutModes = supported, toggleListeningModes = modes)
+        }
+    }
+
+    fun selectToggleListeningMode(mode: Int) {
+        // Recheck the connected model and Off switch even if this click used an older UI state.
+        val supported = ListeningModeShortcut.availableModes(ServiceManager.getService())
+        val modes = ListeningModeShortcut.selectMode(
+            sharedPreferences.getString(ListeningModeShortcut.PREF_KEY, null), supported, mode
+        )
+        if (modes.size == 2 && mode in modes) {
+            sharedPreferences.edit {
+                putString(ListeningModeShortcut.PREF_KEY, modes.joinToString(","))
+            }
+        }
+        refreshShortcutModes()
     }
 
     private fun observeBilling() {
