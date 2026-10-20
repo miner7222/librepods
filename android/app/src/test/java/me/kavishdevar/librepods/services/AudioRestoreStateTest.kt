@@ -26,7 +26,7 @@ class AudioRestoreStateTest {
         assertEquals(setOf(headset), state.restore(address, profiles)?.profiles)
     }
 
-    @Test fun onlyAcceptedConnectedProfilesAreRestorable() {
+    @Test fun onlyAcceptedActiveProfilesAreRestorable() {
         release(a2dp, accepted = false)
         release(headset, connected = false)
         assertNull(state.restore(address, profiles))
@@ -44,23 +44,28 @@ class AudioRestoreStateTest {
         release(a2dp)
         release(headset)
         assertEquals(profiles, state.restore(address, profiles)?.profiles)
-        state.markRestored(address, a2dp)
+        val firstEpoch = state.currentEpoch()
+        state.markRestored(address, a2dp, firstEpoch)
         assertTrue(state.wasReleased(address))
+        state.finishRestore(address, a2dp, firstEpoch)
+        state.finishRestore(address, headset, firstEpoch)
         assertEquals(setOf(headset), state.restore(address, profiles)?.profiles)
-        state.markRestored(address, headset)
+        state.markRestored(address, headset, state.currentEpoch())
+        state.finishRestore(address, headset, state.currentEpoch())
         assertFalse(state.wasReleased(address))
         assertNull(state.restore(address, profiles))
     }
 
     @Test fun restoringAnotherDeviceCannotConsumeReleaseRecords() {
         release(headset)
-        state.markRestored(otherAddress, headset)
+        state.markRestored(otherAddress, headset, state.currentEpoch())
         assertEquals(setOf(headset), state.restore(address, profiles)?.profiles)
     }
 
     @Test fun cancelledRestoreRetainsForbiddenPoliciesForRetry() {
         release(a2dp)
         val first = state.restore(address, profiles)!!
+        state.socketDisconnected()
         val retry = state.restore(address, profiles)!!
         assertFalse(state.isCurrent(first.epoch))
         assertTrue(state.isCurrent(retry.epoch))
@@ -145,6 +150,8 @@ class AudioRestoreStateTest {
         assertNull(state.restore(otherAddress, profiles))
         assertEquals(profiles, state.restore(address, profiles)?.profiles)
         assertFalse(state.isCurrent(claimEpoch))
+        state.finishRestore(address, a2dp, state.currentEpoch())
+        state.finishRestore(address, headset, state.currentEpoch())
         assertNull(state.restore(address, profiles))
     }
 
@@ -186,5 +193,116 @@ class AudioRestoreStateTest {
         val restore = state.restore(address, profiles)!!
         state.localAudioConnected()
         assertTrue(state.isCurrent(restore.epoch))
+    }
+
+    @Test fun repeatedClaimsForTheSameDeviceKeepTheEpoch() {
+        val first = state.claim(address)
+        assertEquals(first, state.claim(address))
+        assertEquals(first, state.claim(address))
+        assertTrue(state.isCurrent(first))
+        val other = state.claim(otherAddress)
+        assertFalse(state.isCurrent(first))
+        assertTrue(state.isCurrent(other))
+    }
+
+    @Test fun bleClaimsCannotRevokeExplicitSetupOrItsPendingRestore() {
+        val explicit = state.beginExplicitClaim(address)
+        assertTrue(state.isClaimPending(address))
+        assertFalse(state.isClaimPending(otherAddress))
+        assertEquals(explicit, state.claim(address))
+        assertNull(state.restore(address, profiles))
+        state.ownershipClaimSent(address, explicit)
+        assertFalse(state.isClaimPending(address))
+        assertEquals(explicit, state.claim(address))
+        val restore = state.restore(address, profiles)!!
+        assertEquals(restore.epoch, state.claim(address))
+        assertTrue(state.isCurrent(restore.epoch))
+    }
+
+    @Test fun explicitSetupIgnoresOnlyItsOwnStartupOwnershipReports() {
+        val explicit = state.beginExplicitClaim(address)
+        state.ownershipClaimSent(otherAddress, explicit)
+        state.ownershipClaimSent(address, explicit - 1)
+        assertTrue(state.isClaimPending(address))
+        state.ownershipClaimSent(address, explicit)
+        assertFalse(state.isClaimPending(address))
+        state.forget(ownershipLost = true)
+        assertTrue(state.hasLostOwnership())
+        assertFalse(state.isCurrent(explicit))
+    }
+
+    @Test fun failedExplicitSetupAndSocketDropClearStartupProtection() {
+        val explicit = state.beginExplicitClaim(address)
+        state.abandonExplicitClaim(explicit - 1)
+        assertTrue(state.isClaimPending(address))
+        state.abandonExplicitClaim(explicit)
+        assertFalse(state.isClaimPending(address))
+        assertFalse(state.isCurrent(explicit))
+        state.beginExplicitClaim(address)
+        state.socketDisconnected()
+        assertFalse(state.isClaimPending(address))
+    }
+
+    @Test fun inFlightRestoreDoesNotBumpEpochOrRedispatchEvenWhenPolicyHasNotSucceeded() {
+        release(a2dp)
+        release(headset)
+        val first = state.restore(address, profiles)!!
+        assertTrue(first.dispatch)
+        repeat(10) {
+            val repeated = state.restore(address, profiles)!!
+            assertEquals(first.epoch, repeated.epoch)
+            assertEquals(first.profiles, repeated.profiles)
+            assertFalse(repeated.dispatch)
+        }
+        state.finishRestore(address, headset, first.epoch)
+        assertFalse(state.restore(address, profiles)!!.dispatch)
+        assertTrue(state.isCurrent(first.epoch))
+    }
+
+    @Test fun completedFailedPolicyCanRetryOnANewTrigger() {
+        release(a2dp)
+        val first = state.restore(address, profiles)!!
+        state.finishRestore(address, a2dp, first.epoch)
+        assertTrue(state.wasReleased(address, a2dp))
+        val retry = state.restore(address, profiles)!!
+        assertTrue(retry.dispatch)
+        assertFalse(state.isCurrent(first.epoch))
+        assertTrue(state.isCurrent(retry.epoch))
+    }
+
+    @Test fun releaseQueriesAndCompletionsAreProfileAndEpochScoped() {
+        release(a2dp)
+        assertTrue(state.wasReleased(address, a2dp))
+        assertFalse(state.wasReleased(address, headset))
+        assertFalse(state.wasReleased(otherAddress, a2dp))
+        val old = state.restore(address, profiles)!!
+        state.socketDisconnected()
+        val current = state.restore(address, profiles)!!
+        state.markRestored(address, a2dp, old.epoch)
+        state.finishRestore(address, a2dp, old.epoch)
+        assertTrue(state.wasReleased(address, a2dp))
+        assertFalse(state.restore(address, profiles)!!.dispatch)
+        state.markRestored(address, a2dp, current.epoch)
+        state.finishRestore(address, a2dp, current.epoch)
+        assertFalse(state.wasReleased(address, a2dp))
+        assertNull(state.restore(address, profiles))
+    }
+
+    @Test fun disconnectedProfilesAreNeverForbidden() {
+        var called = false
+        assertFalse(state.release(address, headset, state.currentEpoch(), true, false) {
+            called = true
+            true
+        })
+        assertFalse(called)
+        assertFalse(state.wasReleased(address))
+    }
+
+    @Test fun connectingProfilesHaveTheSameRestorePermissionAsConnectedProfiles() {
+        // The service treats CONNECTING and CONNECTED as active; DISCONNECTED is rejected above.
+        for (profile in profiles) {
+            assertTrue(state.release(address, profile, state.currentEpoch(), true, true) { true })
+        }
+        assertEquals(profiles, state.restore(address, profiles)!!.profiles)
     }
 }

@@ -8,6 +8,14 @@ import org.junit.Test
 class UnknownStateTakeoverPolicyTest {
     private val now = 100_000L
 
+    @Test fun unknownStateUsesTheSettingForTheRequestedTakeover() {
+        assertTrue(UnknownStateTakeoverPolicy.settingEnabled("call", music = false, call = true))
+        assertFalse(UnknownStateTakeoverPolicy.settingEnabled("music", music = false, call = true))
+        assertTrue(UnknownStateTakeoverPolicy.settingEnabled("music", music = true, call = false))
+        assertFalse(UnknownStateTakeoverPolicy.settingEnabled("call", music = true, call = false))
+        assertFalse(UnknownStateTakeoverPolicy.settingEnabled("reverse", music = true, call = true))
+    }
+
     private fun allows(
         lastSeen: Long? = now, leftInEar: Boolean = true, rightInEar: Boolean = false,
         matchesCurrentAirPods: Boolean = true

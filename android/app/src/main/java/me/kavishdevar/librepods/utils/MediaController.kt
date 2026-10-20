@@ -39,6 +39,26 @@ internal fun isMediaPlayback(contentType: Int, usage: Int): Boolean =
         contentType == AudioAttributes.CONTENT_TYPE_MOVIE ||
         (usage == AudioAttributes.USAGE_MEDIA && contentType == AudioAttributes.CONTENT_TYPE_UNKNOWN)
 
+/** Untyped media includes short UI sounds; require it to survive a trailing playback check. */
+internal class UntypedMediaPlaybackGate(private val sustainMs: Long) {
+    private var activeSince: Long? = null
+
+    fun reset() { activeSince = null }
+
+    fun accepts(typedMedia: Boolean, untypedMedia: Boolean, isActive: Boolean, now: Long): Boolean {
+        if (typedMedia) {
+            reset()
+            return true
+        }
+        if (!untypedMedia || !isActive) {
+            reset()
+            return false
+        }
+        val since = activeSince ?: now.also { activeSince = it }
+        return now - since >= sustainMs
+    }
+}
+
 object MediaController {
     private var initialVolume: Int? = null
     private lateinit var audioManager: AudioManager
@@ -60,6 +80,7 @@ object MediaController {
     private var lastSelfActionAt: Long = 0L
     private const val SELF_ACTION_IGNORE_MS = 800L
     private const val PLAYBACK_DEBOUNCE_MS = 300L
+    private val untypedPlaybackGate = UntypedMediaPlaybackGate(PLAYBACK_DEBOUNCE_MS)
     private var lastPlaybackCallbackAt: Long = 0L
     private var lastKnownIsMusicActive: Boolean? = null
 
@@ -114,6 +135,7 @@ object MediaController {
             super.onPlaybackConfigChanged(configs)
             val now = SystemClock.uptimeMillis()
             val isActive = audioManager.isMusicActive
+            if (!isActive) untypedPlaybackGate.reset()
             Log.d("MediaController", "Playback config changed, iPausedTheMedia: $iPausedTheMedia, isActive: $isActive, pausedForOtherDevice: $pausedForOtherDevice, lastKnownIsMusicActive: $lastKnownIsMusicActive")
 
             if (!isActive && lastPlayWithReplay && now - lastPlayTime < 2500L) {
@@ -157,11 +179,22 @@ object MediaController {
             Log.d("MediaController", "Current active content types: $currentActiveContentTypes")
 
             // Some players leave the content type unknown while correctly declaring media usage.
-            val hasNewMusicOrMovie = configs?.any { config ->
+            val hasTypedMedia = configs?.any { config ->
                 config.audioAttributes?.let { attrs ->
-                    isMediaPlayback(attrs.contentType, attrs.usage)
+                    attrs.contentType == AudioAttributes.CONTENT_TYPE_MUSIC ||
+                        attrs.contentType == AudioAttributes.CONTENT_TYPE_MOVIE
                 } ?: false
             } ?: false
+            val hasUntypedMedia = configs?.any { config ->
+                config.audioAttributes?.let { attrs ->
+                    attrs.contentType == AudioAttributes.CONTENT_TYPE_UNKNOWN &&
+                        isMediaPlayback(attrs.contentType, attrs.usage)
+                } ?: false
+            } ?: false
+            val hasNewMusicOrMovie = untypedPlaybackGate.accepts(hasTypedMedia, hasUntypedMedia, isActive, now)
+            if (hasUntypedMedia && !hasTypedMedia && isActive && !hasNewMusicOrMovie) {
+                handler.postDelayed(trailingPlaybackCheck, PLAYBACK_DEBOUNCE_MS + 20)
+            }
 
             Log.d("MediaController", "Has new music or movie: $hasNewMusicOrMovie")
 
@@ -184,7 +217,7 @@ object MediaController {
                     Log.d("MediaController", "Still not active while pausedForOtherDevice; will clear state after timeout")
                 }
 
-                lastKnownIsMusicActive = isActive
+                lastKnownIsMusicActive = hasNewMusicOrMovie && isActive
                 return
             }
 

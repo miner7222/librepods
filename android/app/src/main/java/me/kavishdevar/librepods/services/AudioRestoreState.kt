@@ -2,18 +2,25 @@ package me.kavishdevar.librepods.services
 
 /** Ownership permission, independent of Bluetooth callbacks and the control socket's lifetime. */
 internal class AudioRestoreState {
-    data class Restore(val epoch: Int, val profiles: Set<Int>)
+    data class Restore(val epoch: Int, val profiles: Set<Int>, val dispatch: Boolean = true)
 
     private var epoch = 0
     private var claimedAddress: String? = null
     private var releasedAddress: String? = null
     private val releasedProfiles = mutableSetOf<Int>()
     private var ownershipLost = false
+    private var pendingOwnershipAddress: String? = null
+    private var restoringAddress: String? = null
+    private var restoring: Restore? = null
+    private val pendingProfiles = mutableSetOf<Int>()
 
     @Synchronized fun currentEpoch(): Int = epoch
     @Synchronized fun isCurrent(expectedEpoch: Int): Boolean = epoch == expectedEpoch
     @Synchronized fun hasLostOwnership(): Boolean = ownershipLost
     @Synchronized fun wasReleased(address: String): Boolean = releasedAddress == address
+    @Synchronized fun wasReleased(address: String, profile: Int): Boolean =
+        releasedAddress == address && profile in releasedProfiles
+    @Synchronized fun isClaimPending(address: String): Boolean = pendingOwnershipAddress == address
 
     /** Keep the check and its side effect atomic with respect to ownership changes. */
     @Synchronized fun withEpoch(expectedEpoch: Int, action: () -> Unit): Boolean {
@@ -27,15 +34,35 @@ internal class AudioRestoreState {
         claimedAddress = null
         releasedAddress = null
         releasedProfiles.clear()
+        pendingOwnershipAddress = null
+        clearRestore()
         this.ownershipLost = ownershipLost
         return epoch
     }
 
     @Synchronized fun claim(address: String): Int {
+        if (claimedAddress == address || pendingOwnershipAddress == address || restoringAddress == address) return epoch
         epoch++
+        clearRestore()
+        pendingOwnershipAddress = null
         claimedAddress = address
         ownershipLost = false
         return epoch
+    }
+
+    @Synchronized fun beginExplicitClaim(address: String): Int {
+        forget()
+        claimedAddress = address
+        pendingOwnershipAddress = address
+        return epoch
+    }
+
+    @Synchronized fun ownershipClaimSent(address: String, expectedEpoch: Int) {
+        if (epoch == expectedEpoch && pendingOwnershipAddress == address) pendingOwnershipAddress = null
+    }
+
+    @Synchronized fun abandonExplicitClaim(expectedEpoch: Int) {
+        if (epoch == expectedEpoch) forget()
     }
 
     @Synchronized fun localAudioConnected() {
@@ -47,16 +74,18 @@ internal class AudioRestoreState {
     @Synchronized fun socketDisconnected() {
         epoch++
         claimedAddress = null
+        pendingOwnershipAddress = null
+        clearRestore()
     }
 
-    /** Only an accepted release of a fully connected profile grants background restore permission. */
+    /** Only an accepted release of a connected or connecting profile grants restore permission. */
     @Synchronized fun release(
         address: String, profile: Int, expectedEpoch: Int, restorable: Boolean,
-        wasConnected: Boolean, forbid: () -> Boolean
+        wasActive: Boolean, forbid: () -> Boolean
     ): Boolean {
-        if (epoch != expectedEpoch || (restorable && ownershipLost)) return false
+        if (epoch != expectedEpoch || !wasActive || (restorable && ownershipLost)) return false
         val accepted = forbid()
-        if (restorable && accepted && wasConnected) {
+        if (restorable && accepted && wasActive) {
             if (releasedAddress != address) releasedProfiles.clear()
             releasedAddress = address
             releasedProfiles += profile
@@ -66,18 +95,37 @@ internal class AudioRestoreState {
 
     @Synchronized fun restore(address: String, claimedProfiles: Set<Int>): Restore? {
         if (ownershipLost) return null
+        if (pendingOwnershipAddress == address) return null
+        if (restoringAddress == address) return restoring?.copy(dispatch = false)
         val profiles = mutableSetOf<Int>()
         if (releasedAddress == address) profiles += releasedProfiles
         if (claimedAddress == address) profiles += claimedProfiles
         if (profiles.isEmpty()) return null
         claimedAddress = null
         // Keep release records until the policy is actually allowed. A cancelled restore can retry.
-        return Restore(++epoch, profiles)
+        return Restore(++epoch, profiles).also {
+            restoringAddress = address
+            restoring = it
+            pendingProfiles.clear()
+            pendingProfiles += profiles
+        }
     }
 
-    @Synchronized fun markRestored(address: String, profile: Int) {
-        if (releasedAddress != address) return
+    @Synchronized fun markRestored(address: String, profile: Int, expectedEpoch: Int) {
+        if (epoch != expectedEpoch || releasedAddress != address) return
         releasedProfiles -= profile
         if (releasedProfiles.isEmpty()) releasedAddress = null
+    }
+
+    @Synchronized fun finishRestore(address: String, profile: Int, expectedEpoch: Int) {
+        if (epoch != expectedEpoch || restoringAddress != address) return
+        pendingProfiles -= profile
+        if (pendingProfiles.isEmpty()) clearRestore()
+    }
+
+    private fun clearRestore() {
+        restoringAddress = null
+        restoring = null
+        pendingProfiles.clear()
     }
 }
