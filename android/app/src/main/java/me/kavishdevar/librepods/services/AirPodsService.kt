@@ -2097,7 +2097,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private fun logPacket(packet: ByteArray, @Suppress("SameParameterValue") source: String) {
-        val packetHex = packet.joinToString(" ") { "%02X".format(it) }
+        val packetHex = AACPManager.loggableHex(packet)
         val logEntry = "$source: $packetHex"
 
         synchronized(inMemoryLogs) {
@@ -3840,7 +3840,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                                     setPackage(packageName)
                                 })
                                 val bytes = buffer.copyOfRange(0, bytesRead)
-                                val formattedHex = bytes.joinToString(" ") { "%02X".format(it) }
+                                val formattedHex = AACPManager.loggableHex(bytes)
 //                                    CrossDevice.sendReceivedPacket(bytes)
                                 updateNotificationContent(
                                     true,

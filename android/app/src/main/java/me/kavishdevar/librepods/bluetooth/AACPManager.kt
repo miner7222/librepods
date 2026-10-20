@@ -135,6 +135,21 @@ class AACPManager {
             }
         }
 
+        /**
+         * Hex for a received packet, safe to log. A proximity keys response carries the
+         * IRK and encryption key, which let anyone resolve and decrypt these AirPods' BLE
+         * advertisements, and logs end up in bug reports, so only its header is shown.
+         */
+        fun loggableHex(packet: ByteArray): String {
+            val isProximityKeys = packet.size > 4 &&
+                packet[0] == 0x04.toByte() && packet[1] == 0x00.toByte() &&
+                packet[2] == 0x04.toByte() && packet[3] == 0x00.toByte() &&
+                packet[4] == Opcodes.PROXIMITY_KEYS_RSP
+            val shown = if (isProximityKeys) packet.copyOf(minOf(packet.size, 7)) else packet
+            val hex = shown.joinToString(" ") { "%02X".format(it) }
+            return if (isProximityKeys) "$hex <${packet.size - shown.size} key bytes redacted>" else hex
+        }
+
         enum class StemPressType(val value: Byte) {
             SINGLE_PRESS(0x05), DOUBLE_PRESS(0x06), TRIPLE_PRESS(0x07), LONG_PRESS(0x08);
 
@@ -357,7 +372,7 @@ class AACPManager {
 
     fun parseProximityKeysResponse(data: ByteArray): Map<ProximityKeyType, ByteArray> {
         Log.d(
-            TAG, "Parsing Proximity Keys Response: ${data.joinToString(" ") { "%02X".format(it) }}"
+            TAG, "Parsing Proximity Keys Response: ${loggableHex(data)}"
         )
         if (data.size < 4) {
             throw IllegalArgumentException("Data array too short to parse Proximity Keys Response")
@@ -386,14 +401,11 @@ class AACPManager {
                 keys[ProximityKeyType.fromByte(keyType)] = key
             } catch (e: Exception) {
                 Log.e(
-                    TAG, "incorrect key type received: $keyType, ${key.toHexString()}"
+                    TAG, "incorrect key type received: $keyType"
                 )
             }
             offset += keyLength
-            Log.d(
-                TAG, "Parsed Proximity Key: Type: ${keyType}, Length: $keyLength, Key: ${
-                key.joinToString(" ") { "%02X".format(it) }
-            }")
+            Log.d(TAG, "Parsed Proximity Key: Type: ${keyType}, Length: $keyLength")
         }
         return keys
     }
