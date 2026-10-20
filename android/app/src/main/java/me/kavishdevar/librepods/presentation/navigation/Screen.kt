@@ -78,6 +78,13 @@ sealed interface Screen: NavKey {
         val bud: String
     ): Screen
 
+    /** The picker for a double or triple press; [press] is a StemPressType name. */
+    @Serializable
+    data class StemPress(
+        val press: String,
+        val bud: String
+    ): Screen
+
     @Serializable
     data class CallControl(
         val action: String

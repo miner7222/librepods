@@ -45,6 +45,7 @@ import me.kavishdevar.librepods.R
 import me.kavishdevar.librepods.bluetooth.AACPManager
 import me.kavishdevar.librepods.data.Capability
 import me.kavishdevar.librepods.presentation.components.CallControlSettings
+import me.kavishdevar.librepods.presentation.components.MultiPressSettings
 import me.kavishdevar.librepods.presentation.components.PressAndHoldSettings
 import me.kavishdevar.librepods.presentation.components.ReportStyledScaffoldScrollState
 import me.kavishdevar.librepods.presentation.components.StyledListItem
@@ -60,6 +61,7 @@ fun ControlsAndGesturesScreen(
     viewModel: AirPodsViewModel,
     navigateToLeftLongPress: () -> Unit,
     navigateToRightLongPress: () -> Unit,
+    navigateToStemPress: (press: AACPManager.Companion.StemPressType, left: Boolean) -> Unit,
     navigateToCallControlScreen: (action: String) -> Unit,
     navigateToHeadTracking: () -> Unit,
     onScrollStateChanged: (Boolean) -> Unit = {}
@@ -93,6 +95,10 @@ fun ControlsAndGesturesScreen(
                 navigateToLeftLongPress = navigateToLeftLongPress,
                 navigateToRightLongPress = navigateToRightLongPress,
                 firstInColumn = true
+            )
+            MultiPressSettings(
+                pressActions = state.pressActions,
+                navigateToStemPress = navigateToStemPress
             )
         }
 

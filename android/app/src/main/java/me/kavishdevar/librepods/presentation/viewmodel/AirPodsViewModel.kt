@@ -90,6 +90,8 @@ data class AirPodsUiState(
 
     val leftAction: StemAction = StemAction.CYCLE_NOISE_CONTROL_MODES,
     val rightAction: StemAction = StemAction.CYCLE_NOISE_CONTROL_MODES,
+    /** Double and triple press actions by preference key; a key that is absent has its fallback. */
+    val pressActions: Map<String, StemAction> = emptyMap(),
 
     val loudSoundReductionEnabled: Boolean = false,
     val transparencyData: ByteArray = byteArrayOf(),
@@ -549,6 +551,9 @@ class AirPodsViewModel(
                 "CYCLE_NOISE_CONTROL_MODES"
             ) ?: "CYCLE_NOISE_CONTROL_MODES"
         ) ?: StemAction.CYCLE_NOISE_CONTROL_MODES
+        val pressActions = StemAction.multiPressFallbacks.mapValues { (key, default) ->
+            StemAction.fromStored(sharedPreferences.getString(key, null), default)
+        }
         val vendorIdHook = xposedRemotePref.getBoolean("vendor_id_hook", false)
         val dynamicEndOfCharge = sharedPreferences.getBoolean("dynamic_end_of_charge", false)
         val chargeNotifications = sharedPreferences.getBoolean("charge_notifications", true)
@@ -563,6 +568,7 @@ class AirPodsViewModel(
                 headGesturesEnabled = headGesturesEnabled,
                 leftAction = leftAction,
                 rightAction = rightAction,
+                pressActions = pressActions,
                 vendorIdHook = vendorIdHook,
                 dynamicEndOfCharge = dynamicEndOfCharge,
                 chargeNotifications = chargeNotifications,
@@ -815,6 +821,12 @@ class AirPodsViewModel(
         _uiState.update {
             if (side.lowercase() == "left") it.copy(leftAction = action) else it.copy(rightAction = action)
         }
+    }
+
+    fun setPressAction(prefKey: String, action: StemAction) {
+        if (prefKey !in StemAction.multiPressFallbacks) return
+        sharedPreferences.edit { putString(prefKey, action.name) }
+        _uiState.update { it.copy(pressActions = it.pressActions + (prefKey to action)) }
     }
 
     private fun countEnabledModes(byteValue: Int): Int {

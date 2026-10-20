@@ -423,4 +423,13 @@
     <string name="channel_charging">AirPods Charging Notifications</string>
     <string name="background_service_running">Background Service Running</string>
     <string name="background_service_description">Useless notification, disable it by clicking on it.</string>
+    <string name="double_press">Double Press</string>
+    <string name="triple_press">Triple Press</string>
+    <string name="stem_press_screen_title">%1$s (%2$s)</string>
+    <string name="stem_action_play_pause">Play/Pause</string>
+    <string name="stem_action_next_track">Next Track</string>
+    <string name="stem_action_previous_track">Previous Track</string>
+    <string name="stem_action_volume_up">Volume Up</string>
+    <string name="stem_action_volume_down">Volume Down</string>
+    <string name="stem_press_listening_mode_description">Listening Mode switches between the modes chosen under Press and Hold AirPod.</string>
 </resources>

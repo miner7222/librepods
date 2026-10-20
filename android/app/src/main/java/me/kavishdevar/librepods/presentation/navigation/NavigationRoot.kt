@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import me.kavishdevar.librepods.R
+import me.kavishdevar.librepods.bluetooth.AACPManager.Companion.StemPressType
 import me.kavishdevar.librepods.presentation.MaterialIcons
 import me.kavishdevar.librepods.presentation.components.AppleDisconnectedSettingsButton
 import me.kavishdevar.librepods.presentation.components.StyledIconButton
@@ -80,6 +81,15 @@ fun NavigationRoot(
         Screen.HearingProtection -> stringResource(R.string.hearing_health)
         is Screen.LongPress -> stringResource(
             if (currentScreen.bud.equals("left", ignoreCase = true)) R.string.left else R.string.right
+        )
+        is Screen.StemPress -> stringResource(
+            R.string.stem_press_screen_title,
+            stringResource(
+                if (currentScreen.press == StemPressType.TRIPLE_PRESS.name) R.string.triple_press else R.string.double_press
+            ),
+            stringResource(
+                if (currentScreen.bud.equals("left", ignoreCase = true)) R.string.left else R.string.right
+            )
         )
         Screen.OpenSourceLicenses -> stringResource(R.string.open_source_licenses)
         Screen.Purchase -> stringResource(R.string.unlock_advanced_features)

@@ -44,6 +44,7 @@ import me.kavishdevar.librepods.presentation.screens.OpenSourceLicensesScreen
 import me.kavishdevar.librepods.presentation.screens.PurchaseScreen
 import me.kavishdevar.librepods.presentation.screens.ReleaseNotesScreen
 import me.kavishdevar.librepods.presentation.screens.RenameScreen
+import me.kavishdevar.librepods.presentation.screens.StemPressScreen
 import me.kavishdevar.librepods.presentation.screens.TransparencySettingsScreen
 import me.kavishdevar.librepods.presentation.screens.TroubleshootingScreen
 import me.kavishdevar.librepods.presentation.screens.UpdateHearingTestRoute
@@ -167,6 +168,9 @@ fun AppNavGraph(
                                 viewModel = airPodsViewModel,
                                 navigateToLeftLongPress = ::navigateToLeftLongPress,
                                 navigateToRightLongPress = ::navigateToRightLongPress,
+                                navigateToStemPress = { press, left ->
+                                    navigate(Screen.StemPress(press.name, if (left) "Left" else "Right"))
+                                },
                                 navigateToCallControlScreen = { navigate(Screen.CallControl(it)) },
                                 navigateToHeadTracking = { navigate(Screen.HeadTracking) },
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
@@ -383,6 +387,23 @@ fun AppNavGraph(
                             LongPress(
                                 viewModel = airPodsViewModel,
                                 name = screen.bud,
+                                navigateToPurchase = ::navigateToPurchase,
+                                onScrollStateChanged = { onScrollStateChanged(screen, it) }
+                            )
+                        }
+
+                    is Screen.StemPress ->
+                        NavEntry(screen) {
+                            if (!airPodsViewModel.isReady) {
+                                // Drawn instead of the screen, not under it: the screen
+                                // would reach into a view model init() has not filled.
+                                LoadingScreen()
+                                return@NavEntry
+                            }
+                            StemPressScreen(
+                                viewModel = airPodsViewModel,
+                                press = screen.press,
+                                bud = screen.bud,
                                 navigateToPurchase = ::navigateToPurchase,
                                 onScrollStateChanged = { onScrollStateChanged(screen, it) }
                             )

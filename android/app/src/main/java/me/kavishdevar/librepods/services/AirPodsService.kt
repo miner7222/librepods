@@ -1412,7 +1412,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 } else {
                     val action = getActionFor(bud, stemPressType)
                     Log.d("AirPodsParser", "$bud $stemPressType action: $action")
-                    action?.let { executeStemAction(it) }
+                    action?.let { executeStemAction(it, stemPressType) }
                 }
             }
 
@@ -1504,14 +1504,19 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
-    private fun executeStemAction(action: StemAction) {
+    private fun executeStemAction(action: StemAction, pressType: StemPressType) {
+        // Only a single press that is still Play/Pause is left to the buds. The same action
+        // on a double or triple press has been picked on purpose, and the buds forward the
+        // press only because it differs from their own double or triple press behaviour.
+        if (pressType == StemPressType.SINGLE_PRESS &&
+            action == StemAction.defaultActions[StemPressType.SINGLE_PRESS]
+        ) {
+            Log.d(
+                "AirPodsParser", "Default single press action: Play/Pause, not taking action."
+            )
+            return
+        }
         when (action) {
-            StemAction.defaultActions[StemPressType.SINGLE_PRESS] -> {
-                Log.d(
-                    "AirPodsParser", "Default single press action: Play/Pause, not taking action."
-                )
-            }
-
             StemAction.PLAY_PAUSE -> MediaController.sendPlayPause()
             StemAction.PREVIOUS_TRACK -> MediaController.sendPreviousTrack()
             StemAction.NEXT_TRACK -> MediaController.sendNextTrack()
@@ -1527,6 +1532,17 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                         "Digital Assistant action is not supported on this Android version."
                     )
                 }
+            }
+
+            StemAction.VOLUME_UP, StemAction.VOLUME_DOWN -> {
+                // One step on the media stream, as the volume keys do. The system volume
+                // panel is shown so the press has a visible result.
+                val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+                audioManager.adjustStreamVolume(
+                    AudioManager.STREAM_MUSIC,
+                    if (action == StemAction.VOLUME_UP) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER,
+                    AudioManager.FLAG_SHOW_UI
+                )
             }
 
             StemAction.CYCLE_NOISE_CONTROL_MODES -> {
