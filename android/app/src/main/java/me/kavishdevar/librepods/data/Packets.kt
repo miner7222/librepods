@@ -218,17 +218,12 @@ class AirPodsNotifications {
         }
 
         fun isBatteryData(data: ByteArray): Boolean {
-            if (data.joinToString("") { "%02x".format(it) }.startsWith("040004000400")) {
-                Log.d("BatteryNotification", "Battery data starts with 040004000400. Most likely is a battery packet.")
-            } else {
-                return false
+            // Header, unsigned component count, then five bytes per component.
+            if (data.size < 7) return false
+            for (index in BATTERY_HEADER.indices) {
+                if (data[index] != BATTERY_HEADER[index]) return false
             }
-            if (data.size != 22) {
-                Log.d("BatteryNotification", "Battery data size is not 22, probably being used with Airpods with fewer or more battery count.")
-                return false
-            }
-            Log.d("BatteryNotification", data.joinToString("") { "%02x".format(it) }.startsWith("040004000400").toString())
-            return data.joinToString("") { "%02x".format(it) }.startsWith("040004000400")
+            return data.size == 7 + 5 * (data[6].toInt() and 0xFF)
         }
 
         fun setBatteryDirect(
@@ -347,41 +342,36 @@ class AirPodsNotifications {
         }
 
         fun setBattery(data: ByteArray): Boolean {
-            if (data.size != 22) {
-                return false
+            if (!isBatteryData(data)) return false
+            var updated = false
+            for (index in 0 until (data[6].toInt() and 0xFF)) {
+                val offset = 7 + 5 * index
+                val component = data[offset].toInt() and 0xFF
+                if (component != BatteryComponent.LEFT && component != BatteryComponent.RIGHT &&
+                    component != BatteryComponent.CASE
+                ) continue
+                val battery = batteryOrUnavailable(
+                    component, data[offset + 2].toInt() and 0xFF, data[offset + 3].toInt() and 0xFF
+                )
+                // Records may arrive in any order; omitted components keep their previous reading.
+                when (component) {
+                    BatteryComponent.LEFT -> first = battery
+                    BatteryComponent.RIGHT -> second = battery
+                    BatteryComponent.CASE -> case = battery
+                }
+                updated = true
             }
-//            first = if (data[10].toInt() == BatteryStatus.DISCONNECTED) {
-//                Battery(first.component, first.level, data[10].toInt())
-//            } else {
-//                Battery(data[7].toInt(), data[9].toInt(), data[10].toInt())
-//            }
-//            second = if (data[15].toInt() == BatteryStatus.DISCONNECTED) {
-//                Battery(second.component, second.level, data[15].toInt())
-//            } else {
-//                Battery(data[12].toInt(), data[14].toInt(), data[15].toInt())
-//            }
-//            case = if (data[20].toInt() == BatteryStatus.DISCONNECTED && case.status != BatteryStatus.DISCONNECTED) {
-//                Battery(case.component, case.level, data[20].toInt())
-//            } else {
-//                Battery(data[17].toInt(), data[19].toInt(), data[20].toInt())
-//            }
-//            sometimes it shows battery as -1%, just skip all that and set it normally
-            first = batteryOrUnavailable(
-                data[7].toInt(), data[9].toInt(), data[10].toInt()
-            )
-            second = batteryOrUnavailable(
-                data[12].toInt(), data[14].toInt(), data[15].toInt()
-            )
-            case = batteryOrUnavailable(
-                data[17].toInt(), data[19].toInt(), data[20].toInt()
-            )
-            return true
+            return updated
         }
 
         fun getBattery(): List<Battery> {
             val left = if (first.component == BatteryComponent.LEFT) first else second
             val right = if (first.component == BatteryComponent.LEFT) second else first
             return listOf(left, right, case)
+        }
+
+        companion object {
+            private val BATTERY_HEADER = Enums.PREFIX.value + byteArrayOf(0x04, 0x00)
         }
     }
 

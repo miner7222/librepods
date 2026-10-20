@@ -1099,13 +1099,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
 
             override fun onBatteryInfoReceived(batteryInfo: ByteArray) {
+                // Rejected/unknown-only frames must not suppress fresh BLE readings or run audio policy.
+                if (!batteryNotification.setBattery(batteryInfo)) return
                 aacpBatteryReported.set(true)
-                if (batteryNotification.setBattery(batteryInfo)) {
-                    batteryNotification.fillDisconnectedFromLive(broadcastBattery())
-                    batteryNotification.settleCase(broadcastCaseCharging())
-                    persistBatterySnapshot()
-                    applyRememberedBattery()
-                }
+                batteryNotification.fillDisconnectedFromLive(broadcastBattery())
+                batteryNotification.settleCase(broadcastCaseCharging())
+                persistBatterySnapshot()
+                applyRememberedBattery()
                 sendBroadcast(Intent(AirPodsNotifications.BATTERY_DATA).apply {
                     putParcelableArrayListExtra("data", ArrayList(batteryNotification.getBattery()))
                     setPackage(packageName)

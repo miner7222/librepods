@@ -29,6 +29,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import me.kavishdevar.librepods.utils.BluetoothCryptography
 import java.util.concurrent.atomic.AtomicBoolean
@@ -77,13 +78,17 @@ class BLEManager(private val context: Context) {
     }
 
     private var mBluetoothLeScanner: BluetoothLeScanner? = null
-    private var mScanCallback: ScanCallback? = null
+    @Volatile private var mScanCallback: ScanCallback? = null
+    @Volatile private var firstMatchScanCallback: ScanCallback? = null
+    @Volatile private var scanRequested = false
+    private var firstMatchUnavailable = false
     private var airPodsStatusListener: AirPodsStatusListener? = null
     private val deviceStatusMap = mutableMapOf<String, AirPodsStatus>()
     private val verifiedAddresses = mutableSetOf<String>()
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private var currentGlobalLidState: Boolean? = null
     private var lastLidAdvertNanos: Long = Long.MIN_VALUE
+    private var lastProcessedAdvertNanos: Long = Long.MIN_VALUE
     private var lastBroadcastTime: Long = 0
     private val processedAddresses = mutableSetOf<String>()
 
@@ -121,6 +126,7 @@ class BLEManager(private val context: Context) {
     private val scanRetryRunnable = Runnable {
         startScanning(resetRetryAttempts = false)
     }
+    private val firstMatchRetryRunnable = Runnable { startFirstMatchScan() }
     private val cleanupRunnable = object : Runnable {
         override fun run() {
             cleanupStaleDevices()
@@ -147,17 +153,24 @@ class BLEManager(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
+    @Synchronized
     fun startScanning() {
+        scanRequested = true
         startScanning(resetRetryAttempts = true)
     }
 
     @SuppressLint("MissingPermission")
+    @Synchronized
     private fun startScanning(resetRetryAttempts: Boolean) {
+        if (!scanRequested) return
         try {
             cancelPendingScanRetry()
             if (resetRetryAttempts) {
                 scanRetryAttempts.set(0)
                 missingIrkLoggedForScan.set(false)
+                cleanupHandler.removeCallbacks(firstMatchRetryRunnable)
+                firstMatchUnavailable = false
+                stopFirstMatchScan()
             }
             Log.d(TAG, "Starting BLE scanner")
 
@@ -176,11 +189,14 @@ class BLEManager(private val context: Context) {
             }
 
             if (!btAdapter.isEnabled) {
+                stopFirstMatchScan()
                 Log.d(TAG, "Bluetooth is disabled")
                 return
             }
 
-            mBluetoothLeScanner = btAdapter.bluetoothLeScanner
+            val scanner = btAdapter.bluetoothLeScanner
+            if (scanner !== mBluetoothLeScanner) stopFirstMatchScan()
+            mBluetoothLeScanner = scanner
 
             val scanSettings = ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -190,32 +206,25 @@ class BLEManager(private val context: Context) {
                 .setReportDelay(500L)
                 .build()
 
-            val manufacturerData = ByteArray(27)
-            val manufacturerDataMask = ByteArray(27)
-
-            manufacturerData[0] = 7
-            manufacturerData[1] = 25
-
-            manufacturerDataMask[0] = -1
-            manufacturerDataMask[1] = -1
-
-            val scanFilter = ScanFilter.Builder()
-                .setManufacturerData(76, manufacturerData, manufacturerDataMask)
-                .build()
-
             mScanCallback = object : ScanCallback() {
                 override fun onScanResult(callbackType: Int, result: ScanResult) {
+                    if (!scanRequested || mScanCallback !== this) return
                     markScanSuccessful()
                     processedAddresses.clear()
                     publishNewestLidState(result, processScanResult(result))
                 }
 
                 override fun onBatchScanResults(results: List<ScanResult>) {
+                    if (!scanRequested || mScanCallback !== this) return
                     markScanSuccessful()
                     processedAddresses.clear()
                     var newest: ScanResult? = null
                     var newestStatus: AirPodsStatus? = null
-                    for (result in results) {
+                    // Keep the newest reading per address, then process them in radio timestamp order.
+                    val newestPerAddress = results.groupBy { it.device.address }.values
+                        .map { it.maxBy { result -> result.timestampNanos } }
+                        .sortedBy { it.timestampNanos }
+                    for (result in newestPerAddress) {
                         val status = processScanResult(result) ?: continue
                         if (newest == null || result.timestampNanos > newest.timestampNanos) {
                             newest = result
@@ -226,14 +235,15 @@ class BLEManager(private val context: Context) {
                 }
 
                 override fun onScanFailed(errorCode: Int) {
-                    if (mScanCallback !== this) return
+                    if (!scanRequested || mScanCallback !== this) return
                     Log.e(TAG, "BLE scan failed with error code: $errorCode")
                     scheduleScanRetry(errorCode)
                 }
             }
 
-            mBluetoothLeScanner?.startScan(listOf(scanFilter), scanSettings, mScanCallback)
+            mBluetoothLeScanner?.startScan(listOf(proximityPairingFilter()), scanSettings, mScanCallback)
             Log.d(TAG, "BLE scanner started successfully")
+            startFirstMatchScan()
 
             cleanupHandler.removeCallbacks(cleanupRunnable)
             cleanupHandler.postDelayed(cleanupRunnable, CLEANUP_INTERVAL_MS)
@@ -243,9 +253,13 @@ class BLEManager(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
+    @Synchronized
     fun stopScanning() {
+        scanRequested = false
         try {
             cancelPendingScanRetry()
+            cleanupHandler.removeCallbacks(firstMatchRetryRunnable)
+            stopFirstMatchScan()
             scanRetryAttempts.set(0)
             val scanCallback = mScanCallback
             mScanCallback = null
@@ -273,6 +287,7 @@ class BLEManager(private val context: Context) {
      * often an app may start a scan.
      */
     private fun scheduleScanRetry(errorCode: Int) {
+        if (!scanRequested) return
         if (errorCode == ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED) {
             Log.e(TAG, "BLE scan settings unsupported, not retrying")
             return
@@ -288,6 +303,80 @@ class BLEManager(private val context: Context) {
 
     private fun cancelPendingScanRetry() {
         cleanupHandler.removeCallbacks(scanRetryRunnable)
+    }
+
+    private fun proximityPairingFilter(): ScanFilter = ScanFilter.Builder()
+        .setManufacturerData(76, byteArrayOf(0x07, 0x19), byteArrayOf(-1, -1))
+        .build()
+
+    /** Some controllers deliver FIRST_MATCH before the scan response ordinary advertisements wait for. */
+    @SuppressLint("MissingPermission")
+    @Synchronized
+    private fun startFirstMatchScan() {
+        if (!scanRequested || mScanCallback == null || firstMatchScanCallback != null || firstMatchUnavailable ||
+            cleanupHandler.hasCallbacks(firstMatchRetryRunnable)
+        ) return
+        try {
+            val adapter = context.getSystemService(BluetoothManager::class.java).adapter ?: return
+            if (!adapter.isEnabled || !adapter.isOffloadedFilteringSupported) return
+            val scanner = mBluetoothLeScanner ?: return
+            val settings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
+                .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
+                .build()
+            val callback = object : ScanCallback() {
+                override fun onScanResult(callbackType: Int, result: ScanResult) {
+                    if (!scanRequested || firstMatchScanCallback !== this) return
+                    // A successful optional scan must not cancel a retry of the ordinary scan.
+                    processedAddresses.clear()
+                    publishNewestLidState(result, processScanResult(result))
+                }
+
+                override fun onScanFailed(errorCode: Int) {
+                    onFirstMatchScanFailed(this, errorCode)
+                }
+            }
+            firstMatchScanCallback = callback
+            scanner.startScan(listOf(proximityPairingFilter()), settings, callback)
+        } catch (t: Throwable) {
+            Log.w(TAG, "FIRST_MATCH scan unavailable; keeping ordinary scan", t)
+            stopFirstMatchScan()
+            scheduleFirstMatchRetry()
+        }
+    }
+
+    @Synchronized
+    private fun onFirstMatchScanFailed(callback: ScanCallback, errorCode: Int) {
+        if (firstMatchScanCallback !== callback) return
+        Log.w(TAG, "FIRST_MATCH scan failed with error code: $errorCode")
+        stopFirstMatchScan()
+        if (errorCode == ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED) {
+            firstMatchUnavailable = true
+        } else {
+            scheduleFirstMatchRetry()
+        }
+    }
+
+    @Synchronized
+    private fun scheduleFirstMatchRetry() {
+        if (!scanRequested || mScanCallback == null) return
+        // Do not compete with the ordinary scanner's 5-30 second backoff or Android's start limit.
+        cleanupHandler.removeCallbacks(firstMatchRetryRunnable)
+        cleanupHandler.postDelayed(firstMatchRetryRunnable, MAX_SCAN_RETRY_BACKOFF_MS)
+    }
+
+    @SuppressLint("MissingPermission")
+    @Synchronized
+    private fun stopFirstMatchScan() {
+        val callback = firstMatchScanCallback ?: return
+        firstMatchScanCallback = null
+        try {
+            mBluetoothLeScanner?.stopScan(callback)
+        } catch (t: Throwable) {
+            Log.w(TAG, "Error stopping FIRST_MATCH scan", t)
+        }
     }
 
     @OptIn(ExperimentalEncodingApi::class)
@@ -326,6 +415,12 @@ class BLEManager(private val context: Context) {
 
     private fun processScanResult(result: ScanResult): AirPodsStatus? {
         try {
+            // FIRST_MATCH can precede an older ordinary batch. Never let that backlog refresh or
+            // overwrite newer battery/lid data, and measure freshness from reception, not dispatch.
+            val seenAt = advertisementSeenAt(
+                System.currentTimeMillis(), SystemClock.elapsedRealtimeNanos(),
+                result.timestampNanos, lastProcessedAdvertNanos
+            ) ?: return null
             val scanRecord = result.scanRecord ?: return null
             val address = result.device.address
 
@@ -352,15 +447,16 @@ class BLEManager(private val context: Context) {
             }
 
             processedAddresses.add(address)
-            lastBroadcastTime = System.currentTimeMillis()
 
             val encryptionKey = getEncryptionKeyFromPreferences()
             val decryptedData = if (encryptionKey != null) decryptLastBytes(manufacturerData, encryptionKey) else null
-            val parsedStatus = if (decryptedData != null && decryptedData.size == 16) {
+            val parsedStatus = (if (decryptedData != null && decryptedData.size == 16) {
                 parseProximityMessageWithDecryption(address, manufacturerData, decryptedData)
             } else {
                 parseProximityMessage(address, manufacturerData)
-            }
+            }).copy(lastSeen = seenAt)
+            lastProcessedAdvertNanos = result.timestampNanos
+            lastBroadcastTime = seenAt
 
             val previousStatus = deviceStatusMap[address]
             deviceStatusMap[address] = parsedStatus
@@ -652,6 +748,16 @@ class BLEManager(private val context: Context) {
         private const val LID_CLOSE_TIMEOUT_MS = 15000L
         private const val SCAN_RETRY_BACKOFF_MS = 5000L
         private const val MAX_SCAN_RETRY_BACKOFF_MS = 30000L
+
+        internal fun advertisementSeenAt(
+            nowMillis: Long, elapsedNanos: Long, advertisementNanos: Long, previousNanos: Long
+        ): Long? {
+            val ageNanos = elapsedNanos - advertisementNanos
+            if (advertisementNanos <= previousNanos || ageNanos < 0 ||
+                ageNanos / 1_000_000L > STALE_DEVICE_TIMEOUT_MS
+            ) return null
+            return nowMillis - ageNanos / 1_000_000L
+        }
 
         /**
          * A bud's encrypted battery byte: the top bit is the charger, the rest the level.
