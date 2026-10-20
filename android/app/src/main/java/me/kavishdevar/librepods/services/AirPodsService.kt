@@ -48,6 +48,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.os.BatteryManager
@@ -1510,7 +1511,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             earDetectionNotification.status[0] == 0x00.toByte(),
             earDetectionNotification.status[1] == 0x00.toByte()
         )
-        var justEnabledA2dp = false
+        var rewearPlaybackHandled = false
         earDetectionNotification.setStatus(earDetection)
         // A late ear report must not resume media and trigger another takeover after ownership loss.
         if (audioRestoreState.hasLostOwnership()) return
@@ -1540,9 +1541,14 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
 
             if (newInEarData.contains(true) && inEarData == listOf(false, false)) {
-                justEnabledA2dp = restoreAudio(playWhenConnected = true)
                 if (MediaController.getMusicActive()) {
                     MediaController.userPlayedTheMedia = true
+                }
+                rewearPlaybackHandled = true
+                if (!restoreAudio(playWhenConnected = true)) {
+                    device?.let { target ->
+                        registerA2dpConnectionReceiver(target, earEpoch, requireControlLink = true)
+                    }
                 }
             } else if (newInEarData == listOf(false, false)) {
                 MediaController.sendPause(force = true)
@@ -1554,12 +1560,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             val nowSingle = newInEarData.count { it } == 1
 
             if (wasNone && nowSingle) {
-                if (!justEnabledA2dp) {
-                    audioRestoreState.withEpoch(earEpoch) {
-                        MediaController.sendPlay()
-                        MediaController.iPausedTheMedia = false
-                    }
-                }
+                // Both partial and full re-wear already resume through the same A2DP route check.
                 return
             }
 
@@ -1580,10 +1581,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
             if (newInEarData.sorted() != inEarData.sorted()) {
                 if (inEar) {
-                    if (!justEnabledA2dp) {
-                        audioRestoreState.withEpoch(earEpoch) {
-                            MediaController.sendPlay()
-                            MediaController.iPausedTheMedia = false
+                    if (!rewearPlaybackHandled) {
+                        device?.let { target ->
+                            registerA2dpConnectionReceiver(target, earEpoch, requireControlLink = true)
                         }
                     }
                 } else if (newInEarData != listOf(false, false)) {
@@ -1626,6 +1626,29 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private var a2dpConnectionReceiver: BroadcastReceiver? = null
     private var a2dpConnectionEpoch: Int? = null
 
+    private fun isA2dpAudioConnected(target: BluetoothDevice): Boolean =
+        getSystemService(AudioManager::class.java)
+            .getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            .any { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP &&
+                it.address.equals(target.address, ignoreCase = true) }
+
+    private fun resumePlaybackIfA2dpReady(
+        target: BluetoothDevice, restoreEpoch: Int, requireControlLink: Boolean,
+        connectionConfirmed: Boolean = false
+    ): Boolean {
+        var played = false
+        audioRestoreState.withEpoch(restoreEpoch) {
+            if (audioRestoreState.hasLostOwnership() || target.address != device?.address ||
+                (requireControlLink && BluetoothConnectionManager.aacpSocket?.isConnected != true)
+            ) return@withEpoch
+            if (!connectionConfirmed && !isA2dpAudioConnected(target)) return@withEpoch
+            MediaController.sendPlay()
+            MediaController.iPausedTheMedia = false
+            played = true
+        }
+        return played
+    }
+
     private fun unregisterA2dpConnectionReceiver() {
         val receiver = a2dpConnectionReceiver ?: return
         a2dpConnectionReceiver = null
@@ -1647,8 +1670,19 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private fun registerA2dpConnectionReceiver(
         target: BluetoothDevice, restoreEpoch: Int, requireControlLink: Boolean = false
     ) {
-        if (!audioRestoreState.isCurrent(restoreEpoch)) return
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Handler(Looper.getMainLooper()).post {
+                registerA2dpConnectionReceiver(target, restoreEpoch, requireControlLink)
+            }
+            return
+        }
+        if (!audioRestoreState.isCurrent(restoreEpoch) || audioRestoreState.hasLostOwnership() ||
+            target.address != device?.address ||
+            (requireControlLink && BluetoothConnectionManager.aacpSocket?.isConnected != true)
+        ) return
         unregisterA2dpConnectionReceiver()
+        // A profile may already be connected; no new connection transition will arrive in that case.
+        if (resumePlaybackIfA2dpReady(target, restoreEpoch, requireControlLink)) return
 
         val a2dpConnectionStateReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -1677,11 +1711,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
                     if (state == BluetoothProfile.STATE_CONNECTED && previousState != BluetoothProfile.STATE_CONNECTED && device?.address == target.address) {
 
-                        audioRestoreState.withEpoch(restoreEpoch) {
-                            Log.d("MediaController", "A2DP connected, sending play command")
-                            MediaController.sendPlay()
-                            MediaController.iPausedTheMedia = false
-                        }
+                        Log.d("MediaController", "A2DP connected, sending play command")
+                        resumePlaybackIfA2dpReady(
+                            target, restoreEpoch, requireControlLink, connectionConfirmed = true
+                        )
 
                         if (a2dpConnectionReceiver === this) {
                             unregisterA2dpConnectionReceiver()
@@ -1699,6 +1732,10 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter, RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(a2dpConnectionStateReceiver, a2dpIntentFilter)
+        }
+        // Cover A2DP becoming ready between the first output check and receiver registration.
+        if (resumePlaybackIfA2dpReady(target, restoreEpoch, requireControlLink)) {
+            unregisterA2dpConnectionReceiver()
         }
         // An armed receiver that outlives a failed connect would start playback on some unrelated later reconnect.
         Handler(Looper.getMainLooper()).postDelayed({
@@ -4161,7 +4198,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             device.address != this.device?.address ||
             (requireControlLink && BluetoothConnectionManager.aacpSocket?.isConnected != true)
         if (restoreRevoked()) return
-        if (playWhenConnected && BluetoothProfile.A2DP in profiles) {
+        if (playWhenConnected) {
             audioRestoreState.withEpoch(restoreEpoch) {
                 registerA2dpConnectionReceiver(device, restoreEpoch, requireControlLink)
             }
@@ -4173,11 +4210,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
         }
         fun connectA2dp(proxy: BluetoothProfile) {
-            if (proxy.getConnectionState(device) == BluetoothProfile.STATE_CONNECTED &&
-                a2dpConnectionEpoch == restoreEpoch
+            if (a2dpConnectionEpoch == restoreEpoch &&
+                resumePlaybackIfA2dpReady(device, restoreEpoch, requireControlLink)
             ) {
-                MediaController.sendPlay()
-                MediaController.iPausedTheMedia = false
                 unregisterA2dpConnectionReceiver()
             }
             val connectMethod = proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
