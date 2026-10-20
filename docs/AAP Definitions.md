@@ -9,6 +9,8 @@ This packet is necessary to establish a connection with the AirPods. Or else, th
 00 00 04 00 01 00 02 00 00 00 00 00 00 00 00 00
 ```
 
+After the handshake, LibrePods sends [host capabilities (`0x004D`)](/docs/host-capabilities.md) before requesting notifications. Keep processing inbound packets during startup and retries; device information can arrive before notification registration completes.
+
 # Setting specific features for AirPods Pro 2
 
 > *may work for airpods 4 anc also, not tested*
@@ -165,10 +167,12 @@ Here, `01` at the 8th byte (offset 7) means CA is enabled.
 This packet contains device information like name, model number, etc. The packet format is:
 
 ```plaintext
-04 00 04 00 1d [strings...]
+04 00 04 00 1D 00 02 [length: uint16 LE] 04 00 [strings...] [opaque tail...]
 ```
 
-The strings are null-terminated UTF-8 strings in the following order:
+In the observed envelope, the length at offsets 7–8 counts all bytes from offset 9 to the end of the packet, including the nested `04 00` type. Strings start at offset 11. The Android parser checks the header, nested type and length to select this layout, otherwise falling back to its legacy bounded scan; see [device information](/docs/device-info.md#framing-and-parsing).
+
+The first eleven fields are null-terminated UTF-8 strings in the following order. Empty fields still occupy a position:
 
 1. Bluetooth advertising name (varies in length)
 2. Model number 
@@ -181,15 +185,15 @@ The strings are null-terminated UTF-8 strings in the following order:
 9. Serial number 1
 10. Serial number 2
 11. Unknown numeric value
-12. Encrypted data
-13. Additional encrypted data
+
+The remaining bytes are opaque; they are not additional identification strings.
 
 Example packet:
 ```plaintext
-040004001d0002d5000400416972506f64732050726f004133303438004170706c6520496e632e0051584e524848595850360036312e313836383034303030323030303030302e323731330036312e313836383034303030323030303030302e3237313300312e302e3000636f6d2e6170706c652e6163636573736f72792e757064617465722e6170702e3731004859394c5432454632364a59004833504c5748444a32364b3000363335373533360089312a6567a5400f84a3ca234947efd40b90d78436ae5946748d70273e66066a2589300035333935303630363400```
-
-The packet contains device identification and version information followed by some encrypted data whose format is not known.
+040004001d0002d5000400416972506f64732050726f004133303438004170706c6520496e632e0051584e524848595850360036312e313836383034303030323030303030302e323731330036312e313836383034303030323030303030302e3237313300312e302e3000636f6d2e6170706c652e6163636573736f72792e757064617465722e6170702e3731004859394c5432454632364a59004833504c5748444a32364b3000363335373533360089312a6567a5400f84a3ca234947efd40b90d78436ae5946748d70273e66066a2589300035333935303630363400
 ```
+
+This example is 222 bytes long. Its nested length is `D5 00` (213 bytes), including the two-byte nested type, eleven strings and opaque tail. The tail's format is not known.
 
 # Writing to the AirPods
 

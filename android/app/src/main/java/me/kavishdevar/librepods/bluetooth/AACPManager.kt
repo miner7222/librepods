@@ -635,6 +635,9 @@ class AACPManager {
 
             Opcodes.INFORMATION -> {
                 Log.d(TAG, "Parsing Information Packet")
+                if (!hasDocumentedInformationEnvelope(packet)) {
+                    Log.w(TAG, "Unexpected device information envelope, using legacy string parsing")
+                }
                 val information = parseInformationPacket(packet)
                 callback?.onDeviceInformationReceived(information)
             }
@@ -1317,25 +1320,37 @@ class AACPManager {
         audioSource = null
     }
 
+    /**
+     * Parses the length-prefixed 0x001D envelope documented in docs/device-info.md.
+     * Other layouts use the legacy string scan; partial fields are retained in both paths.
+     */
     fun parseInformationPacket(packet: ByteArray): AirPodsInformation {
-        val data = packet.sliceArray(6 until packet.size)
-
-        var index = 0
-        while (index < data.size && data[index] != 0x00.toByte()) index++
-
-        val strings = mutableListOf<String>()
-        while (index < data.size) {
-            // skip 0x00 bytes
-            while (index < data.size && data[index] == 0x00.toByte()) index++
-            if (index >= data.size) break
-            val start = index
-            // find next 0x00 byte
-            while (index < data.size && data[index] != 0x00.toByte()) index++
-            val str = data.sliceArray(start until index).decodeToString()
-            strings.add(str)
+        require(packet.size >= 6) { "Device information header is truncated" }
+        val documentedEnvelope = hasDocumentedInformationEnvelope(packet)
+        val payloadEnd = packet.size
+        var index = if (documentedEnvelope) 11 else 6
+        if (!documentedEnvelope) {
+            // Preserve the legacy scan past the leading framing word and its first record.
+            while (index < payloadEnd && packet[index] != 0x00.toByte()) index++
         }
 
-        strings.removeAt(0) // I'm too lazy to adjust, just removing the first empty string
+        val strings = ArrayList<String>(11)
+        var skipLegacyRecord = !documentedEnvelope
+        while (index < payloadEnd && strings.size < 11) {
+            if (!documentedEnvelope) {
+                while (index < payloadEnd && packet[index] == 0x00.toByte()) index++
+                if (index == payloadEnd) break
+            }
+            val start = index
+            while (index < payloadEnd && packet[index] != 0x00.toByte()) index++
+            if (skipLegacyRecord) {
+                skipLegacyRecord = false
+            } else {
+                strings.add(packet.decodeToString(start, index))
+            }
+            if (index < payloadEnd) index++
+        }
+        // Any remaining bytes after the eleven identification fields are opaque.
 
         return AirPodsInformation(
             name = strings.getOrNull(0) ?: "",
@@ -1350,6 +1365,19 @@ class AACPManager {
             rightSerialNumber = strings.getOrNull(9) ?: "",
             version3 = strings.getOrNull(10) ?: "",
         )
+    }
+
+    private fun hasDocumentedInformationEnvelope(packet: ByteArray): Boolean {
+        if (packet.size < 11) return false
+        // The little-endian length includes the nested 04 00 type and its payload.
+        val nestedLength = (packet[7].toInt() and 0xFF) or
+            ((packet[8].toInt() and 0xFF) shl 8)
+        return packet[0] == 0x04.toByte() && packet[1] == 0x00.toByte() &&
+            packet[2] == 0x04.toByte() && packet[3] == 0x00.toByte() &&
+            packet[4] == Opcodes.INFORMATION && packet[5] == 0x00.toByte() &&
+            packet[6] == 0x02.toByte() &&
+            packet[9] == 0x04.toByte() && packet[10] == 0x00.toByte() &&
+            nestedLength >= 2 && nestedLength == packet.size - 9
     }
 
     fun sendCustomEqPacket(customEq: CustomEq): Boolean {
