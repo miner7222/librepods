@@ -79,7 +79,8 @@ class ATTManagerv2 internal constructor(
     )
 
     val characteristicList: MutableMap<ATTHandles, ByteArray> = ConcurrentHashMap()
-    private val requestLock = ReentrantLock()
+    private val requestLock = ReentrantLock(true)
+    private val latestWrites = ConcurrentHashMap<Int, Any>()
     private val readerLock = Any()
 
     private class Pending(val requestOpcode: Byte, val responseOpcode: Byte, val handle: Int) {
@@ -136,7 +137,7 @@ class ATTManagerv2 internal constructor(
                 } catch (e: Exception) {
                     logger(Log.ERROR, "reader thread crashed: ${e.message}", e)
                 } finally {
-                    retire(session)
+                    retire(session, recover = true)
                     logger(Log.DEBUG, "reader thread stopped", null)
                 }
             }.also { it.name = "ATT-Reader"; it.isDaemon = true; it.start() }
@@ -159,11 +160,15 @@ class ATTManagerv2 internal constructor(
     private fun isCurrent(session: ReaderSession): Boolean = activeReader === session &&
         session.running.get() && socketProvider()?.identity === session.socket.identity
 
-    private fun retire(session: ReaderSession, expectedPending: Pending? = null, timedOut: Boolean = false) {
+    private fun retire(
+        session: ReaderSession, expectedPending: Pending? = null,
+        timedOut: Boolean = false, recover: Boolean = timedOut
+    ) {
         synchronized(session) {
-            if (expectedPending != null && session.pending.get() !== expectedPending) return
+            // Reply delivery and deadline resolution compete for this exact slot.
+            if (expectedPending != null && !session.pending.compareAndSet(expectedPending, null)) return
             if (!session.running.getAndSet(false)) return
-            session.pending.getAndSet(null)?.complete(null)
+            (expectedPending ?: session.pending.getAndSet(null))?.complete(null)
         }
         if (timedOut) logger(Log.WARN, "ATT request timed out; retiring its socket", null)
         synchronized(readerLock) {
@@ -176,7 +181,7 @@ class ATTManagerv2 internal constructor(
             logger(Log.WARN, "error closing reader socket: ${e.message}", e)
         }
         val listener = synchronized(readerLock) {
-            if (timedOut && activeReader === session && socketProvider()?.identity === session.socket.identity) {
+            if (recover && activeReader === session && socketProvider()?.identity === session.socket.identity) {
                 onSocketRetired
             } else null
         }
@@ -236,18 +241,29 @@ class ATTManagerv2 internal constructor(
     }
 
     fun writeCharacteristic(handle: ATTHandles, data: ByteArray, timeoutMillis: Long = 2000) {
-        synchronized(readerLock) {
-            activeReader?.takeIf(::isCurrent)?.let { characteristicList[handle] = data }
-        }
-        writeCharacteristic(handle.value.toByte(), data, timeoutMillis)
+        writeCharacteristic(handle.value.toByte(), data, timeoutMillis, cacheHandle = handle)
     }
 
     fun writeCharacteristic(handle: Byte, data: ByteArray, timeoutMillis: Long = 2000) {
+        writeCharacteristic(handle, data, timeoutMillis, cacheHandle = null)
+    }
+
+    private fun writeCharacteristic(handle: Byte, data: ByteArray, timeoutMillis: Long, cacheHandle: ATTHandles?) {
+        val key = handle.toInt() and 0xFF
+        val token = Any()
+        val pdu = byteArrayOf(0x12, handle, 0x00) + data // 0x00 for LE; copy caller data
+        synchronized(readerLock) {
+            latestWrites[key] = token
+            if (cacheHandle != null && activeReader?.let(::isCurrent) == true) {
+                characteristicList[cacheHandle] = pdu.copyOfRange(3, pdu.size)
+            }
+        }
         try {
-            val pdu = byteArrayOf(0x12, handle, 0x00) + data // 0x00 for LE
-            sendRequest(pdu, 0x13, timeoutMillis)
+            sendRequest(pdu, 0x13, timeoutMillis, cacheHandle, writeToken = token)
         } catch (e: Exception) {
             logger(Log.ERROR, "error writing characteristic: ${e.message}", e)
+        } finally {
+            latestWrites.remove(key, token)
         }
     }
 
@@ -314,7 +330,10 @@ class ATTManagerv2 internal constructor(
                     }
                 } else {
                     val pending = session.pending.get()
-                    if (pending != null && pending.matches(data)) pending.complete(data)
+                    synchronized(session) {
+                        if (pending != null && pending.matches(data) &&
+                            session.pending.compareAndSet(pending, null)) pending.complete(data)
+                    }
                 }
             } catch (e: Exception) {
                 logger(Log.ERROR, "error in reader loop: ${e.message}", e)
@@ -325,13 +344,11 @@ class ATTManagerv2 internal constructor(
 
     private fun sendRequest(
         pdu: ByteArray, responseOpcode: Byte, timeoutMillis: Long, cacheHandle: ATTHandles? = null,
-        expectedSocket: Any? = null
+        expectedSocket: Any? = null, writeToken: Any? = null
     ): Reply? {
         if (timeoutMillis <= 0) return null
         val session = activeReader?.takeIf(::isCurrent) ?: return null
         if (expectedSocket != null && session.socket.identity !== expectedSocket) return null
-        val started = System.nanoTime()
-        val budget = TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
         val acquired = try {
             requestLock.tryLock(timeoutMillis, TimeUnit.MILLISECONDS)
         } catch (e: InterruptedException) {
@@ -343,33 +360,37 @@ class ATTManagerv2 internal constructor(
         var timeout: ScheduledFuture<*>? = null
         try {
             synchronized(session) {
-                if (!isCurrent(session) || System.nanoTime() - started >= budget) return null
+                if (!isCurrent(session) ||
+                    (writeToken != null && latestWrites[pending.handle] !== writeToken)) return null
                 check(session.pending.compareAndSet(null, pending)) { "An ATT request is already pending" }
             }
-            // Closing this bearer also unblocks a Bluetooth write that stalls before await().
-            timeout = requestTimeouts.schedule(
-                { retire(session, pending, timedOut = true) },
-                maxOf(0, budget - (System.nanoTime() - started)), TimeUnit.NANOSECONDS
-            )
             val output = session.socket.output
             synchronized(output) {
                 if (!isCurrent(session)) return null
                 output.write(pdu)
                 output.flush()
             }
-            val remaining = budget - (System.nanoTime() - started)
-            if (remaining <= 0 || !pending.ready.await(remaining, TimeUnit.NANOSECONDS)) {
-                // Read/Write Responses carry no handle or transaction ID. After a timeout,
-                // only a new bearer can distinguish a late reply from the next request's reply.
-                logger(Log.WARN, "ATT request timed out; retiring its socket", null)
+            // Waiting for the fair request lock has its own budget. Only a reply
+            // timeout after the PDU was written makes this bearer's replies ambiguous.
+            timeout = requestTimeouts.schedule(
+                { retire(session, pending, timedOut = true) }, timeoutMillis, TimeUnit.MILLISECONDS
+            )
+            if (!pending.ready.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
                 retire(session, pending, timedOut = true)
-                return null
+                // If delivery won the slot, complete() ran under the same session lock.
+                synchronized(session) { }
             }
             val response = pending.response ?: return null
             return synchronized(readerLock) {
                 if (!isCurrent(session) || response[0] == 0x01.toByte()) return@synchronized null
                 // Commit before releasing the request slot, so an older read cannot overwrite a newer one.
-                if (cacheHandle != null) characteristicList[cacheHandle] = response.copyOfRange(1, response.size)
+                if (cacheHandle != null) {
+                    if (writeToken == null) {
+                        characteristicList[cacheHandle] = response.copyOfRange(1, response.size)
+                    } else if (latestWrites[pending.handle] === writeToken) {
+                        characteristicList[cacheHandle] = pdu.copyOfRange(3, pdu.size)
+                    }
+                }
                 Reply(session, response)
             }
         } catch (e: InterruptedException) {
@@ -377,7 +398,7 @@ class ATTManagerv2 internal constructor(
             retire(session)
             return null
         } catch (e: Exception) {
-            retire(session)
+            retire(session, recover = true)
             throw e
         } finally {
             timeout?.cancel(false)

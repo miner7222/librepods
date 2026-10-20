@@ -39,6 +39,7 @@ class ATTManagerTest {
         @Volatile var onWrite: ((ByteArray) -> Unit)? = null
         @Volatile var blockWrites = false
         @Volatile var failWrites = false
+        @Volatile var failReads = false
 
         override val input = object : InputStream() {
             override fun read(): Int = error("Use framed reads")
@@ -51,6 +52,7 @@ class ATTManagerTest {
                     }
                     next
                 } else incoming.take()
+                if (failReads) throw IOException("Remote ATT channel dropped")
                 if (pdu.isEmpty()) return -1
                 check(pdu.size <= length)
                 pdu.copyInto(buffer, offset)
@@ -311,13 +313,18 @@ class ATTManagerTest {
         assertArrayEquals(byteArrayOf(0x44), first.get(2, TimeUnit.SECONDS))
     }
 
-    @Test(timeout = 5_000) fun aStalledWriteIsUnblockedByTheRequestDeadlineClosingItsSocket() {
+    @Test(timeout = 5_000) fun replyBudgetStartsAfterTheWriteRatherThanWhileItIsStillInProgress() {
         val socket = connect()
         socket.blockWrites = true
         val request = read(timeout = 100)
         socket.awaitWrite(0x0A, 0x18, 0)
-        assertNull(request.get(2, TimeUnit.SECONDS))
-        assertTrue(socket.closed.get())
+        assertWaiting(request)
+        assertWaiting(request) // More than the 100 ms reply budget, but not written yet.
+        assertFalse(socket.closed.get())
+        socket.writeGate.countDown()
+        socket.receive(0x0B, 0x33)
+        assertArrayEquals(byteArrayOf(0x33), request.get(2, TimeUnit.SECONDS))
+        assertFalse(socket.closed.get())
     }
 
     @Test(timeout = 5_000) fun writeFailureRetiresTheSessionAndCannotLeaveAPendingReplyBehind() {
@@ -388,19 +395,15 @@ class ATTManagerTest {
         assertNull(retired.poll(300, TimeUnit.MILLISECONDS))
     }
 
-    @Test(timeout = 5_000) fun stopEofWriteFailureAndReplacementDoNotRequestTimeoutRecovery() {
+    @Test(timeout = 5_000) fun stopAndReplacementDoNotRequestRecoveryButWriteFailureDoes() {
         val retired = LinkedBlockingQueue<Any>()
         manager.setOnSocketRetired { retired.offer(it) }
         connect()
         manager.stopReader()
-        val eofSocket = connect()
-        val eofRequest = read()
-        eofSocket.awaitWrite(0x0A, 0x18, 0)
-        eofSocket.eof()
-        assertNull(eofRequest.get(2, TimeUnit.SECONDS))
         val failed = connect()
         failed.failWrites = true
         assertNull(read().get(2, TimeUnit.SECONDS))
+        assertTrue(retired.poll(1, TimeUnit.SECONDS) === failed)
         val old = connect()
         val oldRequest = read()
         old.awaitWrite(0x0A, 0x18, 0)
@@ -470,5 +473,100 @@ class ATTManagerTest {
         val next = connect()
         manager.restoreNotifications(next)
         assertNull(next.writes.poll())
+    }
+
+    @Test(timeout = 5_000) fun aRequestGetsItsFullReplyBudgetAfterWaitingForTheLock() {
+        val socket = connect()
+        val first = read()
+        socket.awaitWrite(0x0A, 0x18, 0)
+        val started = CountDownLatch(1)
+        val second = workers.submit(Callable {
+            started.countDown()
+            manager.readCharacteristic(ATTHandles.HEARING_AID, 500)
+        })
+        assertTrue(started.await(1, TimeUnit.SECONDS))
+        assertWaiting(second)
+        Thread.sleep(250)
+        socket.receive(0x0B, 0x11)
+        assertArrayEquals(byteArrayOf(0x11), first.get(1, TimeUnit.SECONDS))
+        socket.awaitWrite(0x0A, 0x2A, 0)
+        // The old shared budget would now retire this healthy link.
+        assertWaiting(second)
+        Thread.sleep(250)
+        assertFalse(socket.closed.get())
+        socket.receive(0x0B, 0x22)
+        assertArrayEquals(byteArrayOf(0x22), second.get(1, TimeUnit.SECONDS))
+    }
+
+    @Test(timeout = 5_000) fun queuedWritesToTheSameHandleCoalesceToTheNewestPayload() {
+        val socket = connect()
+        val first = read()
+        socket.awaitWrite(0x0A, 0x18, 0)
+        fun queue(value: Byte): Future<*> {
+            val thread = AtomicReference<Thread>()
+            val started = CountDownLatch(1)
+            val task = workers.submit {
+                thread.set(Thread.currentThread())
+                started.countDown()
+                manager.writeCharacteristic(ATTHandles.HEARING_AID, byteArrayOf(value))
+            }
+            assertTrue(started.await(1, TimeUnit.SECONDS))
+            val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(1)
+            while (thread.get().state != Thread.State.TIMED_WAITING && System.nanoTime() < deadline) Thread.yield()
+            assertEquals(Thread.State.TIMED_WAITING, thread.get().state)
+            return task
+        }
+        val older = queue(0x11)
+        val newest = queue(0x22)
+        socket.receive(0x0B, 0x44)
+        first.get(1, TimeUnit.SECONDS)
+        socket.awaitWrite(0x12, 0x2A, 0, 0x22)
+        socket.receive(0x13)
+        older.get(1, TimeUnit.SECONDS)
+        newest.get(1, TimeUnit.SECONDS)
+        assertNull(socket.writes.poll())
+        assertArrayEquals(byteArrayOf(0x22), manager.characteristicList[ATTHandles.HEARING_AID])
+    }
+
+    @Test(timeout = 5_000) fun deliveredReplyCannotBeRetiredWhileTheCallerIsStillFinishing() {
+        val retired = LinkedBlockingQueue<Any>()
+        manager.setOnSocketRetired { retired.offer(it) }
+        val socket = connect()
+        val request = read(timeout = 300)
+        socket.awaitWrite(0x0A, 0x18, 0)
+        // Hold the cache-commit lock to delay the caller's finally block after delivery.
+        val lock = requireNotNull(ATTManagerv2::class.java.getDeclaredField("readerLock").apply { isAccessible = true }.get(manager))
+        synchronized(lock) {
+            socket.receive(0x0B, 0x55)
+            barrier(socket)
+            assertNull(retired.poll(450, TimeUnit.MILLISECONDS))
+            assertFalse(socket.closed.get())
+        }
+        assertArrayEquals(byteArrayOf(0x55), request.get(1, TimeUnit.SECONDS))
+    }
+
+    @Test(timeout = 5_000) fun remoteEofAndReadFailureRequestRecoveryExactlyOnce() {
+        val retired = LinkedBlockingQueue<Any>()
+        manager.setOnSocketRetired { retired.offer(it) }
+        val eof = connect()
+        eof.eof()
+        assertTrue(retired.poll(1, TimeUnit.SECONDS) === eof)
+        assertNull(read().get(1, TimeUnit.SECONDS))
+        val failed = connect()
+        failed.failReads = true
+        failed.receive(0)
+        assertTrue(retired.poll(1, TimeUnit.SECONDS) === failed)
+        manager.disconnected()
+        assertNull(retired.poll(150, TimeUnit.MILLISECONDS))
+    }
+
+    @Test(timeout = 5_000) fun enumWritesKeepTheirOptimisticCacheWhileWaitingForTheReply() {
+        val socket = connect()
+        val request = write()
+        socket.awaitWrite(0x12, 0x2A, 0, 0x55)
+        assertArrayEquals(byteArrayOf(0x55), manager.getCharacteristic(ATTHandles.HEARING_AID))
+        assertWaiting(request)
+        socket.receive(0x13)
+        request.get(1, TimeUnit.SECONDS)
     }
 }

@@ -231,15 +231,18 @@ class AudioRestoreStateTest {
         assertFalse(state.isCurrent(explicit))
     }
 
-    @Test fun failedExplicitSetupAndSocketDropClearStartupProtection() {
+    @Test fun abandonmentClearsProtectionButSocketFailureDoesNotCancelExplicitIntent() {
         val explicit = state.beginExplicitClaim(address)
         state.abandonExplicitClaim(explicit - 1)
         assertTrue(state.isClaimPending(address))
         state.abandonExplicitClaim(explicit)
         assertFalse(state.isClaimPending(address))
         assertFalse(state.isCurrent(explicit))
-        state.beginExplicitClaim(address)
+        val retry = state.beginExplicitClaim(address)
         state.socketDisconnected()
+        assertTrue(state.isClaimPending(address))
+        assertTrue(state.isCurrent(retry))
+        state.completeExplicitClaim(address, retry)
         assertFalse(state.isClaimPending(address))
     }
 
@@ -305,4 +308,73 @@ class AudioRestoreStateTest {
         }
         assertEquals(profiles, state.restore(address, profiles)!!.profiles)
     }
+
+    @Test fun completedExplicitClaimCannotRestoreAUserDisabledProfileLater() {
+        val epoch = state.beginExplicitClaim(address)
+        state.completeExplicitClaim(otherAddress, epoch)
+        state.completeExplicitClaim(address, epoch - 1)
+        assertTrue(state.isClaimPending(address))
+        state.completeExplicitClaim(address, epoch)
+        assertFalse(state.isClaimPending(address))
+        assertTrue(state.isCurrent(epoch))
+        assertNull(state.restore(address, profiles))
+    }
+
+    @Test fun anotherExplicitActionAndBleCanPiggybackTheSameDeviceWithoutBeingAbandoned() {
+        val epoch = state.beginExplicitClaim(address)
+        assertEquals(epoch, state.claim(address))
+        state.socketDisconnected()
+        assertTrue(state.isCurrent(epoch))
+        assertTrue(state.isClaimPending(address))
+        state.ownershipClaimSent(address, epoch)
+        state.completeExplicitClaim(address, epoch)
+        assertNull(state.restore(address, profiles))
+    }
+
+    @Test fun forbiddingAgainEndsAnInFlightRestoreAndRevokesItsCallbacks() {
+        release(a2dp)
+        val old = state.restore(address, profiles)!!
+        val releaseEpoch = state.beginRelease(address)
+        assertFalse(state.isCurrent(old.epoch))
+        assertTrue(release(a2dp, epoch = releaseEpoch))
+        val next = state.restore(address, profiles)!!
+        assertTrue(next.dispatch)
+        assertTrue(next.epoch > old.epoch)
+    }
+
+    @Test fun nonRestorableReleaseForbidsEvenDisconnectedProfiles() {
+        state.forget(ownershipLost = true)
+        assertTrue(release(a2dp, connected = false, restorable = false))
+        assertTrue(release(headset, connected = false, restorable = false))
+        assertNull(state.restore(address, profiles))
+    }
+
+    @Test fun releasePermissionExpiresIndependentlyPerProfileAtThirtyMinutes() {
+        var now = 0L
+        val timed = AudioRestoreState { now }
+        timed.release(address, a2dp, timed.currentEpoch(), true, true) { true }
+        now = 60_000L
+        timed.release(address, headset, timed.currentEpoch(), true, true) { true }
+        now = 30 * 60_000L - 1
+        assertTrue(timed.wasReleased(address, a2dp))
+        now++
+        assertFalse(timed.wasReleased(address, a2dp))
+        assertTrue(timed.wasReleased(address, headset))
+        now += 60_000L
+        assertNull(timed.restore(address, profiles))
+        assertFalse(timed.wasReleased(address))
+    }
+
+    @Test fun repeatedForbidsDoNotExtendOldPermissionAndExpiryRevokesPendingCallbacks() {
+        var now = 0L
+        val timed = AudioRestoreState { now }
+        timed.release(address, a2dp, timed.currentEpoch(), true, true) { true }
+        now = 29 * 60_000L
+        timed.release(address, a2dp, timed.currentEpoch(), true, true) { true }
+        val restore = timed.restore(address, profiles)!!
+        now = 30 * 60_000L
+        assertFalse(timed.withEpoch(restore.epoch) { throw AssertionError("expired callback") })
+        assertNull(timed.restore(address, profiles))
+    }
+
 }

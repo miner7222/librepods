@@ -24,4 +24,18 @@ class AudioProfilePolicyTest {
         assertFalse(AudioProfilePolicy.canPlayA2dp(BluetoothProfile.STATE_CONNECTED, released = false, hasOutput = false))
         assertTrue(AudioProfilePolicy.canPlayA2dp(BluetoothProfile.STATE_CONNECTED, released = false, hasOutput = true))
     }
+
+    @Test fun confirmedConnectionCanPlayBeforeItsOutputPortAppearsButMustStillBeConnectedAndUnreleased() {
+        assertTrue(AudioProfilePolicy.canPlayA2dp(BluetoothProfile.STATE_CONNECTED, false, false, true))
+        assertFalse(AudioProfilePolicy.canPlayA2dp(BluetoothProfile.STATE_CONNECTED, true, false, true))
+        assertFalse(AudioProfilePolicy.canPlayA2dp(BluetoothProfile.STATE_DISCONNECTING, false, true, true))
+    }
+
+    @Test fun lateDisconnectCannotCloseNewSessionOrInterruptAnExplicitClaim() {
+        assertTrue(ControlSessionPolicy.acceptsDisconnect(1, 1, false, false))
+        assertFalse(ControlSessionPolicy.acceptsDisconnect(1, 2, false, false))
+        assertFalse(ControlSessionPolicy.acceptsDisconnect(1, 1, true, false))
+        assertFalse(ControlSessionPolicy.acceptsDisconnect(1, 1, false, true))
+    }
+
 }

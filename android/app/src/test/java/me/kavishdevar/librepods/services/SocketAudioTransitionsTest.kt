@@ -72,4 +72,44 @@ class SocketAudioTransitionsTest {
         assertEquals(false, transitions.batteryChanged(true))
         assertEquals(true, transitions.batteryChanged(false))
     }
+
+    @Test fun shortReconnectCanObserveTakeoutAndRewearDuringTheDrop() {
+        var now = 0L
+        val tracked = SocketAudioTransitions { now }
+        tracked.socketConnected("pods")
+        tracked.batteryChanged(true)
+        tracked.earsChanged(false, false)
+        tracked.socketDisconnected()
+        now = 4_000
+        tracked.socketConnected("pods")
+        assertEquals(true, tracked.batteryChanged(false))
+        assertTrue(tracked.earsChanged(true, false)!!.reworn)
+    }
+
+    @Test fun sixtySecondDropUsesIndependentBaselinesAndDuplicateTeardownDoesNotExtendTheWindow() {
+        var now = 0L
+        val tracked = SocketAudioTransitions { now }
+        tracked.socketConnected("pods")
+        tracked.batteryChanged(true)
+        tracked.earsChanged(false, false)
+        tracked.socketDisconnected()
+        now = 59_999
+        tracked.socketDisconnected()
+        now = 60_000
+        tracked.socketConnected("pods")
+        assertNull(tracked.batteryChanged(false))
+        assertNull(tracked.earsChanged(true, true))
+    }
+
+    @Test fun aDifferentDeviceNeverInheritsThePreviousDevicesBaseline() {
+        val tracked = SocketAudioTransitions { 0L }
+        tracked.socketConnected("first")
+        tracked.batteryChanged(true)
+        tracked.earsChanged(false, false)
+        tracked.socketDisconnected()
+        tracked.socketConnected("second")
+        assertNull(tracked.batteryChanged(false))
+        assertNull(tracked.earsChanged(true, true))
+    }
+
 }
