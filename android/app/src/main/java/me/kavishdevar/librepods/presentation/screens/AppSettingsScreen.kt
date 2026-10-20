@@ -57,6 +57,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -100,6 +101,7 @@ import me.kavishdevar.librepods.presentation.theme.screenBottomPadding
 import me.kavishdevar.librepods.presentation.theme.screenTopPadding
 import me.kavishdevar.librepods.presentation.theme.MaterialTypography
 import me.kavishdevar.librepods.presentation.viewmodel.AppSettingsViewModel
+import me.kavishdevar.librepods.utils.AppLanguage
 import me.kavishdevar.librepods.utils.XposedState
 import java.util.concurrent.TimeUnit
 import me.kavishdevar.librepods.presentation.theme.LocalIsDarkTheme
@@ -225,6 +227,33 @@ fun AppSettingsScreen(
                     ),
                     selected = state.appTheme == theme,
                     onClick = { viewModel.setAppTheme(theme) }
+                )
+            }
+        }
+
+        // Outside the connection and premium gates below: the language has to be
+        // changeable before AirPods are ever connected.
+        val supportedLanguages = remember { AppLanguage.supported(context) }
+        var selectedLanguage by remember {
+            mutableStateOf(AppLanguage.match(supportedLanguages, AppLanguage.selected(context)))
+        }
+        StyledList(title = stringResource(R.string.app_language)) {
+            StyledListItem(
+                name = stringResource(R.string.app_language_system_default),
+                selected = selectedLanguage == null,
+                onClick = {
+                    selectedLanguage = null
+                    AppLanguage.select(context, null)
+                }
+            )
+            supportedLanguages.forEach { locale ->
+                StyledListItem(
+                    name = AppLanguage.displayName(locale),
+                    selected = selectedLanguage == locale,
+                    onClick = {
+                        selectedLanguage = locale
+                        AppLanguage.select(context, locale)
+                    }
                 )
             }
         }

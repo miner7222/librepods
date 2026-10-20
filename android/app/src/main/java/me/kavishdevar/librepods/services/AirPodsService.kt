@@ -46,6 +46,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.media.AudioDeviceInfo
@@ -2441,26 +2442,51 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
+    /** Locale the notifications and their channels were last written in. */
+    private var notificationLocaleTags: String? = null
+
+    /**
+     * The in-app language picker changes the app locale without restarting the
+     * service, so the foreground notification and the channel names would keep the
+     * old language until the next start. Write them again when the locale changes.
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val localeTags = resources.configuration.locales.toLanguageTags()
+        if (notificationLocaleTags != null && notificationLocaleTags != localeTags) {
+            startForegroundNotification()
+            // The connected notification skips an unchanged repost; its text is
+            // what changed, not its inputs.
+            lastConnectedNotification = null
+            updateNotificationContent(
+                BluetoothConnectionManager.aacpSocket?.isConnected == true,
+                config.deviceName,
+                batteryNotification.getBattery()
+            )
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     fun startForegroundNotification() {
+        notificationLocaleTags = resources.configuration.locales.toLanguageTags()
         val disconnectedNotificationChannel = NotificationChannel(
             "background_service_status",
-            "Background Service Status",
+            getString(R.string.channel_background_service),
             NotificationManager.IMPORTANCE_NONE
         )
 
         val connectedNotificationChannel = NotificationChannel(
             "airpods_connection_status",
-            "AirPods Connection Status",
+            getString(R.string.channel_airpods_connection),
             NotificationManager.IMPORTANCE_LOW,
         )
 
         val socketFailureChannel = NotificationChannel(
             "socket_connection_failure",
-            "AirPods BluetoothConnectionManager.aacpSocket? Connection Issues",
+            getString(R.string.channel_connection_issues),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Notifications about problems connecting to AirPods protocol"
+            description = getString(R.string.channel_connection_issues_description)
             enableLights(true)
             lightColor = Color.RED
             enableVibration(true)
@@ -2468,7 +2494,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
         val chargeNotificationChannel = NotificationChannel(
             "airpods_charging_status",
-            "AirPods Charging Notifications",
+            getString(R.string.channel_charging),
             NotificationManager.IMPORTANCE_DEFAULT
         )
 
@@ -2491,8 +2517,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         )
 
         val notification = NotificationCompat.Builder(this, "background_service_status")
-            .setSmallIcon(R.drawable.ic_notification_airpods).setContentTitle("Background Service Running")
-            .setContentText("Useless notification, disable it by clicking on it.")
+            .setSmallIcon(R.drawable.ic_notification_airpods).setContentTitle(getString(R.string.background_service_running))
+            .setContentText(getString(R.string.background_service_description))
             .setContentIntent(pendingIntentNotifDisable).setCategory(Notification.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_LOW).setOngoing(true).build()
 
@@ -3092,7 +3118,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     } ${
                         batteryList?.find { it.component == BatteryComponent.CASE }?.let {
                             if (it.status != BatteryStatus.DISCONNECTED) {
-                                "Case: ${if (BatteryStatus.isCharging(it.status)) "⚡" else ""} ${it.level}%"
+                                "${getString(R.string.case_alt)}: ${if (BatteryStatus.isCharging(it.status)) "⚡" else ""} ${it.level}%"
                             } else {
                                 ""
                             }
@@ -3102,7 +3128,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
             if (disconnectedBecauseReversed) {
                 updatedNotificationBuilder.addAction(
-                    R.drawable.ic_bluetooth, "Reconnect", PendingIntent.getService(
+                    R.drawable.ic_bluetooth, getString(R.string.reconnect_to_last_device), PendingIntent.getService(
                         this, 0, Intent(this, AirPodsService::class.java).apply {
                             action = "me.kavishdevar.librepods.RECONNECT_AFTER_REVERSE"
                         }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
