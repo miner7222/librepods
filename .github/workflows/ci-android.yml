@@ -24,15 +24,16 @@ concurrency:
 
 jobs:
   build:
-    runs-on: blacksmith-8vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     env:
-      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx16g -XX:MaxMetaspaceSize=2g -XX:+UseParallelGC" -Dkotlin.daemon.jvm.options="-Xmx6g,-XX:+UseParallelGC" -Dorg.gradle.workers.max=8'
+      # Sized for GitHub's standard runner (4 vCPU, 16 GB).
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g -XX:+UseParallelGC" -Dkotlin.daemon.jvm.options="-Xmx3g,-XX:+UseParallelGC" -Dorg.gradle.workers.max=4'
     outputs:
       short_sha: ${{ steps.vars.outputs.short_sha }}
       app_version: ${{ steps.version.outputs.app_version }}
       version_code: ${{ steps.version.outputs.version_code }}
     steps:
-      - uses: useblacksmith/checkout@v1
+      - uses: actions/checkout@v5
         with:
           submodules: true
           fetch-depth: 0
@@ -42,23 +43,23 @@ jobs:
           distribution: zulu
           java-version: 21
 
-      - name: Mount Gradle Cache
-        uses: useblacksmith/stickydisk@v1
-        with:
-          key: ${{ github.repository }}-android-gradle-cache
-          path: ~/.gradle
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Mount Native NDK CXX Cache
-        uses: useblacksmith/stickydisk@v1
+      - name: Cache native CXX build
+        uses: actions/cache@v4
         with:
-          key: ${{ github.repository }}-android-cxx-cache
           path: android/app/.cxx
+          key: android-cxx-${{ runner.os }}-${{ hashFiles('android/app/src/main/cpp/**', 'android/app/build.gradle.kts') }}
+          restore-keys: android-cxx-${{ runner.os }}-
 
-      - name: Mount Android NDK
-        uses: useblacksmith/stickydisk@v1
+      # The NDK is a ~2GB download and the slowest step in the job; it never
+      # changes unless its version does.
+      - name: Cache Android NDK
+        uses: actions/cache@v4
         with:
-          key: ${{ github.repository }}-android-ndk
-          path: /usr/local/lib/android/sdk/ndk
+          path: /usr/local/lib/android/sdk/ndk/30.0.14904198
+          key: android-ndk-${{ runner.os }}-30.0.14904198
 
       - name: Decode keystore
         if: github.event_name != 'pull_request'
@@ -74,7 +75,7 @@ jobs:
           if [ ! -d "/usr/local/lib/android/sdk/ndk/30.0.14904198" ]; then
             sdkmanager "ndk;30.0.14904198"
           else
-            echo "NDK 30.0.14904198 already cached on sticky disk"
+            echo "NDK 30.0.14904198 restored from cache"
           fi
 
       - name: Create local.properties
@@ -135,13 +136,13 @@ jobs:
       github.event_name == 'push' &&
       (github.ref == 'refs/heads/main' ||
        github.ref == 'refs/heads/android/rewrite')
-    runs-on: blacksmith-8vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: build
     permissions:
       contents: write
 
     steps:
-      - uses: useblacksmith/checkout@v1
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -225,12 +226,13 @@ jobs:
         id: changelog
         env:
           PREVIOUS_TAG: ${{ steps.prev.outputs.tag }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
             if [ -z "$PREVIOUS_TAG" ]; then
-              NOTES=$(git log --pretty=format:"- %s ([%h](https://github.com/kavishdevar/librepods/commit/%H))")
+              NOTES=$(git log --pretty=format:"- %s ([%h](${REPO_URL}/commit/%H))")
             else
-              NOTES=$(git log "${PREVIOUS_TAG}..HEAD" --pretty=format:"- %s ([%h](https://github.com/kavishdevar/librepods/commit/%H))")
+              NOTES=$(git log "${PREVIOUS_TAG}..HEAD" --pretty=format:"- %s ([%h](${REPO_URL}/commit/%H))")
             fi
           else
             if [ -z "$PREVIOUS_TAG" ]; then
@@ -241,8 +243,8 @@ jobs:
 
             NOTES=$(git log "$RANGE" \
               --pretty=format:"%s|%h|%H" |
-              awk -F '|' '$1 ~ /^android/ {
-                printf "- %s ([%s](https://github.com/kavishdevar/librepods/commit/%s))\n", $1, $2, $3
+              awk -F '|' -v repo_url="$REPO_URL" '$1 ~ /^android/ {
+                printf "- %s ([%s](%s/commit/%s))\n", $1, $2, repo_url, $3
               }')
           fi
 
@@ -294,13 +296,14 @@ jobs:
           fi
 
       - name: Download release bundle
+        if: github.repository == 'librepods-org/librepods'
         uses: actions/download-artifact@v8
         with:
           name: release-bundle
           path: artifacts/release-bundle
 
       - name: Upload to Google Play (Main branch only)
-        if: github.ref == 'refs/heads/main' && (steps.prev_code.outputs.previous_code != env.VERSION_CODE)
+        if: github.repository == 'librepods-org/librepods' && github.ref == 'refs/heads/main' && (steps.prev_code.outputs.previous_code != env.VERSION_CODE)
         env:
           APP_VERSION: ${{ needs.build.outputs.app_version }}
           VERSION_CODE: ${{ needs.build.outputs.version_code }}
@@ -314,7 +317,7 @@ jobs:
 
       - name: Upload to Google Play (Rewrite Internal Track)
         id: upload_rewrite
-        if: github.ref == 'refs/heads/android/rewrite'
+        if: github.repository == 'librepods-org/librepods' && github.ref == 'refs/heads/android/rewrite'
         env:
           APP_VERSION: ${{ needs.build.outputs.app_version }}
           VERSION_CODE: ${{ needs.build.outputs.version_code }}
@@ -327,12 +330,12 @@ jobs:
           releaseName: "rewrite v${APP_VERSION} (${VERSION_CODE})"
 
       - name: Get timestamp
-        if: steps.release.outputs.posted == 'true'
+        if: github.repository == 'librepods-org/librepods' && steps.release.outputs.posted == 'true'
         id: timestamp
         run: echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - name: Post to Discord
-        if: steps.release.outputs.posted == 'true'
+        if: github.repository == 'librepods-org/librepods' && steps.release.outputs.posted == 'true'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_ANDROID_CI_URL }}
           RELEASE_TAG: ${{ steps.release_check.outputs.tag }}
